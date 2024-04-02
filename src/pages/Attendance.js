@@ -32,14 +32,14 @@ export const Attendance = () => {
         setShowAddModal(false);
     }
 
-    // useEffect(() => {
-    //     refreshStatus(); // Initial call
-    //     const interval = setInterval(() => {
-    //         refreshStatus(); // Refresh every 3 seconds
-    //     }, 3000);
+    useEffect(() => {
+        refreshStatus(); // Initial call
+        const interval = setInterval(() => {
+            refreshStatus(); // Refresh every 3 seconds
+        }, 3000);
 
-    //     return () => clearInterval(interval); // Cleanup
-    // }, []);
+        return () => clearInterval(interval); // Cleanup
+    }, []);
 
   return (
     <div>
