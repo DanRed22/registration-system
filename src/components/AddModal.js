@@ -69,7 +69,7 @@ const handleSubmit = async ()=>{
         <button 
             onClick={hide} 
             type="button" 
-            class="justify-self-end text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 focus:ring-red-800 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2"><FaWindowClose /></button>
+            class="justify-self-end text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2"><FaWindowClose /></button>
         </div>
         <div class="grid gap-6 mb-6 md:grid-cols-2">
         <div>
