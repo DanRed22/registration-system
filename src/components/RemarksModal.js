@@ -28,7 +28,7 @@ const RemarksModal = ({hideModal, id, name, remark, refresh}) =>{
             <div className='bg-slate-800 w-[60%] h-[70%] rounded-lg'>
                 <div className='grid grid-cols-2 mt-4 mr-4 '>
                     <p className='text-white text-lg justify-self-start mx-4'>{id} - {name}</p>
-                <button onClick={hideModal} type="button" class="justify-self-end text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 focus:ring-red-800 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2"><FaWindowClose /></button>
+                <button onClick={hideModal} type="button" class="justify-self-end text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-800 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2"><FaWindowClose /></button>
                 </div>
                 
                 <span>
