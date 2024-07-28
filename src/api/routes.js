@@ -151,7 +151,7 @@ router.post('/unclaim', (req, res) => {
 // Route to update timeIn based on id
 router.post('/update-timein', (req, res) => {
     const { id } = req.body; // Assuming id is sent in the request body
-    const currentTime = new Date(); // Get current time
+    const currentTime = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(); // Get current time
 
     // Create a SQL query to update the timeIn field
     const query = `
@@ -194,7 +194,7 @@ router.post('/reset-timein', (req, res) => {
 // Route to update timeIn based on id
 router.post('/update-timeout', (req, res) => {
     const { id } = req.body; // Assuming id is sent in the request body
-    const currentTime = new Date(); // Get current time
+    const currentTime = new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(); // Get current time
 
     // Create a SQL query to update the timeIn field
     const query = `
@@ -237,6 +237,7 @@ router.post('/reset-timeout', (req, res) => {
 
 router.post('/update-remarks',(req, res)=>{
     const { id, remarks } = req.body;
+    
 
     const query = `UPDATE members SET remarks = ? WHERE id = ?`;
 
