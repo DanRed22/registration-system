@@ -233,7 +233,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             {showAdditional? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Additional</th>:''}
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
-                            <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>
+                            {/* <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th> */}
                             {sig? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th> :''}
                         </tr>
                     </thead>
@@ -246,9 +246,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id_number}</td>
                                     {showProgram? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.program}</td> : ''}
                                     {showAdditional? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.additional}</td>:''}
-                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>
-                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>
-                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? 'YES' : 'NO'}</td>
+                                    <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>
+                                    <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>
+                                    {/* <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? 'YES' : 'NO'}</td> */}
                                     
                                         {
                                         sig === true && (
