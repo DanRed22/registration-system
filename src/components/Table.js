@@ -4,17 +4,26 @@ import axios from 'axios';
 import { CiSearch } from "react-icons/ci";
 import RemarksModal from '../components/RemarksModal'
 import API from './Config'
-
+import { FaPencilAlt, FaRegEye } from 'react-icons/fa';
+import ClipLoader from "react-spinners/ClipLoader";
+import SignatureModal from './SignatureModal';
+import ShowSignatureModal from './ShowSignatureModal';
 
 const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
 
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
     const [showRemarksModal, setShowRemarksModal] = useState(false);
-    const [remarkID, setRemarkID] = useState('')
-    const [remark, setRemark] = useState('')
-    const [remarkName, setRemarkName] = useState('')
+    const [remarkID, setRemarkID] = useState('');
+    const [selectedID, setSelectedID] = useState('');
+    const [selectedIDNumber, setSelectedIDNumber] = useState('');
+    const [selectedName, setSelectedName] = useState('');
+    const [remark, setRemark] = useState('');
+    const [remarkName, setRemarkName] = useState('');
+    const [showSignatureModal, setShowSignatureModal] = useState(false);
+    const [showUserSig, setShowUserSig] = useState(false);
+    const [imageSrc, setImageSrc] = useState('');
     const hideRemarksModal = () =>{
         setShowRemarksModal(false)
     }
@@ -36,27 +45,57 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
         }
     }
 
+    const handleSignaturePress = (id, id_number, name) =>{
+            setSelectedID(id);
+            setSelectedIDNumber(id_number);
+            setSelectedName(name);
+            setShowSignatureModal(!showSignatureModal);
+    }
+
+    const handleShowUserSignature = (id, id_number, name) =>{
+            setSelectedID(id);
+            setSelectedIDNumber(id_number);
+            setSelectedName(name);
+            setShowUserSig(!showUserSig);
+
+    }
+
     const handleSearch = async ()  =>{
-     if (search && search != ''){
-        const data = await axios.get(`${API}search`, {
-            params:{
-                searchTerm: search
+        
+            if (search && search !== '') {
+                setIsLoading(true); // Set isLoading to true when the search begins
+                try {
+                    const response = await axios.get(`${API}search`, {
+                    params: {
+                        searchTerm: search
+                    }
+                });
+                    setData(response.data);
+                    setIsLoading(false);
+                }catch (error) {
+                    console.error(error);
+                    setIsLoading(true); // Set isLoading to true if the request fails
+                }
             }
-        })
-        setData(data.data);
-        console.log(data)
-    }
     }
 
 
-    const handleClaim = async (id) =>{
+    const handleClaim = async (id, name) =>{
         console.log(id)
         if(id){
-            const data = await axios.post(`${API}claim`, {
+            try {
+                setIsLoading(true);
+                const data = await axios.post(`${API}claim`, {
                 "id": id
-            });
-            // alert('Claimed')
-            handleSearch();
+                });
+                setIsLoading(false);
+                handleSearch();
+                showNotif(true);
+                setMessage(`${name} has Claimed`);
+        }catch (error){
+            console.error(error);
+            setIsLoading(true);
+        }
         }else{
             showNotif(true);
             setMessage("Please input id to Claim");
@@ -64,62 +103,82 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     }
 
     
-    const handleUnclaim = async (id) =>{
+    const handleUnclaim = async (id, name) =>{
         console.log(id)
         if(id){
-            const data = await axios.post(`${API}unclaim`, {
-                "id": id
-            });
-            // alert('Unclaimed');
-            handleSearch();
+            try{
+                setIsLoading(true);
+                const data = await axios.post(`${API}unclaim`, {
+                    "id": id
+                });
+                setIsLoading(false);
+                handleSearch();
+                showNotif(true);
+                setMessage(`${name} has Unclaimed`);
+            }catch(error){
+                setIsLoading(true);
+                console.error(error);
+            }
         }else{
             showNotif(true);
             setMessage("Please input id to Unclaim");
+
         }
     }
 
-    const handleTimeIn = async (id) =>{
+    const handleTimeIn = async (id, name) =>{
         if(id){
-            const data = await axios.post(`${API}update-timein`, {
-                "id": id
-            });
-            // alert('Unclaimed');
-            handleSearch();
+            try{
+                setIsLoading(true);
+                const data = await axios.post(`${API}update-timein`, {
+                    "id": id
+                });
+                setIsLoading(false);
+                showNotif(true);
+                setMessage(`Set Time In ${name}`);
+                handleSearch();
+            }catch(error){
+                setIsLoading(true);
+                console.error(error);
+            }
         }else{
             showNotif(true);
             setMessage("Failed to Update Time");
         }
     }
-    const handleTimeOut = async (id) =>{
+    const handleTimeOut = async (id, name) =>{
         if(id){
             const data = await axios.post(`${API}update-timeout`, {
                 "id": id
             });
-            // alert('Unclaimed');
+            showNotif(true);
+            setMessage(`Set Time Out ${name}`);
             handleSearch();
         }else{
             showNotif(true);
             setMessage("Failed to Update Time");
         }
     }
-    const handleResetTimeIn = async (id) =>{
+    const handleResetTimeIn = async (id,name) =>{
         if(id){
             const data = await axios.post(`${API}reset-timein`, {
                 "id": id
             });
-            // alert('Unclaimed');
+            showNotif(true);
+            setMessage(`Reset Time In ${name}`);
             handleSearch();
         }else{
             showNotif(true);
             setMessage("Failed to Update Time");
         }
     }
-    const handleResetTimeOut = async (id) =>{
+    const handleResetTimeOut = async (id, name) =>{
         if(id){
             const data = await axios.post(`${API}reset-timeout`, {
                 "id": id
             });
-            // alert('Unclaimed');
+            showNotif(true)
+            setMessage(`Reset T-Out - ${name}`);
             handleSearch();
         }else{
             showNotif(true);
@@ -128,6 +187,8 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     }
   return (
     <div className='w-[90vw]'>
+            {showUserSig && <ShowSignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleShowUserSignature}/>}
+         {showSignatureModal && <SignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleSignaturePress}/>}
          {showRemarksModal && <RemarksModal hideModal={hideRemarksModal} id={remarkID} name={remarkName} remark={remark} refresh={handleSearch}/>}
         <div className='flex justify-items-end border border-white rounded-lg border-solid w-full my-4'>
 
@@ -138,7 +199,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                                 }
                             }
                     type="button" 
-                    class="text-white block mt-2 bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"> Add Attendee</button>
+                    className="transition duration-300 ease-in-out text-white block mt-2 bg-gradient-to-br from-red-400 bg-red-800 hover:bg-red-600 hover:from-red-950 hover:cursor-pointer hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"> Add Attendee</button>
             </div>
 
 
@@ -161,85 +222,104 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     
 
         </div>
-    <div class="relative overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
-    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+    <div class="overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
+    <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800">
                 <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Number</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Shirt Size</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Stub Number</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Program</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Additional</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th>
 
                 </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                {!isLoading? <>
                 {data.map((entry) => (
-                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.id_number}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.number}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.shirt_size}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{entry.stub_number}</td>
+                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
+                        <td className="px-1 py-1 whitespace-nowrap">{entry.name}</td>
+                        <td className="px-1 py-1 whitespace-nowrap">{entry.id_number}</td>
+                        <td className="px-1 py-1 whitespace-nowrap">{entry.program}</td>
+                        <td className="overflow-clip px-1 py-1">{entry.additional}</td>
                         {entry.timeIn? 
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-1 py-1 whitespace-nowrap">
                                 <button 
-                                    onClick={()=>handleResetTimeIn(entry.id)}
+                                    onClick={()=>handleResetTimeIn(entry.id, entry.name)}
                                     type="button" 
-                                    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">{entry.timeIn}</button>
+                                    className={` cursor-pointer w-28 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800`}>{entry.timeIn.split("T")[0]}</button>
                             </td> : 
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-1 py-1 whitespace-nowrap">
                                 <button 
                                     type="button" 
-                                    onClick={()=>handleTimeIn(entry.id)}
-                                    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Time In</button>
+                                    onClick={()=>handleTimeIn(entry.id, entry.name)}
+                                    className=" cursor-pointer w-28 focus:outline-none text-white font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 ">Time In</button>
                             </td>}
                         
                         {entry.timeOut? 
-                            <td className="px-6 py-4 whitespace-nowrap"><button 
-                                    onClick={()=>handleResetTimeOut(entry.id)}    
+                            <td className="px-1 py-1 whitespace-nowrap"><button 
+                                    onClick={()=>handleResetTimeOut(entry.id, entry.name)}    
                                     type="button" 
-                                    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">{entry.timeOut}</button></td>:
-                            <td className="px-6 py-4 whitespace-nowrap">
+                                    className=" cursor-pointer w-28 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">{entry.timeOut.split("T")[0]}</button></td>:
+                            <td className="px-1 py-1 whitespace-nowrap">
                                 <button 
-                                    onClick={()=>handleTimeOut(entry.id)}
+                                    onClick={()=>handleTimeOut(entry.id, entry.name)}
                                     type="button" 
-                                    class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Time Out</button>
+                                    className=" cursor-pointer w-28 focus:outline-none text-white font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 ">Time Out</button>
                             </td>
                         }
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-1 py-1 whitespace-nowrap">
                             {
                                 entry.claimed == 1? 
                                 <button 
-                                onClick={()=>{handleUnclaim(entry.id)}}
+                                onClick={()=>{handleUnclaim(entry.id, entry.name)}}
                                 type="button" 
-                                class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Claimed</button>
+                                className=" cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Claimed</button>
                         :
                         <button 
-                                onClick={()=>{handleClaim(entry.id)}}
+                                onClick={()=>{handleClaim(entry.id, entry.name)}}
                                 type="button" 
-                                class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Not Claimed</button>
+                                className="cursor-pointer focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Not Claimed</button>
                     
                         
                             }
                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-1 py-1 whitespace-nowrap">
                         <button 
                             onClick={() => handleShowRemarks(entry.id, entry.name, entry.remarks)}
                             type="button" 
-                            class="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Add</button>
+                            className="text-white cursor-pointer bg-gradient-to-br from-red-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"><FaPencilAlt/></button>
                         </td>
+
+                        <td className="px-1 py-1 whitespace-nowrap">
+                        {
+                        entry.signature === null || entry.signature === ''? 
+                            <button 
+                                onClick={() => handleSignaturePress(entry.id, entry.id_number, entry.name)}
+                                type="button" 
+                                className="text-white cursor-pointer bg-gradient-to-br from-red-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"><FaPencilAlt/></button>
+                            :
+                            <button 
+                                onClick={() => handleShowUserSignature(entry.id, entry.id_number, entry.name)}
+                                type="button" 
+                                className="text-black cursor-pointer bg-gradient-to-br focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"><FaRegEye/></button>
+                        }
+</td>
                     </tr>
                 ))}
-            </tbody>
+                </>: ''}</tbody>
         </table>
-    </div>
+        {isLoading && <div className='flex flex-col items-center h-96 bg-white p-5'>
+            <ClipLoader/> 
+            <p className='mt-2 text-sm'>Currently Processing. If this notification persists for 5 seconds.</p>
+            <p className=' text-sm'>Possible Problems: Failed to Connect to Server or Internet is Slow</p>
+            <p className='mt-2 text-sm italic'>Possible Solution: Refresh your Browser or Restart your Device.</p>
+            </div>}
+    </div>                    
     </div>
   )
 }
