@@ -18,7 +18,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-/src/api/signatures/*
+/public/signatures/*
 
 npm-debug.log*
 yarn-debug.log*
