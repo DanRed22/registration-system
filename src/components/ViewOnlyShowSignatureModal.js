@@ -3,7 +3,7 @@ import { FaWindowClose } from 'react-icons/fa';
 import API from './Config';
 import axios from 'axios';
 const ViewOnlyShowSignatureModal = ({ id, idNumber, name, close }) => {
-  const imagePath = `/signatures/${idNumber}.png`;
+  const imagePath = `/signatures/${id}.png`;
   const [imageError, setImageError] = useState(false)
   
   

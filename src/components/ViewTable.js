@@ -32,6 +32,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [selectedName, setSelectedName] = useState('');
     const [selectedIDNumber, setSelectedIDNumber] = useState('');
     const [isExporting, setIsExporting] = useState(false);
+    const [truncTime, setTruncTime] = useState(true);
     var paginatedData = data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -57,6 +58,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
         toggleViewSignatureModal();
     }
 
+    const handleTruncTime = () =>{
+        setTruncTime(!truncTime)
+    }
+
+    const handleShowEmail = ()=>{
+        setShowEmail(!showEmail)
+    }
+
     const toggleViewSignatureModal = () =>{
         setShowSignatureModal(!showSignatureModal);
     }
@@ -64,7 +73,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         setIsExporting(true)
         const input = document.getElementById('table-container');
         const pdf = new jsPDF('p', 'mm', 'letter');
-        const margin = 25.4; // 1 inch margin in mm
+        const margin = 12; //12mm
         const pageWidth = pdf.internal.pageSize.width;
         const pageHeight = pdf.internal.pageSize.height;
         const imgWidth = pageWidth - 2 * margin;
@@ -238,7 +247,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                         <input type='checkbox' name='sig' checked={sig} onClick={handleClickSig}></input>
                         <label for='sig' className='text-white mr-4'>Signatures</label>
+
+                        <input type='checkbox' name='email' checked={showEmail} onClick={handleShowEmail}></input>
+                        <label for='email' className='text-white mr-4'>Emails</label>
                         
+                        <input type='checkbox' name='truncTime' checked={truncTime} onClick={handleTruncTime}></input>
+                        <label for='truncTime' className='text-white mr-4'>Truncate Time</label>
                         </div>
             <div className="overflow-x-auto overflow-y-auto shadow-md">
             <p className='text-white'>{currentPage} / {totalPages}</p>
@@ -264,13 +278,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             paginatedData.map((entry) => (
                                     <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
-                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.name}</td>
+                                    <td className="flex flex-col items_center px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                        <div>{entry.name}</div>
+                                        <div>{entry.orgname? `${entry.orgname} - ${entry.position}`: ''}</div>
+
+                                    </td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id_number}</td>
                                     {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.email}</td>:''}
                                     {showProgram? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.program}</td> : ''}
                                     {showAdditional? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.additional}</td>:''}
-                                    <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>
-                                    <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>
+                                    {!truncTime? 
+                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>:
+                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>}
+                                    {!truncTime?
+                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>:
+                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>
+                                    }
                                     {<td className="px-1 py-1 font-bold whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span>}</td>}
                                     
                                         {
@@ -283,7 +306,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                                         onClick={()=>handleViewSignature(entry.id, entry.id_number, entry.name)}
                                                         src={`${filePath}${entry.id}.png`}
                                                         alt="Signature"
-                                                        className="w-20 h-10 object-fill"
+                                                        className="h-10 object-fill"
                                                     />
                                              
                                                 ) : (
