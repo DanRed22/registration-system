@@ -49,7 +49,7 @@ router.post('/save-signature', upload.single('signature'), (req, res) => {
     const { id, idNumber, signature } = req.body;
   
     const base64Data = signature.replace(/^data:image\/png;base64,/, "");
-    const filePath = path.join(dir, `${idNumber}.png`);
+    const filePath = path.join(dir, `${id}.png`);
   
     fs.writeFile(filePath, base64Data, 'base64', (err) => {
       if (err) {
@@ -65,7 +65,7 @@ router.post('/save-signature', upload.single('signature'), (req, res) => {
             return res.status(500).send({message: 'Failed to execute database query'});
         }
       })
-        console.log(`Saved signature for ID ${idNumber} at ${filePath}`);
+        console.log(`Saved signature for ID: ${id} with ${idNumber} at ${filePath}`);
         res.status(200).send('Signature saved successfully');
     });
   });
@@ -252,14 +252,14 @@ router.post('/update-remarks',(req, res)=>{
 })
 
 router.post('/add', (req, res)=>{
-    const { name, id_number, program, additional, remarks} =req.body;
+    const { name, id_number, email, program, additional, remarks, orgname, position} = req.body;
     console.log(req.body)
 
-    const query = `INSERT INTO members (name, id_number, program, additional, remarks)
-    VALUES (?,?,?,?,?);
+    const query = `INSERT INTO members (name, id_number, email, program, additional, remarks, orgname, position)
+    VALUES (?,?,?,?,?,?,?,?);
     `
 
-    pool.query(query, [name, id_number, program, additional, remarks], (err, result)=>{
+    pool.query(query, [name, id_number, email, program, additional, remarks, orgname, position], (err, result)=>{
         if(err){
             console.error("Error Adding Record!", err);
             res.status(400).json({error: 'Bad Request'});

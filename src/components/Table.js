@@ -185,8 +185,10 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
             setMessage("Failed to Update Time");
         }
     }
+
+    console.log(data)
   return (
-    <div className='w-[90vw]'>
+    <div className='w-[90%]'>
             {showUserSig && <ShowSignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleShowUserSignature}/>}
          {showSignatureModal && <SignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleSignaturePress}/>}
          {showRemarksModal && <RemarksModal hideModal={hideRemarksModal} id={remarkID} name={remarkName} remark={remark} refresh={handleSearch}/>}
@@ -223,17 +225,17 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
 
         </div>
     <div class="overflow-x-auto overflow-y-auto shadow-md sm:rounded-lg">
-    <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+    <table className="w-full divide-y divide-gray-400 dark:divide-gray-700">
+            <thead className="bg-gray-100 dark:bg-gray-800">
                 <tr>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Program</th>
-                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Additional</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Package</th>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
-                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>
-                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th>
+                    <th scope="col" className="w-8 px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>
+                    <th scope="col" className="w-5 px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medical Disclosure</th>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th>
 
                 </tr>
@@ -241,8 +243,14 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                 {!isLoading? <>
                 {data.map((entry) => (
-                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
-                        <td className="px-1 py-1 whitespace-nowrap">{entry.name}</td>
+                    <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
+                        <td className="flex flex-col justify-center items-center px-1 py-1 whitespace-nowrap"><>{entry.name}</>
+                            {entry.orgname? 
+                                <button className='flex flex-col justify-center items-center w-[50%] rounded-lg p-1 bg-red-900 text-white text-xs font-medium whitespace-normal break-words overflow-wrap'>
+                                    <span>{entry.orgname}</span>
+                                    <span>{entry.position}</span>
+                                    </button> :''}
+                        </td>
                         <td className="px-1 py-1 whitespace-nowrap">{entry.id_number}</td>
                         <td className="px-1 py-1 whitespace-nowrap">{entry.program}</td>
                         <td className="overflow-clip px-1 py-1">{entry.additional}</td>
@@ -264,7 +272,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                             <td className="px-1 py-1 whitespace-nowrap"><button 
                                     onClick={()=>handleResetTimeOut(entry.id, entry.name)}    
                                     type="button" 
-                                    className=" cursor-pointer  focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">{entry.timeOut}</button></td>:
+                                    className=" cursor-pointer text-xs focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">{entry.timeOut}</button></td>:
                             <td className="px-1 py-1 whitespace-nowrap">
                                 <button 
                                     onClick={()=>handleTimeOut(entry.id, entry.name)}
@@ -308,7 +316,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                                 type="button" 
                                 className="text-black cursor-pointer bg-gradient-to-br focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"><FaRegEye/></button>
                         }
-</td>
+                        </td>
                     </tr>
                 ))}
                 </>: ''}</tbody>

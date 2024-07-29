@@ -52,7 +52,7 @@ export const Attendance = () => {
 
   return (
     <div>
-        <div className='flex flex-col items-center'>
+        <div className='flex flex-col items-center overflow-auto'>
            
            {showNotif && <Notification hideNotif={hideNotif} message={message}/>}
             <div><h1 class="mb-4 text-3xl font-extrabold text-white md:text-5xl lg:text-6xl"><span class="bg-gradient-to-r from-red-700 to-red-900 text-transparent bg-clip-text font-bold py-2 px-4 rounded transition duration-700 ease-in-out hover:from-red-500 hover:to-red-700"> Attendance System </span></h1></div>
@@ -65,7 +65,7 @@ export const Attendance = () => {
             </div>
         
         : ''}
-            <div className='mt-10 p-2 w-[110rem] border border-solid rounded-lg border-white z-10 overflow-auto'>
+            <div className='mt-10 p-2 border border-solid rounded-lg border-white z-10 overflow-auto'>
                 <div className='flex flex-row'>
                 <div className='flex flex-row w-1/2 my-2 items-center'>
                     <p className='text-white mr-4'>Present: {data.present}</p>
@@ -77,7 +77,7 @@ export const Attendance = () => {
                     type="button" 
                     className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
                     onClick={ExportPreview}
-                    >Export Preview</button> */
+                    >Export</button> */
                     
 
 
@@ -85,9 +85,10 @@ export const Attendance = () => {
                     } 
                 </div>
                 </div>
+                </div>
                 <Table setShowAddModal={setShowAddModal} showAddModal={showAddModal} showNotif={setShowNotif} setMessage={setMessage} className=''/>
         
-            </div>
+            
 
 
         </div>

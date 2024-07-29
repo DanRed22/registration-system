@@ -5,7 +5,6 @@ import RemarksModal from '../components/RemarksModal';
 import API from './Config';
 import { FaPencilAlt, FaRegEye } from 'react-icons/fa';
 import ClipLoader from "react-spinners/ClipLoader";
-import SignatureModal from './SignatureModal';
 import ViewOnlyShowSignatureModal from './ViewOnlyShowSignatureModal';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -20,13 +19,24 @@ const ViewTable = ({ showNotif, setMessage }) => {
     //const [viewedData, setViewedData] = useState ([]);
     const itemsPerPage = 20
     const totalPages = Math.ceil(data.length/itemsPerPage);
-    const filename = 'Carsumm'; //change this if necessary
+    const fileNameExport = 'Carsumm'; //change this if necessary
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
     const [showSig, setShowSig] = useState(true);
     const [sig, setSig] = useState(true);
     const [showProgram, setShowProgram] = useState(true);
     const [showAdditional, setShowAdditional] = useState(false);
+    const [showSignatureModal, setShowSignatureModal] = useState(false);
+    const [selectedID, setSelectedID] = useState(0);
+    const [showEmail, setShowEmail] = useState(true);
+    const [selectedName, setSelectedName] = useState('');
+    const [selectedIDNumber, setSelectedIDNumber] = useState('');
+    const [isExporting, setIsExporting] = useState(false);
+    var paginatedData = data.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+
 
     const nextPage = () => {
         if (currentPage < totalPages){
@@ -39,55 +49,60 @@ const ViewTable = ({ showNotif, setMessage }) => {
             setCurrentPage(currentPage-1);
         }
     }
-    
-      const paginatedData = data.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-      );
 
-    const exportTableToPDF = () => {
+    const handleViewSignature = (id, idNumber, name) =>{
+        setSelectedID(id);
+        setSelectedIDNumber(idNumber);
+        setSelectedName(name);
+        toggleViewSignatureModal();
+    }
+
+    const toggleViewSignatureModal = () =>{
+        setShowSignatureModal(!showSignatureModal);
+    }
+      const exportTableToPDF = async () => {
+        setIsExporting(true)
         const input = document.getElementById('table-container');
         const pdf = new jsPDF('p', 'mm', 'letter');
         const margin = 25.4; // 1 inch margin in mm
         const pageWidth = pdf.internal.pageSize.width;
         const pageHeight = pdf.internal.pageSize.height;
         const imgWidth = pageWidth - 2 * margin;
-        const imgHeight = (input.scrollHeight * imgWidth) / input.scrollWidth;
-        const canvasHeight = pageHeight - 2 * margin;
         const verificationText = `Verified from (Attendance System © USC-SSC 2024) on ${new Date().toLocaleString()}`;
-
-        html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
-            
-            const imgData = canvas.toDataURL('image/jpeg', 0.95); // Adjust quality here
     
-            let heightLeft = imgHeight;
-            let position = 0;
+        // Set the initial page to 1
+        let currentPage = 1;
     
-            //Function to add image and text to each page
-            const addPageContent = (isFirstPage) => {
-                if (!isFirstPage) pdf.addPage();
-                pdf.addImage(imgData, 'JPEG', margin, position, imgWidth, imgHeight);
-                pdf.setFontSize(8);
-                pdf.text(
-                    verificationText,
-                    margin,
-                    pageHeight - margin / 2 // Position text at the bottom margin
-                );
-            };
+        // Function to capture and add a single page
+        const addPageToPDF = async (pageNumber) => {
+            setCurrentPage(pageNumber); // Make sure to define this function as per your logic to set the page view
+            const canvas = await html2canvas(input, { scale: 2, useCORS: true });
+            const imageData = canvas.toDataURL('image/jpeg', 0.95);
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
     
-            // Add the first page
-            addPageContent(true);
-            heightLeft -= canvasHeight;
-    
-            // Add new pages as necessary
-            while (heightLeft > 0) {
-                position -= canvasHeight;
-                addPageContent(false);
-                heightLeft -= canvasHeight;
+            // If it's not the first page, add a new page to the PDF
+            if (pageNumber > 1) {
+                pdf.addPage();
             }
     
-            pdf.save(`${currentPage}-${totalPages} ${filename}.pdf`);
-        }).catch((err) => console.error(err));
+            pdf.addImage(imageData, 'JPEG', margin, margin, imgWidth, imgHeight);
+            pdf.setFontSize(8);
+            pdf.text(
+                verificationText,
+                margin,
+                pageHeight - margin / 2 // Position text at the bottom margin
+            );
+        };
+    
+        // Iterate over all pages and add them to the PDF
+        for (let x = 1; x <= totalPages; x++) {
+            await addPageToPDF(x);
+        }
+        setCurrentPage(1)
+    
+        // Save the PDF
+        pdf.save(`${fileNameExport}.pdf`);
+        setIsExporting(false)
     };
 
     
@@ -155,17 +170,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
     }
 
     const handleExportCSV = () => {
+        setIsExporting(false)
         try {
             const tableId = '#table-container';
-            ExportMatTableToCSV(tableId, filename);
+            ExportMatTableToCSV(tableId, fileNameExport);
         } catch (err) {
             console.error(err);
+        }
+        finally{
+            setIsExporting(false)
         }
     };
 
 
     return (
-        <div className='w-[90vw]'>
+        <div className='w-[90%]'>
+            {showSignatureModal && <ViewOnlyShowSignatureModal id={selectedID} name={selectedName} idNumber={selectedIDNumber} close={toggleViewSignatureModal}/>}
             <div className='flex justify-items-end border border-white rounded-lg border-solid w-full my-2'>
                 <div className="m-2 flex justify-items-center items-center">
                     <label htmlFor="search-input" className="block ml-4 text-sm font-medium text-white">Search </label><CiSearch className=' text-white mx-2' />
@@ -198,6 +218,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         type="button" className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                         Export to CSV
                     </button>
+                    {isExporting? <ClipLoader size={'2rem'} color='white'/>: ''}
                     
 
                 </div>
@@ -206,7 +227,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <p className='mx-2 '>Columns to Show:</p>
                         {sig && (<>
                         <input type='checkbox' name='show-sig' checked={showSig} onClick={handleClickShowSig}></input>
-                        <label for='show-sig' className='text-white mr-4'> Show Signatures</label></>)
+                        <label for='show-sig' className='text-white mr-4'> Show Signatures <span className='text-[0.75rem] italic'>{`(Uncheck this for CSV)`}</span></label></>)
                         }
 
                         <input type='checkbox' name='show-prog' checked={showProgram} onClick={handleClickProgram}></input>
@@ -229,11 +250,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"> </th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>
+                            {showEmail? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>:''}
                             {showProgram? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Program</th> :''}
                             {showAdditional? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Additional</th>:''}
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
-                            {/* <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th> */}
+                            { <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th> }
                             {sig? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th> :''}
                         </tr>
                     </thead>
@@ -244,27 +266,31 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.name}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id_number}</td>
+                                    {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.email}</td>:''}
                                     {showProgram? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.program}</td> : ''}
                                     {showAdditional? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.additional}</td>:''}
                                     <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>
                                     <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>
-                                    {/* <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? 'YES' : 'NO'}</td> */}
+                                    {<td className="px-1 py-1 font-bold whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span>}</td>}
                                     
                                         {
                                         sig === true && (
                                             <td className="px-1 py-1 whitespace-nowrap items-center flex justify-center">
                                             {entry.signature ? (
                                                 showSig ? (
-                                                <img
-                                                    src={`${filePath}${entry.id_number}.png`}
-                                                    alt="Signature"
-                                                    className="w-20 h-10 object-fill"
-                                                />
+                                          
+                                                    <img
+                                                        onClick={()=>handleViewSignature(entry.id, entry.id_number, entry.name)}
+                                                        src={`${filePath}${entry.id}.png`}
+                                                        alt="Signature"
+                                                        className="w-20 h-10 object-fill"
+                                                    />
+                                             
                                                 ) : (
-                                                <span className='text-xs italic'>Digitally Signed</span>
+                                                <span className='text-xs font-bold italic text-green-600'>Digitally Signed</span>
                                                 )
                                             ) : (
-                                                <span className='text-xs italic'>No Signature</span>
+                                                <span className='text-xs font-light italic'>No Signature</span>
                                             )}
                                             </td>
                                             

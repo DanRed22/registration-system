@@ -9,11 +9,25 @@ const [id, setId]= useState('');
 const [additional, setAdditional] = useState('');
 const [remarks, setRemarks] = useState('');
 const [program, setProgram] = useState('');
+const [email, setEmail] = useState('');
+const [orgname, setOrgname] = useState('');
+const [position, setPosition] = useState('');
 
 const handleNameChange = (e) =>{
     setName(e.target.value);
 }
 
+const handleEmailChange = (e) =>{
+    setEmail(e.target.value);
+}
+
+const handleOrgnameChange = (e) =>{
+    setOrgname(e.target.value);
+}
+
+const handlePositionChange = (e) =>{
+    setPosition(e.target.value);
+}
 
 const handleIdChange = (e) =>{
     setId(e.target.value)
@@ -36,9 +50,12 @@ const handleSubmit = async ()=>{
     const response = await axios.post(`${API}add`, {
         "name": name,
         "id_number": id,
+        "email":email,
         "program": program,
         "additional": additional,
-        "remarks": remarks
+        "remarks": remarks,
+        "orgname": orgname,
+        "position":position
     })
     if (response){
         alert(response.data.message);
@@ -71,15 +88,28 @@ const handleSubmit = async ()=>{
         </div>
         <div>
             <label for="program" class="block mb-2 text-sm font-medium  text-white">Program</label>
-            <input value={program} onChange={handleProgramChange} type="textarea" id="program" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="Remarks Here" />
+            <input value={program} onChange={handleProgramChange} type="textarea" id="program" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="BS Psych" />
         </div>
         <div>
-            <label for="additional" class="block mb-2 text-sm font-medium  text-white">Additional Info</label>
-            <input value={additional} onChange={handleAdditionalChange} type="text" id="number" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="1" />
+            <label for="email" class="block mb-2 text-sm font-medium  text-white">Email</label>
+            <input value={email} onChange={handleEmailChange} type="textarea" id="email" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="example@gmail.com" />
+        </div>
+        <div>
+            <label for="additional" class="block mb-2 text-sm font-medium  text-white">Package</label>
+            <input value={additional} onChange={handleAdditionalChange} type="text" id="additional" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="Game Changer / Starter" />
         </div>  
         <div>
-            <label for="remarks" class="block mb-2 text-sm font-medium  text-white">Remarks</label>
+            <label for="remarks" class="block mb-2 text-sm font-medium  text-white">Medical Disclosure</label>
             <input value={remarks} onChange={handleIRemarksChange} type="textarea" id="remarks" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="Remarks Here" />
+        </div>
+
+        <div>
+            <label for="orgname" class="block mb-2 text-sm font-medium  text-white">Organization</label>
+            <input value={orgname} onChange={handleOrgnameChange} type="textarea" id="orgname" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="President" />
+        </div>
+        <div>
+            <label for="position" class="block mb-2 text-sm font-medium  text-white">Position</label>
+            <input value={position} onChange={handlePositionChange} type="textarea" id="position" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="President" />
         </div>
 
         <div>
