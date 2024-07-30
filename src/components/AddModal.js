@@ -12,7 +12,11 @@ const [program, setProgram] = useState('');
 const [email, setEmail] = useState('');
 const [orgname, setOrgname] = useState('');
 const [position, setPosition] = useState('');
+const [isFreshmen, setIsFreshmen] = useState(true);
 
+// const handleIsFreshmen = ()=>{
+//     isFreshmen === 1? setIsFreshmen(0) : setIsFreshmen(1)
+// }
 const handleNameChange = (e) =>{
     setName(e.target.value);
 }
@@ -55,7 +59,8 @@ const handleSubmit = async ()=>{
         "additional": additional,
         "remarks": remarks,
         "orgname": orgname,
-        "position":position
+        "position":position,
+        "freshman": isFreshmen,
     })
     if (response){
         alert(response.data.message);
@@ -111,6 +116,11 @@ const handleSubmit = async ()=>{
             <label for="position" class="block mb-2 text-sm font-medium  text-white">Position</label>
             <input value={position} onChange={handlePositionChange} type="textarea" id="position" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="President" />
         </div>
+        <div>
+            <input type='checkbox' name='freshmen' checked={isFreshmen} onClick={()=>setIsFreshmen(!isFreshmen)}></input>
+            <label for='freshmen' className='text-white text-xs mx-2'>Freshmen?</label>
+        </div>
+               
 
         <div>
         

@@ -252,14 +252,14 @@ router.post('/update-remarks',(req, res)=>{
 })
 
 router.post('/add', (req, res)=>{
-    const { name, id_number, email, program, additional, remarks, orgname, position} = req.body;
+    const { name, id_number, email, program, additional, remarks, orgname, position, freshman} = req.body;
     console.log(req.body)
 
-    const query = `INSERT INTO members (name, id_number, email, program, additional, remarks, orgname, position)
-    VALUES (?,?,?,?,?,?,?,?);
+    const query = `INSERT INTO members (name, id_number, email, program, additional, remarks, orgname, position, freshman)
+    VALUES (?,?,?,?,?,?,?,?, ?);
     `
 
-    pool.query(query, [name, id_number, email, program, additional, remarks, orgname, position], (err, result)=>{
+    pool.query(query, [name, id_number, email, program, additional, remarks, orgname, position,freshman], (err, result)=>{
         if(err){
             console.error("Error Adding Record!", err);
             res.status(400).json({error: 'Bad Request'});
