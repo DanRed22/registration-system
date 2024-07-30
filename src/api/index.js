@@ -17,7 +17,7 @@ const pool = createPool({
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '10mb'}));
 app.use(cors({
     // origin: process.env.CORS_ORIGIN,
     origin: '*',
