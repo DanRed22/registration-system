@@ -51,7 +51,7 @@ const ShowSignatureModal = ({ id, idNumber, name, close }) => {
         <button 
                 onClick={()=>handleClear(id)}
                 type="button" 
-                className="mx-2 mt-4 cursor-pointer focus:outline-none text-white font-medium rounded-lg text-sm px-4 py-2.5 me-2 mb-2 bg-red-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900">
+                className="mx-2 mt-4 cursor-pointer focus:outline-none text-white font-medium rounded-lg text-sm px-4 py-2.5 me-2 mb-2 bg-red-700 hover:bg-red-900 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-900">
                 Clear
             </button>
       </div>
