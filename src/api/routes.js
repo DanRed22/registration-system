@@ -79,7 +79,7 @@ router.post('/clear-signature', (req, res)=>{
                 return res.status(500).send({message: 'Failed to execute database query'});
             }
         })
-        const filePath = path.join(dir, `${idNumber}.png`);
+        const filePath = path.join(dir, `${id}.png`);
 
         // Remove the signature file
         fs.unlink(filePath, (err) => {
