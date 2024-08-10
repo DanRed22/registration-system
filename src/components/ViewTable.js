@@ -17,7 +17,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState([]);
     //const [viewedData, setViewedData] = useState ([]);
-    const itemsPerPage = 20
+    const itemsPerPage = 16     // adjust this if necessary
     const totalPages = Math.ceil(data.length/itemsPerPage);
     const fileNameExport = 'Carsumm'; //change this if necessary
     const [currentPage, setCurrentPage] = useState(1);
