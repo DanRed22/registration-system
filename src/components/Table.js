@@ -269,7 +269,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                     {show.timeout? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>:""}
                     {show.claimed?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>:""}
-                    {show.remarks?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Medical Disclosure</th>:""}
+                    {show.remarks?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Disclosure & Remarks</th>:""}
                     {show.signature?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th>:""}
 
                 </tr>
