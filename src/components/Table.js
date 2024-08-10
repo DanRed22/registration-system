@@ -29,14 +29,12 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     }
 
     const[show, setShow] = useState({
-        idnumber: true,
+        course: true,
         program: false, //default false if not needed
-        package: true,
-        claimed: true,
+        yearlevel: true,
+        regular: true,
         timeout: false, //default false if feature not needed
         remarks: true, //aka medical disclosure
-        signature:true,
-        freshmen: true
     })
 
     const handleFilterClick = (name) => {
@@ -262,15 +260,14 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
             <thead className="bg-gray-100 dark:bg-gray-800 border-b-2 border-black">
                 <tr className='bg-white divide-y w-full'>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                    {show.freshmen?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Freshmen</th>:""}
-                    {show.idnumber? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>:""}
-                    {show.program? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Program</th>:""}
-                    {show.package?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Package</th>:""}
-                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
-                    {show.timeout? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>:""}
-                    {show.claimed?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th>:""}
-                    {show.remarks?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Disclosure & Remarks</th>:""}
-                    {show.signature?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th>:""}
+                        {show.course?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>:""}
+                        {show.yearlevel? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year Level</th>:""}
+                        {show.regular? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Regular</th>:""}
+                        {show.organization? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Organization</th> : ""}
+                        <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
+                        {show.timeout? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>:""}
+                        {show.remarks?<th scope="col" className=" px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th>:""}
+                        {show.signature?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th>:""}
 
                 </tr>
             </thead>
@@ -278,18 +275,12 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                 {!isLoading? <>
                 {data.map((entry) => (
                     
-                    <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
-                        <td className="flex flex-col justify-center items-center px-1 py-1 whitespace-nowrap"><>{entry.name}</>
-                            {entry.orgname? 
-                                <button className='flex flex-col justify-center items-center w-[50%] rounded-lg p-1 bg-red-900 text-white text-xs font-medium whitespace-normal break-words overflow-wrap'>
-                                    <span>{entry.orgname}</span>
-                                    <span>{entry.position}</span>
-                                    </button> :''}
-                        </td>
-                        {show.idnumber && <td className="px-1 py-1 whitespace-nowrap">{entry.freshman? "✅" : "⛔"}</td>}
-                        {show.idnumber && <td className="px-1 py-1 whitespace-nowrap">{entry.id_number}</td>}
-                       {show.program && <td className="px-1 py-1 whitespace-nowrap">{entry.program}</td>}
-                        {show.package && <td className="overflow-clip px-1 py-1">{entry.additional}</td>}
+                     <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
+                        <td className="px-1 py-1 whitespace-nowrap">{data.name}</td>
+                        {show.course && <td className="px-1 py-1 whitespace-nowrap">{entry.course}</td>}
+                        {show.yearlevel && <td className="px-1 py-1 whitespace-nowrap">{entry.yearlevel}</td>}
+                        {show.regular && <td className="px-1 py-1 whitespace-nowrap">{entry.regular? "✅" : "⛔"}</td>}
+                        {show.organization && <td className="overflow-clip px-1 py-1">{entry.organization}</td>}
                         {entry.timeIn? 
                             <td className="px-1 py-1 whitespace-nowrap">
                                 <button 
@@ -317,23 +308,6 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                                     className=" cursor-pointer focus:outline-none text-white font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900 ">Time Out</button>
                             </td>
                         )}
-                        {show.claimed &&
-                        (<td className="px-1 py-1 whitespace-nowrap">
-                            {show.claimed &&
-                                (entry.claimed == 1? 
-                                <button 
-                                onClick={()=>{handleUnclaim(entry.id, entry.name)}}
-                                type="button" 
-                                className=" cursor-pointer focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Claimed</button>
-                        :
-                        <button 
-                                onClick={()=>{handleClaim(entry.id, entry.name)}}
-                                type="button" 
-                                className="cursor-pointer focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Not Claimed</button>
-                    
-                        
-                            )}
-                       </td>)}
                         {show.remarks && (
                         <td className="px-1 py-1 whitespace-nowrap">
                             <button 
