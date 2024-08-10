@@ -10,16 +10,16 @@ import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import ExportMatTableToCSV from './ExportMatTableToCSV'
+import config from '../configuration';
 
 const ViewTable = ({ showNotif, setMessage }) => {
     const filePath = "/signatures/";
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState([]);
-    //const [viewedData, setViewedData] = useState ([]);
     const itemsPerPage = 16     // adjust this if necessary
     const totalPages = Math.ceil(data.length/itemsPerPage);
-    const fileNameExport = 'Carsumm'; //change this if necessary
+    const fileNameExport = config.eventName; //change this if necessary
     const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
     const [showSig, setShowSig] = useState(true);
