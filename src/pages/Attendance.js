@@ -6,6 +6,7 @@ import Notification from '../components/Notification'
 import axios from 'axios'
 import API from '../components/Config'
 import { useNavigate } from 'react-router-dom';
+import config from '../configuration'
 
 export const Attendance = () => {
     const navigate = useNavigate();
@@ -55,8 +56,8 @@ export const Attendance = () => {
         <div className='flex flex-col items-center overflow-auto'>
            
            {showNotif && <Notification hideNotif={hideNotif} message={message}/>}
-            <div><h1 class="mb-4 text-3xl font-extrabold text-white md:text-5xl lg:text-6xl"><span class="bg-gradient-to-r from-red-700 to-red-900 text-transparent bg-clip-text font-bold py-2 px-4 rounded transition duration-700 ease-in-out hover:from-red-500 hover:to-red-700"> Attendance System </span></h1></div>
-            <div><p class="text-lg font-normal text-gray-200 lg:text-xl dark:text-gray-100">USC | SSC Carolinian Summit 2024</p></div>
+            <div><h1 class="mb-4 text-3xl font-extrabold text-white md:text-5xl lg:text-6xl"><span class="bg-gradient-to-r from-green-700 to-yellow-500 text-transparent bg-clip-text font-bold py-2 px-4 rounded transition duration-300 hover:from-yellow-500 hover:to-green-700"> {config.websiteName} </span></h1></div>
+            <div><p class="text-lg font-normal text-gray-200 lg:text-xl dark:text-gray-100">{config.subheader}</p></div>
             {showAddModal? 
             <div className=' fixed top-0 left-0 right-0 bottom-0 bg-[rgba(0,0,0,0.8)] grid place-content-center z-50 overflow-auto'>
                 <div className='w-[60%] '>
