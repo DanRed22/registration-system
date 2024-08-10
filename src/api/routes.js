@@ -132,8 +132,7 @@ router.post('/claim', (req, res) => {
 
 router.post('/unclaim', (req, res) => {
     const id = req.body.id;
-    console.log(req.body)
-
+    console.log(req.body);
     const SQLquery = 'UPDATE members SET claimed = 0 WHERE id = ?;'; 
     // Execute the query
     pool.query(SQLquery, [id], (err, results) => {
