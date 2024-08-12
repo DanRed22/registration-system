@@ -5,14 +5,15 @@ import API from '../components/Config'
 
 const AddModal = ({hide}) => {
 const [name, setName] = useState('');
-const [id, setId]= useState('');
-const [additional, setAdditional] = useState('');
+const [course, setCourse]= useState('');
+const [year, setYear] = useState('');
+const [regular, setRegular] = useState(true);
+const [organization, setOrganization] = useState('');
 const [remarks, setRemarks] = useState('');
-const [program, setProgram] = useState('');
-const [email, setEmail] = useState('');
-const [orgname, setOrgname] = useState('');
-const [position, setPosition] = useState('');
-const [isFreshmen, setIsFreshmen] = useState(true);
+const [timeIn, setTimeIn] = useState('');
+const [showCoursesDropDown, setShowCoursesDropdown] = useState(true);
+const [showYearDropDown, setShowYearDropDown] = useState(false);
+
 
 // const handleIsFreshmen = ()=>{
 //     isFreshmen === 1? setIsFreshmen(0) : setIsFreshmen(1)
@@ -21,55 +22,49 @@ const handleNameChange = (e) =>{
     setName(e.target.value);
 }
 
-const handleEmailChange = (e) =>{
-    setEmail(e.target.value);
+const handleCourseChange = (name) =>{
+    setCourse(name);
+    setShowCoursesDropdown(false);
 }
 
 const handleOrgnameChange = (e) =>{
-    setOrgname(e.target.value);
+    setOrganization(e.target.value);
 }
 
-const handlePositionChange = (e) =>{
-    setPosition(e.target.value);
+const handleYearChange = (number) =>{
+    setYear(number);
+    setShowYearDropDown(false);
 }
 
-const handleIdChange = (e) =>{
-    setId(e.target.value)
+const handleTimeInChange = (e) =>{
+    setTimeIn(e.target.value);
 }
-
-
-const handleAdditionalChange = (e) =>{
-    setAdditional(e.target.value)
-}
-
 
 const handleIRemarksChange = (e) =>{
-    setRemarks(e.target.value)
+    setRemarks(e.target.value);
 }
 
-const handleProgramChange = (e) =>{
-    setProgram(e.target.value)
-}
+
 const handleSubmit = async ()=>{
     const response = await axios.post(`${API}add`, {
         "name": name,
-        "id_number": id,
-        "email":email,
-        "program": program,
-        "additional": additional,
+        "course":course,
+        "year": year,
+        "regular": regular,
+        "organization": organization,
         "remarks": remarks,
-        "orgname": orgname,
-        "position":position,
-        "freshman": isFreshmen,
+        "timeIn":timeIn,
     })
     if (response){
         alert(response.data.message);
     }
     setName('')
-    setId('')
-    setAdditional('')
+    setCourse('')
+    setYear('')
+    setOrganization('')
+    setRegular(true)
     setRemarks('')
-    setProgram('')
+    setTimeIn('')
     hide()
 }
 
@@ -87,43 +82,72 @@ const handleSubmit = async ()=>{
             <label for="name" class="block mb-2 text-sm font-medium  text-white">Name</label>
             <input value={name} onChange={handleNameChange} type="text" id="name" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="John Doe " />
         </div>
-        <div>
-            <label for="id_number" class="block mb-2 text-sm font-medium  text-white">ID Number</label>
-            <input value={id} onChange={handleIdChange} type="text" id="id_number" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="21100000" />
+        <div className='flex items-center justify-center flex-col'>
+            
+
         </div>
-        <div>
-            <label for="program" class="block mb-2 text-sm font-medium  text-white">Program</label>
-            <input value={program} onChange={handleProgramChange} type="textarea" id="program" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="BS Psych" />
+
+        <div className='flex items-center justify-center flex-row'>
+            <div className='mx-2'>
+                <button onClick={()=>setShowYearDropDown(!showYearDropDown)}class="w-44 flex items-center justify-center h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{year? year : "Select Year"}<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                </svg>
+                </button>
+
+                {/* <!-- Dropdown menu --> */}
+                {showYearDropDown && <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
+                    <button onClick={()=>handleYearChange(null)} className='h-10 rounded-lg w-full hover:bg-blue-200'>Select Year</button>
+                    <button onClick={()=>handleYearChange("1st")} className='h-10 rounded-lg w-full hover:bg-blue-200'>1st</button>
+                    <button onClick={()=>handleYearChange("2nd")} className='h-10 rounded-lg w-full hover:bg-blue-200'>2nd</button>
+                    <button onClick={()=>handleYearChange("3rd")} className='h-10 rounded-lg w-full hover:bg-blue-200'>3rd</button>
+                    <button onClick={()=>handleYearChange("4th")} className='h-10 rounded-lg w-full hover:bg-blue-200'>4th</button>
+                    
+                </div>}
+            </div>
+            <div className='mx-2'>
+                <button onClick={()=>setShowCoursesDropdown(!showCoursesDropDown)}class=" h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{course? course : "Select Course"}<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                </svg>
+                </button>
+
+                {/* <!-- Dropdown menu --> */}
+                {showCoursesDropDown && <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
+                    <button onClick={()=>handleCourseChange(null)} className='h-10 rounded-lg w-full hover:bg-blue-200'>Select Course</button>
+                    <button name="AMT" onClick={()=>handleCourseChange("AMT")} className='h-10 rounded-lg w-full hover:bg-blue-200'>AMT</button>
+                    <button name="AE" onClick={()=>handleCourseChange("AE")} className='h-10 rounded-lg w-full hover:bg-blue-200'>AE</button>
+                    <button name="AMGT" onClick={()=>handleCourseChange("AMGT")} className='h-10 rounded-lg w-full hover:bg-blue-200'>AMGT</button>
+                    
+                </div>}
+            </div>
+
+            
+
         </div>
+
         <div>
-            <label for="email" class="block mb-2 text-sm font-medium  text-white">Email</label>
-            <input value={email} onChange={handleEmailChange} type="textarea" id="email" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="example@gmail.com" />
+            <label for="organization" class="block mb-2 text-sm font-medium  text-white">Organization</label>
+            <input value={organization} onChange={handleOrgnameChange} type="text" id="organization" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="Game Changer / Starter" />
+        </div> 
+        
+        <div className='flex flex-row'>
+            <input value={regular} checked={regular} onClick={()=>setRegular(!regular)} type="checkbox" id="regular" class="bg-gray-50 border border-gray-300  text-sm rounded-lg mr-2 block w-4 p-2.5  placeholder-gray-400 text-black" placeholder="example@gmail.com"/>
+            <label for="regular" className='text-white'>Regular? </label>
         </div>
+         
         <div>
-            <label for="additional" class="block mb-2 text-sm font-medium  text-white">Package</label>
-            <input value={additional} onChange={handleAdditionalChange} type="text" id="additional" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="Game Changer / Starter" />
-        </div>  
-        <div>
-            <label for="remarks" class="block mb-2 text-sm font-medium  text-white">Medical Disclosure</label>
+            <label for="remarks" class="block mb-2 text-sm font-medium  text-white">Remarks</label>
             <input value={remarks} onChange={handleIRemarksChange} type="textarea" id="remarks" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="Remarks Here" />
         </div>
 
         <div>
-            <label for="orgname" class="block mb-2 text-sm font-medium  text-white">Organization</label>
-            <input value={orgname} onChange={handleOrgnameChange} type="textarea" id="orgname" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="President" />
-        </div>
-        <div>
-            <label for="position" class="block mb-2 text-sm font-medium  text-white">Position</label>
-            <input value={position} onChange={handlePositionChange} type="textarea" id="position" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="President" />
-        </div>
-        <div>
-            <input type='checkbox' name='freshmen' checked={isFreshmen} onClick={()=>setIsFreshmen(!isFreshmen)}></input>
-            <label for='freshmen' className='text-white text-xs mx-2'>Freshmen?</label>
-        </div>
-               
-
-        <div>
-        
+            <button
+                value={timeIn} 
+                onClick={handleTimeInChange}
+                id="orgname" 
+                class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" 
+                >
+                    {timeIn !== ''? timeIn: "Time In"}
+            </button>
         </div>
         
     </div>

@@ -29,6 +29,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     }
 
     const[show, setShow] = useState({
+        name: true,
         course: true,
         program: false, //default false if not needed
         yearlevel: true,
@@ -274,9 +275,8 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
             <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                 {!isLoading? <>
                 {data.map((entry) => (
-                    
                      <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
-                        <td className="px-1 py-1 whitespace-nowrap">{data.name}</td>
+                        <td className="px-1 py-1 whitespace-nowrap">{entry.name}</td>
                         {show.course && <td className="px-1 py-1 whitespace-nowrap">{entry.course}</td>}
                         {show.yearlevel && <td className="px-1 py-1 whitespace-nowrap">{entry.yearlevel}</td>}
                         {show.regular && <td className="px-1 py-1 whitespace-nowrap">{entry.regular? "✅" : "⛔"}</td>}
