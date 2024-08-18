@@ -6,18 +6,22 @@ import API from '../components/Config'
 const AddModal = ({hide}) => {
 const [name, setName] = useState('');
 const [course, setCourse]= useState('');
+const [email, setEmail] = useState('');
 const [year, setYear] = useState('');
 const [regular, setRegular] = useState(true);
-const [organization, setOrganization] = useState('');
+const [organization, setOrganization] = useState("Normal");
 const [remarks, setRemarks] = useState('');
 const [timeIn, setTimeIn] = useState('');
-const [showCoursesDropDown, setShowCoursesDropdown] = useState(true);
+const [timeOut, setTimeOut] = useState('');
+const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
+const [showOrganizationDropDown, setShowOrganizationDropDown] = useState(false);
 const [showYearDropDown, setShowYearDropDown] = useState(false);
 
 
-// const handleIsFreshmen = ()=>{
-//     isFreshmen === 1? setIsFreshmen(0) : setIsFreshmen(1)
-// }
+const handleEmailChange = (e)=>{
+    setEmail(e.target.value);
+}
+
 const handleNameChange = (e) =>{
     setName(e.target.value);
 }
@@ -25,10 +29,12 @@ const handleNameChange = (e) =>{
 const handleCourseChange = (name) =>{
     setCourse(name);
     setShowCoursesDropdown(false);
+    console.log(course)
 }
 
-const handleOrgnameChange = (e) =>{
-    setOrganization(e.target.value);
+const handleOrgnameChange = (name) =>{
+    setOrganization(name);
+    setShowOrganizationDropDown(false);
 }
 
 const handleYearChange = (number) =>{
@@ -36,8 +42,20 @@ const handleYearChange = (number) =>{
     setShowYearDropDown(false);
 }
 
-const handleTimeInChange = (e) =>{
-    setTimeIn(e.target.value);
+const handleTimeInChange = () =>{
+    if (timeIn === "" || timeIn === null){
+        setTimeIn(new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString());
+       }else{
+        setTimeIn("")
+       }
+}
+
+const handleTimeOutChange = () =>{
+    if (timeOut === "" || timeOut === null){
+     setTimeOut(new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString());
+    }else{
+        setTimeOut("")
+    }
 }
 
 const handleIRemarksChange = (e) =>{
@@ -48,23 +66,27 @@ const handleIRemarksChange = (e) =>{
 const handleSubmit = async ()=>{
     const response = await axios.post(`${API}add`, {
         "name": name,
+        "email":email,
         "course":course,
         "year": year,
         "regular": regular,
         "organization": organization,
         "remarks": remarks,
         "timeIn":timeIn,
+        "timeOut": timeOut
     })
     if (response){
         alert(response.data.message);
     }
+    setEmail('')
     setName('')
     setCourse('')
     setYear('')
-    setOrganization('')
+    setOrganization('Normal')
     setRegular(true)
     setRemarks('')
     setTimeIn('')
+    setTimeOut('')
     hide()
 }
 
@@ -79,12 +101,31 @@ const handleSubmit = async ()=>{
         </div>
         <div class="grid gap-6 mb-6 md:grid-cols-2">
         <div>
-            <label for="name" class="block mb-2 text-sm font-medium  text-white">Name</label>
+            <label for="name" class="block mb-2 text-sm font-medium  text-white">Full Name</label>
             <input value={name} onChange={handleNameChange} type="text" id="name" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="John Doe " />
+
+            <label for="name" class="block mb-2 mt-4 text-sm font-medium  text-white">Email</label>
+            <input value={email} onChange={handleEmailChange} type="text" id="email" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="email@example.com" />
         </div>
         <div className='flex items-center justify-center flex-col'>
-            
-
+        <div>
+            <label for="organization" className='block mb-2 text-sm font-medium text-white'>Organization</label>
+            <button value={organization} onClick={()=>setShowOrganizationDropDown(!showOrganizationDropDown)} type="button" id="organization" className="justify-center w-36 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"  placeholder="Game Changer / Starter" >
+                {organization}
+                <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                </svg>
+            </button>
+            {showOrganizationDropDown && 
+                <div id="orgdrop" class="z-0 absolute bg-white rounded-lg shadow w-36 dark:bg-gray-700 text-center">
+                    <button onClick={()=>handleOrgnameChange("Normal")} className='h-10 rounded-lg w-full hover:bg-blue-200'>Normal</button>
+                    <button onClick={()=>handleOrgnameChange("TAT")} className='h-10 rounded-lg w-full hover:bg-blue-200'>TAT</button>
+                    <button onClick={()=>handleOrgnameChange("SSC")} className='h-10 rounded-lg w-full hover:bg-blue-200'>SSC</button>
+                    <button onClick={()=>handleOrgnameChange("Event Committee")} className='h-10 rounded-lg w-full hover:bg-blue-200'>Event Committee</button>
+                    
+                </div>
+            }
+            </div>
         </div>
 
         <div className='flex items-center justify-center flex-row'>
@@ -97,10 +138,10 @@ const handleSubmit = async ()=>{
                 {/* <!-- Dropdown menu --> */}
                 {showYearDropDown && <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
                     <button onClick={()=>handleYearChange(null)} className='h-10 rounded-lg w-full hover:bg-blue-200'>Select Year</button>
-                    <button onClick={()=>handleYearChange("1st")} className='h-10 rounded-lg w-full hover:bg-blue-200'>1st</button>
-                    <button onClick={()=>handleYearChange("2nd")} className='h-10 rounded-lg w-full hover:bg-blue-200'>2nd</button>
-                    <button onClick={()=>handleYearChange("3rd")} className='h-10 rounded-lg w-full hover:bg-blue-200'>3rd</button>
-                    <button onClick={()=>handleYearChange("4th")} className='h-10 rounded-lg w-full hover:bg-blue-200'>4th</button>
+                    <button onClick={()=>handleYearChange(1)} className='h-10 rounded-lg w-full hover:bg-blue-200'>1st</button>
+                    <button onClick={()=>handleYearChange(2)} className='h-10 rounded-lg w-full hover:bg-blue-200'>2nd</button>
+                    <button onClick={()=>handleYearChange(3)} className='h-10 rounded-lg w-full hover:bg-blue-200'>3rd</button>
+                    <button onClick={()=>handleYearChange(4)} className='h-10 rounded-lg w-full hover:bg-blue-200'>4th</button>
                     
                 </div>}
             </div>
@@ -124,14 +165,29 @@ const handleSubmit = async ()=>{
 
         </div>
 
-        <div>
-            <label for="organization" class="block mb-2 text-sm font-medium  text-white">Organization</label>
-            <input value={organization} onChange={handleOrgnameChange} type="text" id="organization" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black " placeholder="Game Changer / Starter" />
-        </div> 
         
         <div className='flex flex-row'>
             <input value={regular} checked={regular} onClick={()=>setRegular(!regular)} type="checkbox" id="regular" class="bg-gray-50 border border-gray-300  text-sm rounded-lg mr-2 block w-4 p-2.5  placeholder-gray-400 text-black" placeholder="example@gmail.com"/>
             <label for="regular" className='text-white'>Regular? </label>
+        </div>
+
+        <div className="flex flex-row h-10">
+            <button
+                value={timeIn} 
+                onClick={handleTimeInChange}
+                id="timein" 
+                class={`bg-gray-50 mx-2 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-white ${timeIn? "bg-green-700 hover:bg-green-800": "bg-blue-800 "}`}
+                >
+                    {timeIn !== ''? timeIn: "Time In"}
+            </button>
+            <button
+                value={timeIn} 
+                onClick={handleTimeOutChange}
+                id="timeout"    
+                className={`bg-gray-50 border mx-2  border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-white ${timeOut? "bg-green-700 hover:bg-green-800": "bg-blue-800 "}`}
+                >
+                    {timeOut? timeOut: "Time Out"}
+            </button>
         </div>
          
         <div>
@@ -139,16 +195,7 @@ const handleSubmit = async ()=>{
             <input value={remarks} onChange={handleIRemarksChange} type="textarea" id="remarks" class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" placeholder="Remarks Here" />
         </div>
 
-        <div>
-            <button
-                value={timeIn} 
-                onClick={handleTimeInChange}
-                id="orgname" 
-                class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black" 
-                >
-                    {timeIn !== ''? timeIn: "Time In"}
-            </button>
-        </div>
+        
         
     </div>
     <button onClick={handleSubmit} type="button" class="w-[12rem] transition duration-200 focus:outline-none text-black hover:text-white bg-green-400 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Add Attendee</button>
