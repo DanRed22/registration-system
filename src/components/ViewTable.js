@@ -24,8 +24,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const navigate = useNavigate();
     const [showSig, setShowSig] = useState(true);
     const [sig, setSig] = useState(true);
-    const [showProgram, setShowProgram] = useState(true);
-    const [showAdditional, setShowAdditional] = useState(false);
+    const [showCourse, setShowCourse] = useState(true);
+    const [showRegular, setShowRegular] = useState(false);
     const [showSignatureModal, setShowSignatureModal] = useState(false);
     const [selectedID, setSelectedID] = useState(0);
     const [showEmail, setShowEmail] = useState(true);
@@ -77,7 +77,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         const pageWidth = pdf.internal.pageSize.width;
         const pageHeight = pdf.internal.pageSize.height;
         const imgWidth = pageWidth - 2 * margin;
-        const verificationText = `Verified from (Attendance System © USC-SSC 2024) on ${new Date().toLocaleString()}`;
+        const verificationText = `Verified from (Attendance System © CACI SSC 2024) on ${new Date().toLocaleString()}`;
     
         // Set the initial page to 1
         let currentPage = 1;
@@ -125,11 +125,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
     }
 
     const handleClickProgram = () =>{
-        setShowProgram(!showProgram)
+        setShowCourse(!showCourse)
     }
 
     const handleClickAdditional = () =>{
-        setShowAdditional(!showAdditional)
+        setShowRegular(!showRegular)
     }
 
 
@@ -239,11 +239,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         <label for='show-sig' className='text-white mr-4'> Show Signatures <span className='text-[0.75rem] italic'>{`(Uncheck this for CSV)`}</span></label></>)
                         }
 
-                        <input type='checkbox' name='show-prog' checked={showProgram} onClick={handleClickProgram}></input>
-                        <label for='show-prog' className='text-white mr-4'> Programs</label>
+                        <input type='checkbox' name='show-prog' checked={showCourse} onClick={handleClickProgram}></input>
+                        <label for='show-prog' className='text-white mr-4'> Course</label>
 
-                        <input type='checkbox' name='show-add' checked={showAdditional} onClick={handleClickAdditional}></input>
-                        <label for='show-add' className='text-white mr-4'> Additional</label>
+                        <input type='checkbox' name='show-add' checked={showRegular} onClick={handleClickAdditional}></input>
+                        <label for='show-add' className='text-white mr-4'> Regular</label>
 
                         <input type='checkbox' name='sig' checked={sig} onClick={handleClickSig}></input>
                         <label for='sig' className='text-white mr-4'>Signatures</label>
@@ -262,14 +262,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"> </th>
+                            <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Organization</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                            <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID Number</th>
+                            <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
                             {showEmail? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>:''}
-                            {showProgram? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Program</th> :''}
-                            {showAdditional? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Additional</th>:''}
+                            {showCourse? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th> :''}
+                            {showRegular? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Regular</th>:''}
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
-                            { <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Claimed</th> }
                             {sig? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th> :''}
                         </tr>
                     </thead>
@@ -278,15 +278,16 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             paginatedData.map((entry) => (
                                     <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
+                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
                                     <td className="flex flex-col items_center px-1 py-1 whitespace-normal break-words overflow-wrap">
                                         <div>{entry.name}</div>
                                         <div>{entry.orgname? `${entry.orgname} - ${entry.position}`: ''}</div>
 
                                     </td>
-                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id_number}</td>
+                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.year}</td>
                                     {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.email}</td>:''}
-                                    {showProgram? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.program}</td> : ''}
-                                    {showAdditional? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.additional}</td>:''}
+                                    {showCourse? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.course}</td> : ''}
+                                    {showRegular? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.regular? "✅": "❌"}</td>:''}
                                     {!truncTime? 
                                         <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>:
                                         <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>}
@@ -294,7 +295,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>:
                                         <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>
                                     }
-                                    {<td className="px-1 py-1 font-bold whitespace-normal break-words overflow-wrap">{entry.claimed == 1 ? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span>}</td>}
+                                    
                                     
                                         {
                                         sig === true && (

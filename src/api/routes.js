@@ -45,6 +45,26 @@ router.get('/all', (req, res) => {
     })
 });
 
+router.get('/get-by-params',(req, res)=>{
+    const {order, colfilter, filter} = req.body;
+    var SQLquery = 'SELECT * FROM `members`'; 
+    if (filter){
+        SQLquery = SQLquery.concat(` WHERE ${colfilter} = ${filter}`)
+
+    }
+    if (order){
+        SQLquery = SQLquery.concat(` ORDER BY ${order}`)
+    }
+    pool.query(SQLquery, (err, results)=>{
+        if(err){
+            console.error("ERROR", err)
+            return res.status(500).send({message: 'Failed to execute database query'});
+        }else{
+            return res.status(200).send({results})
+        }
+    })
+});
+
 router.post('/save-signature', upload.single('signature'), (req, res) => {
     const { id, signature } = req.body;
   
