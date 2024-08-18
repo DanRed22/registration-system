@@ -10,7 +10,6 @@ const ShowSignatureModal = ({ id, idNumber, name, close }) => {
     try {
       const response = axios.post(`${API}clear-signature`,{
         id: id,
-        idNumber: idNumber
       }).then(()=>{
         console.log(response);
         alert('Successfully Cleared Signature');
@@ -46,7 +45,7 @@ const ShowSignatureModal = ({ id, idNumber, name, close }) => {
         )}
 
 
-        <div className='text-black mb-4 mt-2'>{idNumber} - {name}</div>
+        <div className='text-black mb-4 mt-2'>{id} - {name}</div>
         
         <button 
                 onClick={()=>handleClear(id)}
