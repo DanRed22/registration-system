@@ -32,10 +32,11 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
         name: true,
         course: true,
         program: false, //default false if not needed
-        yearlevel: true,
+        year: true,
         regular: true,
         timeout: false, //default false if feature not needed
         remarks: true, //aka medical disclosure
+        signature:true
     })
 
     const handleFilterClick = (name) => {
@@ -207,7 +208,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
   return (
     <div className='w-[90%]'>
             {showUserSig && <ShowSignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleShowUserSignature}/>}
-         {showSignatureModal && <SignatureModal id={selectedID} idNumber={selectedIDNumber} name={selectedName} close={handleSignaturePress}/>}
+         {showSignatureModal && <SignatureModal id={selectedID} name={selectedName} close={handleSignaturePress}/>}
          {showRemarksModal && <RemarksModal hideModal={hideRemarksModal} id={remarkID} name={remarkName} remark={remark} refresh={handleSearch}/>}
         <div className='flex justify-items-end border border-white rounded-lg border-solid w-full my-4'>
 
@@ -262,7 +263,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                 <tr className='bg-white divide-y w-full'>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
                         {show.course?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>:""}
-                        {show.yearlevel? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year Level</th>:""}
+                        {show.year? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year Level</th>:""}
                         {show.regular? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Regular</th>:""}
                         {show.organization? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Organization</th> : ""}
                         <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
@@ -278,7 +279,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                      <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
                         <td className="px-1 py-1 whitespace-nowrap">{entry.name}</td>
                         {show.course && <td className="px-1 py-1 whitespace-nowrap">{entry.course}</td>}
-                        {show.yearlevel && <td className="px-1 py-1 whitespace-nowrap">{entry.yearlevel}</td>}
+                        {show.year && <td className="px-1 py-1 whitespace-nowrap">{entry.year}</td>}
                         {show.regular && <td className="px-1 py-1 whitespace-nowrap">{entry.regular? "✅" : "⛔"}</td>}
                         {show.organization && <td className="overflow-clip px-1 py-1">{entry.organization}</td>}
                         {entry.timeIn? 
