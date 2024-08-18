@@ -4,7 +4,7 @@ import axios from 'axios';
 import API from './Config';
 import { FaWindowClose } from 'react-icons/fa';
 
-const SignatureModal = ({ id, idNumber, name, close }) => {
+const SignatureModal = ({ id, name, close }) => {
   const sigCanvas = useRef({});
 
   const clear = () => sigCanvas.current.clear();
@@ -14,7 +14,6 @@ const SignatureModal = ({ id, idNumber, name, close }) => {
     try {
       await axios.post(`${API}save-signature`, {
         id,
-        idNumber,
         signature
       });
       alert('Signature saved successfully!');
@@ -51,7 +50,7 @@ const SignatureModal = ({ id, idNumber, name, close }) => {
                 canvasProps={{ width: 400, height: 300, className: 'sigCanvas' }}
                 />
             </div>
-            <div className='text-black mb-4'>{idNumber} - {name}</div>
+            <div className='text-black mb-4'>{id} - {name}</div>
         <div className=''>
           <button 
             onClick={clear}
