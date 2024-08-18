@@ -46,7 +46,7 @@ router.get('/all', (req, res) => {
 });
 
 router.post('/save-signature', upload.single('signature'), (req, res) => {
-    const { id, idNumber, signature } = req.body;
+    const { id, signature } = req.body;
   
     const base64Data = signature.replace(/^data:image\/png;base64,/, "");
     const filePath = path.join(dir, `${id}.png`);
@@ -65,7 +65,7 @@ router.post('/save-signature', upload.single('signature'), (req, res) => {
             return res.status(500).send({message: 'Failed to execute database query'});
         }
       })
-        console.log(`Saved signature for ID: ${id} with ${idNumber} at ${filePath}`);
+        console.log(`Saved signature for ID: ${id} at ${filePath}`);
         res.status(200).send('Signature saved successfully');
     });
   });
@@ -96,13 +96,13 @@ router.post('/clear-signature', (req, res)=>{
 router.get('/search', (req, res) => {
     const searchTerm = req.query.searchTerm;
     // Construct the SQL query with the LIKE operator
-    const SQLquery = 'SELECT * FROM members WHERE name LIKE ? OR id_number LIKE ? LIMIT 10'; 
+    const SQLquery = 'SELECT * FROM members WHERE name LIKE ? OR email LIKE ? OR organization LIKE ? LIMIT 15'; 
 
     // Prepare the values for the LIKE operator 
     const searchValue = `%${searchTerm}%`;
 
     // Execute the query
-    pool.query(SQLquery, [searchValue, searchValue], (err, results) => {
+    pool.query(SQLquery, [searchValue, searchValue, searchValue], (err, results) => {
         if (err) {
             console.error('Error executing database query:', err);
             return res.status(500).send({ message: 'Failed to execute database query' });
@@ -251,14 +251,14 @@ router.post('/update-remarks',(req, res)=>{
 })
 
 router.post('/add', (req, res)=>{
-    const { name, id_number, email, program, additional, remarks, orgname, position, freshman} = req.body;
-    console.log(req.body)
+    const { name, email, year, course, regular, remarks, organization, timeIn, timeOut} = req.body;
+    //console.log(req.body)
 
-    const query = `INSERT INTO members (name, id_number, email, program, additional, remarks, orgname, position, freshman)
+    const query = `INSERT INTO members (name, email, year, course, regular, remarks, organization, timeIn, timeOut)
     VALUES (?,?,?,?,?,?,?,?, ?);
     `
 
-    pool.query(query, [name, id_number, email, program, additional, remarks, orgname, position,freshman], (err, result)=>{
+    pool.query(query, [name, email, year, course, regular, remarks, organization, timeIn, timeOut], (err, result)=>{
         if(err){
             console.error("Error Adding Record!", err);
             res.status(400).json({error: 'Bad Request'});
@@ -266,6 +266,22 @@ router.post('/add', (req, res)=>{
             res.status(200).json({message: 'Added Record'});
         }
     })
+})
+
+router.post('/reset-all-time', (req, res)=>{
+    const {password} = req.query;
+    const query = `UPDATE members SET timeIn = NULL, timeOut = NULL`
+    if (password === "reset"){
+        pool.query(query, (err, result)=>{
+            if (err){
+                res.status(400).json({error:"Bad Request"});
+            }else{
+                res.status(200).json({message: 'Database Resetted'});
+            }
+        })
+    }else{
+        res.status(403).json({error:"Retype Password Correctly."});
+    }
 })
 
 router.get('/status', (req, res)=>{
