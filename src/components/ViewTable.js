@@ -35,6 +35,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [truncTime, setTruncTime] = useState(true);
     const [showReset, setShowReset] = useState(false);
+    const [showCoursesDropDown, setShowCoursesDropdown] = useState(true);
+    const [selectedCourse, setSelectedCourse] = useState("");
     var paginatedData = data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -197,6 +199,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
         setShowReset(!showReset);
     }
 
+    const handleCourseChange = (name)=>{
+        setSelectedCourse(name);
+        setShowCoursesDropdown(false)
+    }
+
     
 
 
@@ -268,6 +275,21 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         
                         <input type='checkbox' name='truncTime' checked={truncTime} onClick={handleTruncTime}></input>
                         <label for='truncTime' className='text-white mr-4'>Truncate Time</label>
+
+                        <div>
+                        <button onClick={()=>setShowCoursesDropdown(!showCoursesDropDown)}class=" h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{selectedCourse? selectedCourse : "Select Course"}<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                        </svg>
+                        </button>
+                        {showCoursesDropDown && <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
+                    <button onClick={()=>handleCourseChange(null)} className='text-black h-10 border rounded-lg w-full hover:bg-blue-200'>Select Course</button>
+                    <button name="AMT" onClick={()=>handleCourseChange("AMT")} className='text-black border h-10 rounded-lg w-full hover:bg-blue-200'>AMT</button>
+                    <button name="AE" onClick={()=>handleCourseChange("AE")} className='text-black border h-10 rounded-lg w-full hover:bg-blue-200'>AE</button>
+                    <button name="AMGT" onClick={()=>handleCourseChange("AMGT")} className='text-black border h-10 rounded-lg w-full hover:bg-blue-200'>AMGT</button>
+                </div>}
+                </div>
+
+                        
                         </div>
             <div className="overflow-x-auto overflow-y-auto shadow-md">
             <p className='text-white'>{currentPage} / {totalPages}</p>
