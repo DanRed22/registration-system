@@ -117,11 +117,12 @@ const handleSubmit = async ()=>{
                 </svg>
             </button>
             {showOrganizationDropDown && 
-                <div id="orgdrop" class="z-0 absolute bg-white rounded-lg shadow w-36 dark:bg-gray-700 text-center">
-                    <button onClick={()=>handleOrgnameChange("Normal")} className='h-10 rounded-lg w-full hover:bg-blue-200'>Normal</button>
-                    <button onClick={()=>handleOrgnameChange("TAT")} className='h-10 rounded-lg w-full hover:bg-blue-200'>TAT</button>
-                    <button onClick={()=>handleOrgnameChange("SSC")} className='h-10 rounded-lg w-full hover:bg-blue-200'>SSC</button>
-                    <button onClick={()=>handleOrgnameChange("Event Committee")} className='h-10 rounded-lg w-full hover:bg-blue-200'>Event Committee</button>
+                <div id="orgdrop" class="z-0 absolute bg-white rounded-lg shadow-lg w-36 dark:bg-gray-700 text-center border-solid border border-black">
+                    <button onClick={()=>handleOrgnameChange("Normal")} className='h-10 border rounded-lg w-full hover:bg-blue-200'>Normal</button>
+                    <button onClick={()=>handleOrgnameChange("SSC")} className='h-10 rounded-lg border w-full hover:bg-blue-200'>SSC</button>
+                    <button onClick={()=>handleOrgnameChange("TAT")} className='h-10 rounded-lg w-full border hover:bg-blue-200'>TAT</button>
+                    <button onClick={()=>handleOrgnameChange("Dept. Officer")} className='h-10 rounded-lg border w-full hover:bg-blue-200'>Dept. Officer</button>
+                    <button onClick={()=>handleOrgnameChange("Event Committee")} className='h-10 rounded-lg border w-full hover:bg-blue-200'>Event Committee</button>
                     
                 </div>
             }

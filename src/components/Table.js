@@ -31,7 +31,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
     const[show, setShow] = useState({
         name: true,
         course: true,
-        program: false, //default false if not needed
+        email: false,
         year: true,
         regular: true,
         timeout: false, //default false if feature not needed
@@ -262,6 +262,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
             <thead className="bg-gray-100 dark:bg-gray-800 border-b-2 border-black">
                 <tr className='bg-white divide-y w-full'>
                     <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                    {show.email?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>:""}
                         {show.course?<th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th>:""}
                         {show.year? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year Level</th>:""}
                         {show.regular? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Regular</th>:""}
@@ -278,6 +279,7 @@ const Table = ({showAddModal, setShowAddModal, showNotif, setMessage}) => {
                 {data.map((entry) => (
                      <tr key={entry.id} className="border-b-2 border-gray-200 dark:border-gray-700 text-sm">
                         <td className="px-1 py-1 whitespace-nowrap">{entry.name}</td>
+                        {show.email && <td className="px-1 py-1 whitespace-nowrap">{entry.email}</td>}
                         {show.course && <td className="px-1 py-1 whitespace-nowrap">{entry.course}</td>}
                         {show.year && <td className="px-1 py-1 whitespace-nowrap">{entry.year}</td>}
                         {show.regular && <td className="px-1 py-1 whitespace-nowrap">{entry.regular? "✅" : "⛔"}</td>}
