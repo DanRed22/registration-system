@@ -196,7 +196,7 @@ router.post('/reset-timein', (req, res) => {
     // Create a SQL query to rest the timeIn field
     const query = `
         UPDATE members 
-        SET timeIn = NULL
+        SET timeIn = null
         WHERE id = ?`;
 
     pool.query(query, [id], (err, result) => {
@@ -273,12 +273,14 @@ router.post('/update-remarks',(req, res)=>{
 router.post('/add', (req, res)=>{
     const { name, email, year, course, regular, remarks, organization, timeIn, timeOut} = req.body;
     //console.log(req.body)
-
     const query = `INSERT INTO members (name, email, year, course, regular, remarks, organization, timeIn, timeOut)
     VALUES (?,?,?,?,?,?,?,?, ?);
     `
 
-    pool.query(query, [name, email, year, course, regular, remarks, organization, timeIn, timeOut], (err, result)=>{
+    const timeInValue = timeIn || null;
+    const timeOutValue = timeOut || null;
+
+    pool.query(query, [name, email, year, course, regular, remarks, organization, timeInValue, timeOutValue], (err, result)=>{
         if(err){
             console.error("Error Adding Record!", err);
             res.status(400).json({error: 'Bad Request'});

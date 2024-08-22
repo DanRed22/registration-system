@@ -46,7 +46,7 @@ const handleTimeInChange = () =>{
     if (timeIn === "" || timeIn === null){
         setTimeIn(new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString());
        }else{
-        setTimeIn("")
+        setTimeIn(null);
        }
 }
 
@@ -54,7 +54,7 @@ const handleTimeOutChange = () =>{
     if (timeOut === "" || timeOut === null){
      setTimeOut(new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString());
     }else{
-        setTimeOut("")
+        setTimeOut(null);
     }
 }
 
