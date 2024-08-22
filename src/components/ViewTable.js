@@ -284,8 +284,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         <input type='checkbox' name='truncTime' checked={truncTime} onClick={handleTruncTime}></input>
                         <label for='truncTime' className='text-white mr-4'>Truncate Time</label>
 
-                        <input type='checkbox' name='remarks' checked={truncTime} onClick={handleClickRemarks}></input>
-                        <label for='remarks' className='text-white mr-4'>Truncate Time</label>
+                        <input type='checkbox' name='remarks' checked={showRemarks} onClick={handleClickRemarks}></input>
+                        <label for='remarks' className='text-white mr-4'>Remarks</label>
 
                         <div>
                         <button onClick={()=>setShowCoursesDropdown(!showCoursesDropDown)}class=" h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{selectedCourse? selectedCourse : "Select Course"}<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
