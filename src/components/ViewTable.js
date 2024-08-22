@@ -35,7 +35,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [truncTime, setTruncTime] = useState(true);
     const [showReset, setShowReset] = useState(false);
-    const [showCoursesDropDown, setShowCoursesDropdown] = useState(true);
+    const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState("");
     var paginatedData = data.slice(
         (currentPage - 1) * itemsPerPage,
@@ -316,13 +316,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
-                                    <td className="flex flex-col items_center px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                    <td className="flex flex-col items_center justify-center px-1 py-1 whitespace-normal break-words overflow-wrap">
                                         <div>{entry.name}</div>
                                         <div>{entry.orgname? `${entry.orgname} - ${entry.position}`: ''}</div>
 
                                     </td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.year}</td>
-                                    {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.email}</td>:''}
+                                    {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap align-text-top">{entry.email}</td>:''}
                                     {showCourse? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.course}</td> : ''}
                                     {showRegular? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.regular? "✅": "❌"}</td>:''}
                                     {!truncTime? 

@@ -291,7 +291,7 @@ router.post('/add', (req, res)=>{
 router.post('/reset-all-time', (req, res)=>{
     const {password} = req.body;
     console.log(password)
-    const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'Normal'`
+    const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'NONE'`
     if (password == "reset"){
         pool.query(query, (err, result)=>{
             if (err){
