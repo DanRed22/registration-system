@@ -313,14 +313,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                         {!isLoading ? ( //change paginatedData to data if you want to export all in CSV
                             paginatedData.map((entry) => (
-                                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm">
+                                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm h-20">
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
-                                    <td className="flex flex-col items_center justify-center px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                    <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                         {entry.name}
                                     </td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.year}</td>
-                                    {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap align-text-top">{entry.email}</td>:''}
+                                    {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">{entry.email}</td>:''}
                                     {showCourse? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.course}</td> : ''}
                                     {showRegular? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.regular? "✅": "❌"}</td>:''}
                                     {!truncTime? 
@@ -334,7 +334,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     
                                         {
                                         sig === true && (
-                                            <td className="px-1 py-1 whitespace-nowrap items-center flex justify-center">
+                                            <td className="px-1 py-1 whitespace-nowrap ">
                                             {entry.signature ? (
                                                 showSig ? (
                                           
