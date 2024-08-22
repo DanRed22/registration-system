@@ -317,9 +317,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
                                     <td className="flex flex-col items_center justify-center px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                        <div>{entry.name}</div>
-                                        <div>{entry.orgname? `${entry.orgname} - ${entry.position}`: ''}</div>
-
+                                        {entry.name}
                                     </td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.year}</td>
                                     {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap align-text-top">{entry.email}</td>:''}
