@@ -291,11 +291,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                         
                         </div>
-            <div className="overflow-x-auto overflow-y-auto shadow-md">
-            <p className='text-white'>{currentPage} / {totalPages}</p>
+            <div className="w-[100%] overflow-x-auto overflow-y-auto shadow-md flex flex-col justify-center items-center">
+                        <div className='flex flex-row'>
             <button type="button" onClick={prevPage} class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Prev</button>
+            <p className='text-white'>{currentPage} / {totalPages}</p>
             <button type="button" onClick={nextPage} class="focus:outline-none text-white bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:focus:ring-yellow-900">Next</button>
-                <table id='table-container' className="w-[50rem] divide-gray-200 dark:divide-gray-700"> {/* Shirking the table makes it appear larger when printing */}
+                        </div>
+                <table id='table-container' className=" w-[80%] divide-gray-200 dark:divide-gray-700"> {/* Shirking the table makes it appear larger when printing */}
                     <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"> </th>

@@ -24,7 +24,9 @@ export default function View() {
         >
         
           Go Home</button>
-      <ViewTable showNotif={setShowNotif} setMessage={setMessage} />
+          <div className='flex w-full flex-col justify-center items-center'>
+            <ViewTable showNotif={setShowNotif} setMessage={setMessage} />  
+          </div>
     </div>
   )
 }
