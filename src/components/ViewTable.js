@@ -36,7 +36,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [truncTime, setTruncTime] = useState(true);
     const [showReset, setShowReset] = useState(false);
     const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
+    const [showRemarks, setShowRemarks] = useState(true);
     const [selectedCourse, setSelectedCourse] = useState("");
+    const [exportCSV, setExportCSV] = useState(false);
     var paginatedData = data.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
@@ -62,6 +64,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
         toggleViewSignatureModal();
     }
 
+    const handleClickRemarks = ()=>{
+        setShowRemarks(!showRemarks);
+    }
+
     const handleTruncTime = () =>{
         setTruncTime(!truncTime)
     }
@@ -76,7 +82,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
       const exportTableToPDF = async () => {
         setIsExporting(true)
         const input = document.getElementById('table-container');
-        const pdf = new jsPDF('p', 'mm', 'letter');
+        const pdf = new jsPDF('l', 'mm', 'letter');
         const margin = 12; //12mm
         const pageWidth = pdf.internal.pageSize.width;
         const pageHeight = pdf.internal.pageSize.height;
@@ -183,15 +189,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
     }
 
     const handleExportCSV = () => {
-        setIsExporting(false)
+            setIsExporting(false)
         try {
-            const tableId = '#table-container';
+            setExportCSV(true);
+            const tableId = '#table-container-csv';
             ExportMatTableToCSV(tableId, fileNameExport);
         } catch (err) {
             console.error(err);
         }
         finally{
             setIsExporting(false)
+            setExportCSV(false);
         }
     };
 
@@ -276,6 +284,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         <input type='checkbox' name='truncTime' checked={truncTime} onClick={handleTruncTime}></input>
                         <label for='truncTime' className='text-white mr-4'>Truncate Time</label>
 
+                        <input type='checkbox' name='remarks' checked={truncTime} onClick={handleClickRemarks}></input>
+                        <label for='remarks' className='text-white mr-4'>Truncate Time</label>
+
                         <div>
                         <button onClick={()=>setShowCoursesDropdown(!showCoursesDropDown)}class=" h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">{selectedCourse? selectedCourse : "Select Course"}<svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
@@ -310,12 +321,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
                             <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
                             {sig? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th> :''}
+                            {showRemarks? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th> : ''}
                         </tr>
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                         {!isLoading ? ( //change paginatedData to data if you want to export all in CSV
                             paginatedData.map((entry) => (
-                                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm h-20">
+                                    <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20">
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
                                     <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
@@ -358,6 +370,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                             
                                         )
                                         }
+                                        {showRemarks? <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.remarks}</td>:''}
                                     </tr>
                             ))):''}
                     </tbody>
@@ -371,6 +384,74 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </div>
                 )}
             </div>
+                
+        <table id='table-container-csv' className="hidden w-[80%] divide-gray-200 dark:divide-gray-700"> {/* Shirking the table makes it appear larger when printing */}
+            <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"> </th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Organization</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Year</th>
+                    {showEmail? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>:''}
+                    {showCourse? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Course</th> :''}
+                    {showRegular? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Regular</th>:''}
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time In</th>
+                    <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Time Out</th>
+                    {sig? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Signature</th> :''}
+                    {showRemarks? <th scope="col" className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Remarks</th> : ''}
+                </tr>
+            </thead>
+            <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
+                {!isLoading ? ( //change paginatedData to data if you want to export all in CSV
+                    data.map((entry) => (
+                            <tr key={entry.id} className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20">
+                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.id}</td>
+                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.organization}</td>
+                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                {entry.name}
+                            </td>
+                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.year}</td>
+                            {showEmail? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">{entry.email}</td>:''}
+                            {showCourse? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.course}</td> : ''}
+                            {showRegular? <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">{entry.regular? "✅": "❌"}</td>:''}
+                            {!truncTime? 
+                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn}</td>:
+                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeIn? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>}
+                            {!truncTime?
+                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut}</td>:
+                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.timeOut? <span className='text-green-500'>YES</span> : <span className='text-red-500'>NO</span> }</td>
+                            }
+                            
+                            
+                                {
+                                sig === true && (
+                                    <td className="px-1 py-1 whitespace-nowrap ">
+                                    {entry.signature ? (
+                                        showSig ? (
+                                  
+                                            <img
+                                                onClick={()=>handleViewSignature(entry.id, entry.id_number, entry.name)}
+                                                src={`${filePath}${entry.id}.png`}
+                                                alt="Signature"
+                                                className="h-10 object-fill"
+                                            />
+                                     
+                                        ) : (
+                                        <span className='text-xs font-bold italic text-green-600'>Digitally Signed</span>
+                                        )
+                                    ) : (
+                                        <span className='text-xs font-light italic'>No Signature</span>
+                                    )}
+                                    </td>
+                                    
+                                    
+                                )
+                                }
+                                {showRemarks? <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">{entry.remarks}</td>:''}
+                            </tr>
+                    ))):''}
+            </tbody>
+        </table>
         </div>
     );
 }
