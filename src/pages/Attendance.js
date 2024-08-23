@@ -66,7 +66,7 @@ export const Attendance = () => {
             </div>
         
         : ''}
-            <div className='mt-10 p-2 border border-solid rounded-lg border-white z-10 overflow-auto'>
+            <div className='mt-10 p-2 border border-solid rounded-lg border-white z-0 overflow-auto'>
                 <div className='flex flex-row'>
                 <div className='flex flex-row w-1/2 my-2 items-center'>
                     <p className='text-white mr-4'>Present: {data.present}</p>

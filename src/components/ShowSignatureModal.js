@@ -35,7 +35,7 @@ const ShowSignatureModal = ({ id, idNumber, name, close }) => {
 
         {!imageError ? (
           <img
-            className='border-2 border-black border-solid mt-4 w-[30rem]'
+            className='border-2 border-black border-solid mt-4 w-[30rem] h-[20rem] object-contain'
             src={imagePath}
             alt="Signature"
             onError={() => setImageError(true)}
