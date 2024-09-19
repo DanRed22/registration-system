@@ -20,15 +20,15 @@ const ExportMatTableToCSV = (tableId, filename) => {
 
     // Create CSV string
     const csvString = csv.join('\n');
-    
+
     // Create a Blob from the CSV string
     const blob = new Blob([csvString], { type: 'text/csv' });
-    
+
     // Create a link element to trigger the download
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `${filename}.csv`;
-    
+
     // Append link to the body, trigger the click and then remove the link
     document.body.appendChild(link);
     link.click();

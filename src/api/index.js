@@ -13,17 +13,19 @@ const pool = createPool({
     database: process.env.DB_DATABASE,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({limit: '10mb'}));
-app.use(cors({
-    // origin: process.env.CORS_ORIGIN,
-    origin: '*',
-    methods: ["GET", "POST"],
-    credentials: true
-}));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(
+    cors({
+        // origin: process.env.CORS_ORIGIN,
+        origin: '*',
+        methods: ['GET', 'POST'],
+        credentials: true,
+    })
+);
 
 const routes = require('./routes');
 app.use('/', routes); // Use routes as middleware
