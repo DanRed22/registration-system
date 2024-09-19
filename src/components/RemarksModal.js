@@ -42,7 +42,7 @@ const RemarksModal = ({ hideModal, id, name, remark, refresh }) => {
                             for="remarks"
                             class="block mb-2 text-lg font-medium text-white"
                         >
-                            Medical Disclosure
+                            Remarks
                         </label>
                         <textarea
                             id="remarks"

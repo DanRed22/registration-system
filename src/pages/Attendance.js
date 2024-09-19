@@ -13,7 +13,11 @@ export const Attendance = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showNotif, setShowNotif] = useState(false);
     const [message, setMessage] = useState('');
-
+    const [paymentData, setPaymentData] = useState({
+        totalPaid: 0,
+        totalAmountPaid: 0,
+        totalNotYetPaid: 0
+    })
     const [data, setData] = useState({
         present: '100',
         absent: '50',
@@ -26,8 +30,10 @@ export const Attendance = () => {
 
     const refreshStatus = async () => {
         const response = await axios.get(`${API}status`);
-        if (response.status == 200) {
+        const paymentData = await axios.get(`${API}paymentTotal`);
+        if (response.status == 200 && paymentData.status == 200) {
             setData(response.data);
+            setPaymentData(paymentData.data);
         } else {
             setMessage('Error Connecting to Database!');
             setShowNotif(true);
@@ -80,8 +86,8 @@ export const Attendance = () => {
                     ''
                 )}
                 <div className="mt-10 p-2 border border-solid rounded-lg border-white z-0 overflow-auto">
-                    <div className="flex flex-row">
-                        <div className="flex flex-row w-1/2 my-2 items-center">
+                    <div className="flex flex-row w-[30rem]">
+                        <div className="w-1/3 my-2 items-center text-start">
                             <p className="text-white mr-4">
                                 Present: {data.present}
                             </p>
@@ -92,7 +98,11 @@ export const Attendance = () => {
                                 Total: {data.total}
                             </p>
                         </div>
-                        <div className="flex flex-row w-1/2 justify-end mx-5 my-2">
+                        <div className="w-1/3 my-2 items-center text-start">
+                        <p className="text-white mr-4">Total Paid: <b>{paymentData.totalPaid}</b></p>
+                        <p className="text-white mr-4">Total Amount Paid: PHP <b>{paymentData.totalAmountPaid}</b></p>
+                        </div>
+                        <div className="flex flex-row w-1/4 justify-end mx-5 my-2">
                             <button
                                 type="button"
                                 className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"

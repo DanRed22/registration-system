@@ -47,6 +47,53 @@ router.get('/all', (req, res) => {
     });
 });
 
+router.get('/allFiltered', async (req, res) => {
+    const { coursesFilter, yearLevelFilter, onlyPresent } = req.query;
+    //console.log(req);
+    console.log({ coursesFilter, yearLevelFilter, onlyPresent });
+    const courseFilters = JSON.parse(coursesFilter);
+    const yearFilters = JSON.parse(yearLevelFilter);
+
+    // Parse onlyPresent to a boolean
+    const isOnlyPresent = onlyPresent === 'true';
+
+    try {
+        const members = await prisma.members.findMany({
+            where: {
+                AND: [
+                    // Year level filters (AND condition)
+                    {
+                        OR: [
+                            yearFilters.Freshman ? { year: 1 } : null,
+                            yearFilters.Sophomore ? { year: 2 } : null,
+                            yearFilters.Junior ? { year: 3 } : null,
+                            yearFilters.Senior ? { year: 4 } : null,
+                        ].filter(Boolean),
+                    },
+                    // Presence filter (if applicable)
+                    isOnlyPresent ? { timeIn: { not: null } } : null,
+                ].filter(Boolean),
+                // Course filters (OR condition)
+                OR: [
+                    courseFilters.AMT ? { course: 'AMT' } : null,
+                    courseFilters.AMGT ? { course: 'AMGT' } : null,
+                    courseFilters.AE ? { course: 'AE' } : null,
+                ].filter(Boolean),
+            },
+        });
+        const sanitizedMembers = members.map(member => ({
+            ...member,
+            id: member.id.toString(), // Ensure BigInt fields are converted to strings
+        }));
+       // console.log(sanitizedMembers)
+
+        res.status(200).send({ data: sanitizedMembers});
+    } catch (error) {
+        console.error('ERROR', error);
+        res.status(500).send({ message: 'Failed to execute database query', error:error});
+    }
+});
+
 router.get('/get-by-params', (req, res) => {
     const { order, colfilter, filter } = req.body;
     var SQLquery = 'SELECT * FROM `members`';
@@ -257,7 +304,90 @@ router.post('/update-timeout', (req, res) => {
     });
 });
 
-router.post('/setPaid', (req, res) => {});
+router.post('/togglePaid', async (req, res) => {
+    const {id} = req.body;
+
+    try{
+        const data = await prisma.members.findUnique({
+            where:{
+                id:id
+            }
+        });
+        const isPaid = data.paid;
+        const response = await prisma.members.update({
+            where:{
+                id: id
+            },
+            data:{
+                paid: isPaid == 0? true : false,
+            }
+        })
+        res.status(201).json({message: 'Updated Payment'})
+    }catch(error){
+        res.status(500).json({message:error.message})
+    }finally{
+        prisma.$disconnect();
+    }
+    
+});
+
+router.post('/setPaidAmount', async (req, res) => {
+    const { id, paid_amount } = req.body;
+
+    if (!id || paid_amount === undefined) {
+        return res.status(400).json({ message: 'Missing id or paid_amount' });
+    }
+
+    try {
+        const response = await prisma.members.update({
+            where: {
+                id: id
+            },
+            data: {
+                paid: (paid_amount > 0) ? true : false,
+                amount: parseInt(paid_amount) || 0,
+            }
+        });
+        res.status(200).json({ message: `Updated Payment Amount to ${paid_amount}` });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }finally{
+        prisma.$disconnect();
+    }
+});
+
+
+router.get('/paymentTotal', async (req, res) => {
+    try {
+        const totalPaid = await prisma.members.count({
+            where: {
+                paid: true,
+            }
+        });
+        const totalAmountPaid = await prisma.members.aggregate({
+            _sum: {
+                amount: true
+            },
+            where: {
+                paid: true,
+            }
+        });
+        const totalNotYetPaid = await prisma.members.count({
+            where: {
+                paid: false,
+            }
+        })
+        res.status(200).json({
+            totalPaid: totalPaid,
+            totalAmountPaid: totalAmountPaid._sum.amount!= null ? totalAmountPaid._sum.amount : 0,
+            totalNotYetPaid: totalNotYetPaid
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
 
 router.post('/reset-timeout', (req, res) => {
     const { id } = req.body; // Assuming id is sent in the request body
@@ -339,21 +469,42 @@ router.post('/add', (req, res) => {
 });
 
 router.post('/reset-all-time', (req, res) => {
-    const { password } = req.body;
+    const { password, secret} = req.body;
     console.log(password);
     const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'NONE'`;
-    if (password == 'reset') {
+    if (password == secret) {
         pool.query(query, (err, result) => {
             if (err) {
-                res.status(400).json({ error: 'Bad Request' });
+                res.status(200).json({ message: 'DB Error' });
             } else {
                 res.status(200).json({ message: 'Database Resetted' });
             }
         });
     } else {
-        res.status(403).json({ error: 'Retype Password Correctly.' });
+        res.status(200).json({ message: 'Retype Password Correctly.' });
     }
 });
+
+router.post('/reset-all-payments', async(req, res)=>{
+    const {secret, password} = req.body;
+    try{
+        if (secret !== password) {
+            res.status(400).json({message: 'Incorrect Password!'});
+            return;
+        }
+        await prisma.members.updateMany({
+            data:{
+                paid: false,
+                amount: 0
+            }
+        })
+        res.status(200).json({ message: 'Resetted Payments' });
+    }catch(error){
+        res.status(500).json({ message: `Database Error: ${error.message}` });
+    }finally{
+        prisma.$disconnect();
+    }
+})
 
 router.get('/status', (req, res) => {
     const query = `SELECT 

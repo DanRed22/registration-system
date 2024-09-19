@@ -43,7 +43,7 @@ const ShowSignatureModal = ({ id, idNumber, name, close }) => {
                         onError={() => setImageError(true)}
                     />
                 ) : (
-                    <div className="mt-4 text-red-500">No Signature</div>
+                    <div className="mt-4 text-red-500">Image Not Found.</div>
                 )}
 
                 <div className="text-black mb-4 mt-2">

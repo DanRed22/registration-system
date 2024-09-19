@@ -2,22 +2,33 @@ import React, { useState } from 'react';
 import { FaWindowClose } from 'react-icons/fa';
 import axios from 'axios';
 import API from './Config';
+import config from '../configuration';
 
-export default function ConfirmationResetModal({ close }) {
+export default function ConfirmationResetModal({ close, type }) {
     const [input, setInput] = useState('');
 
     const handleInputChange = (e) => {
         setInput(e.target.value);
     };
 
+
     const handleClick = async () => {
+        let endpoint = '';
+        if(type === 'time'){
+            endpoint = 'reset-all-time';
+        }
+        if(type === 'payment'){
+            endpoint = 'reset-all-payments';
+        }
         try {
             console.log(input);
-            const response = await axios.post(`${API}reset-all-time`, {
+            const response = await axios.post(`${API}${endpoint}`, {
+                secret: config.password,
                 password: input,
             });
             alert(response.data.message);
         } catch (error) {
+            alert(error.message);
             console.error(error);
         } finally {
             close();
@@ -36,14 +47,14 @@ export default function ConfirmationResetModal({ close }) {
                     </button>
                 </div>
                 <div>
-                    <p>Please Type 'reset' to confirm</p>
+                    <p>Please type your password to confirm</p>
                     <input
                         value={input}
                         onChange={handleInputChange}
-                        type="text"
+                        type="password"
                         id="input"
                         class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black "
-                        placeholder="reset"
+                        placeholder="Enter Password"
                     />
                     <button
                         onClick={handleClick}

@@ -23,8 +23,15 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [showSignatureModal, setShowSignatureModal] = useState(false);
     const [showUserSig, setShowUserSig] = useState(false);
     const [imageSrc, setImageSrc] = useState('');
+    const [isEditing, setIsEditing] = useState(false);
     const hideRemarksModal = () => {
         setShowRemarksModal(false);
+    };
+    const [editingEntryId, setEditingEntryId] = useState(null);
+    const [amountInput, setAmountInput] = useState('');
+
+    const handleAmountInputChange = (e) => {
+        setAmountInput(e.target.value);
     };
 
     const [show, setShow] = useState({
@@ -36,6 +43,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         timeout: false, //default false if feature not needed
         remarks: true, //aka medical disclosure
         signature: true,
+        amount: true,
     });
 
     const handleFilterClick = (name) => {
@@ -59,6 +67,36 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         if (e.key === 'Enter') {
             handleSearch();
         }
+    };
+
+    const handleAmountClick = (entry) => {
+        setEditingEntryId(entry.id);
+        setAmountInput(entry.amount);
+        setIsEditing(true); // Set editing mode to true
+    };
+    
+    const handleAmountSave = async (entry) => {
+        await handleUpdate(entry.id, amountInput); // Call your existing update function
+        setEditingEntryId(null); // Reset editing entry
+        setIsEditing(false); // Exit editing mode
+    };
+    
+    const handleUpdate = async (id, amount) => {
+        console.log(id,amount)
+        setIsEditing(false);
+        try{
+            await axios.post(`${API}setPaidAmount`,{
+            id: id, 
+            paid_amount: amount
+        });
+            showNotif(true);
+            setMessage(`Successfully set amount`);
+            handleSearch();
+        }catch(error){
+            showNotif(true);
+            setMessage(`Error: ${error.message}`);
+        }
+       
     };
 
     const handleSignaturePress = (id, id_number, name) => {
@@ -334,6 +372,16 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                             ) : (
                                 ''
                             )}
+                            {show.amount ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Amount
+                                </th>
+                            ) : (
+                                ''
+                            )}
                             {show.organization ? (
                                 <th
                                     scope="col"
@@ -411,6 +459,31 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         {show.regular && (
                                             <td className="px-1 py-1 whitespace-nowrap">
                                                 {entry.regular ? '✅' : '⛔'}
+                                            </td>
+                                        )}
+                                        {show.amount && (
+                                            <td className="px-1 py-1 whitespace-nowrap">
+                                                {editingEntryId === entry.id ? (
+                                                    <input
+                                                        type="number"
+                                                        value={amountInput}
+                                                        onChange={handleAmountInputChange}
+                                                        onBlur={() => handleAmountSave(entry)}
+                                                        onKeyPress={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                handleAmountSave(entry);
+                                                            }
+                                                        }}
+                                                        className="border rounded p-1"
+                                                    />
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleAmountClick(entry)}
+                                                        className={`${entry.paid ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
+                                                    >
+                                                        {entry.paid ? `₱ ${entry.amount}` : 'Not Paid'}
+                                                    </button>
+                                                )}
                                             </td>
                                         )}
                                         {show.organization && (
