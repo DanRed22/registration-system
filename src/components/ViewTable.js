@@ -38,6 +38,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showCoursesDropDown, setShowCoursesDropDown] = useState(false);
     const [showFiltersDropDown, setShowFiltersDropDown] = useState(false);
     const [showYearLevelDropDown, setShowYearLevelDropDown] = useState(false);
+    const [showPaid, setShowPaid] = useState(true);
 
     //SelectedRecord
     const [selectedName, setSelectedName] = useState('');
@@ -65,7 +66,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [onlyPresent, setOnlyPresent] = useState(false);
 
     const handleCoursesFilterSelect = useCallback(
+        
         debounce((course) => {
+            setShowCoursesDropDown(false);
+            setShowFiltersDropDown(false);
             setCoursesFilter((prev) => ({
                 ...prev,
                 [course]: !prev[course],
@@ -76,6 +80,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
     const handleYearLevelFilterSelect = useCallback(
         debounce(async (year) => {
+            setShowYearLevelDropDown(false);
+            setShowCoursesDropDown(false);
             setYearLevelFilter((prev) => ({
                 ...prev,
                 [year]: !prev[year],
@@ -85,6 +91,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
         }, 300),
         []
     );
+
+    const handleSetOnlyPresentClick = () =>{
+        setOnlyPresent(!onlyPresent);
+        setShowFiltersDropDown(false);
+    }
     
 
     var paginatedData = Array.isArray(data) 
@@ -425,6 +436,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <input
                                 type="checkbox"
                                 name="show-prog"
+                                checked={showPaid}
+                                onClick={()=>setShowPaid(!showPaid)}
+                            />
+                            <label htmlFor="show-prog" className="ml-2">Show Paid</label>
+                        </div>
+                        <div className="flex items-center mb-2">
+                            <input
+                                type="checkbox"
+                                name="show-prog"
                                 checked={showCourse}
                                 onClick={handleClickProgram}
                             />
@@ -571,7 +591,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             {"Select Year Level >"}
                         </button>
                         <div className='flex-row hover:bg-blue-200 p-2 rounded-lg '
-                             onClick={()=>setOnlyPresent(!onlyPresent)}>
+                             onClick={()=>handleSetOnlyPresentClick()}>
                             <input type='checkbox' name='onlyPresent' checked={onlyPresent}  onClick={()=>setOnlyPresent(!onlyPresent)}></input>
                             <label for="onlyPresent">Present Only</label>
                         </div>
@@ -670,6 +690,16 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             ) : (
                                 ''
                             )}
+                            {showPaid ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Paid
+                                </th>
+                            ) : (
+                                ''
+                            )}
                             <th
                                 scope="col"
                                 className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -744,6 +774,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       ) : (
                                           ''
                                       )}
+
+                                        {showPaid ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.amount > 0 ? entry.amount : '❌'}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+
                                       {!truncTime ? (
                                           <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
                                               {entry.timeIn}
