@@ -167,6 +167,100 @@ router.get('/searchFiltered', async (req, res) => {
     }
 });
 
+router.get('/committeeMembers', async (req, res) => {
+    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+
+    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+
+    const courseFilters = JSON.parse(coursesFilter);
+    const yearFilters = JSON.parse(yearLevelFilter);
+    const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
+
+    // Parse onlyPresent to a boolean
+    const isOnlyPresent = onlyPresent === 'true';
+
+    try {
+        const committeeMembers = await prisma.members.findMany({
+            where: {
+                AND: [
+                    { isEventCommittee: true }, // Only include event committee members
+                    // Year level filters (AND condition)
+                    {
+                        OR: [
+                            yearFilters.Freshman ? { year: 1 } : null,
+                            yearFilters.Sophomore ? { year: 2 } : null,
+                            yearFilters.Junior ? { year: 3 } : null,
+                            yearFilters.Senior ? { year: 4 } : null,
+                        ].filter(Boolean),
+                    },
+                    // Course filters (OR condition)
+                    {
+                        OR: [
+                            courseFilters.AMT ? { course: 'AMT' } : null,
+                            courseFilters.AMGT ? { course: 'AMGT' } : null,
+                            courseFilters.AE ? { course: 'AE' } : null,
+                        ].filter(Boolean),
+                    },
+                    // Organization filters (OR condition)
+                    {
+                        OR: Object.keys(organizationFilters)
+                            .filter(org => organizationFilters[org]) // Only include selected organizations
+                            .map(org => ({ organization: org })),
+                    },
+                    // Apply search query across relevant fields
+                    searchParams
+                        ? {
+                            OR: [
+                                { name: { contains: searchParams.toLowerCase() } }, // Name
+                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
+                            ],
+                        }
+                        : null,
+                    // Presence filter (if applicable)
+                    isOnlyPresent ? { timeIn: { not: null } } : null,
+                ].filter(Boolean),
+            },
+            orderBy: {
+                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+            },
+        });
+
+        // Convert BigInt IDs to strings
+        const sanitizedMembers = committeeMembers.map((member) => ({
+            ...member,
+            id: member.id.toString(),
+        }));
+
+        // Return filtered data
+        res.status(200).send({ data: sanitizedMembers });
+    } catch (error) {
+        console.error('ERROR', error);
+        res.status(500).send({ message: 'Failed to execute database query', error });
+    }
+});
+
+router.post('/resetCommitteeMembers', async (req, res) => {
+    const {secret, password} = req.body;
+    if(secret !== password){
+        return res.status(403).send({ message: 'Wrong Password' });
+    }
+    try {
+        const updatedMembers = await prisma.members.updateMany({
+            where: {
+                isEventCommittee: true, // Only target current committee members
+            },
+            data: {
+                isEventCommittee: false, // Set to non-committee members
+            },
+        });
+
+        res.status(200).send({ message: `${updatedMembers.count} members have been reset to non-committee members.` });
+    } catch (error) {
+        console.error('ERROR', error);
+        res.status(500).send({ message: 'Failed to reset committee members', error });
+    }
+});
+
 router.get('/organizations', async (req, res) => {
     try {
         const organizations = await prisma.members.findMany({

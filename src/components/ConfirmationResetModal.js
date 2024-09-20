@@ -20,6 +20,9 @@ export default function ConfirmationResetModal({ close, type }) {
         if(type === 'payment'){
             endpoint = 'reset-all-payments';
         }
+        if(type === 'committee'){
+            endpoint = 'resetCommitteeMembers';
+        }
         try {
             console.log(input);
             const response = await axios.post(`${API}${endpoint}`, {
@@ -27,6 +30,7 @@ export default function ConfirmationResetModal({ close, type }) {
                 password: input,
             });
             alert(response.data.message);
+            window.location.reload();
         } catch (error) {
             alert(error.message);
             console.error(error);

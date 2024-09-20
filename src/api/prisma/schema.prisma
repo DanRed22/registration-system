@@ -8,17 +8,19 @@ datasource db {
 }
 
 model members {
-  id           BigInt   @id @default(autoincrement())
-  name         String?  @db.Text
-  email        String?  @db.Text
-  year         Int?
-  course       String?  @db.VarChar(100)
-  regular      Boolean?
-  organization String?  @db.VarChar(100)
-  timeIn       String?  @db.VarChar(50)
-  timeOut      String?  @db.VarChar(50)
-  remarks      String?  @db.Text
-  signature    String?  @db.Text
-  paid         Boolean  @default(false)
-  amount       Int      @default(0)
+  id               BigInt   @id @default(autoincrement())
+  name             String?  @db.Text
+  email            String?  @db.Text
+  year             Int?
+  course           String?  @db.VarChar(100)
+  regular          Boolean?
+  organization     String?  @db.VarChar(100)
+  position         String?  @db.VarChar(255)
+  timeIn           String?  @db.VarChar(50)
+  timeOut          String?  @db.VarChar(50)
+  remarks          String?  @db.Text
+  signature        String?  @db.Text
+  paid             Boolean  @default(false)
+  amount           Int      @default(0)
+  isEventCommittee Boolean  @default(false)
 }

@@ -279,6 +279,33 @@ const ViewTable = ({ showNotif, setMessage }) => {
             handleSearch();
         }
     };
+    const handleCommitteeOnly = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`${API}committeeMembers`, {
+                params: {
+                    coursesFilter: JSON.stringify(coursesFilter),
+                    yearLevelFilter: JSON.stringify(yearLevelFilter),
+                    orgsFilter: JSON.stringify(orgsFilter),
+                    onlyPresent,
+                    searchParams: search, 
+                    orderName: orderBy,
+                },
+            });
+            if (response.status !== 200) {
+                throw new Error(response);
+            }
+            setData(response.data.data);
+            setCurrentPage(1);
+            refreshPaginatedData();
+        } catch (error) {
+            setMessage(error.message);
+            showNotif(true);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [coursesFilter, yearLevelFilter, onlyPresent, search, orderBy, orgsFilter]);
+    
     
     const handleSearch = useCallback(async () => {
         setIsLoading(true);
@@ -447,6 +474,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
                         Reset Payments
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setShowReset(true)
+                            setResetType('committee')
+                        }}
+                        type="button"
+                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    >
+                        Reset Committee
                     </button>
 
                     <button
@@ -712,6 +750,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     >
                         Display All
                     </button>
+
+                    <button
+                        onClick={handleCommitteeOnly}
+                        type="button"
+                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    >
+                        Only List Committee
+                    </button>
             </div>
 
             <div className="w-[100%] overflow-x-auto overflow-y-auto shadow-md flex flex-col justify-center items-center">
@@ -841,7 +887,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                        {!isLoading //change paginatedData to data if you want to export all in CSV
+                        {!isLoading && currentDataToDisplay.length > 0 //change paginatedData to data if you want to export all in CSV
                             ? currentDataToDisplay.map((entry, idx) => (
                                   <tr
                                       key={entry.id}
@@ -851,7 +897,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       {(idx + 1) + ((currentPage - 1) * itemsPerPage)}
                                       </td>
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.organization}
+                                          {entry.organization} {entry.position? `: ${entry.position}`: null}
                                       </td>
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                           {entry.name}
@@ -962,6 +1008,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   </tr>
                               ))
                             : ''}
+                            
                     </tbody>
                 </table>
                 {isLoading && (
@@ -979,6 +1026,16 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             Possible Solution: Refresh your Browser or Restart
                             your Device.
                         </p>
+                    </div>
+                )}
+
+            {!isLoading && currentDataToDisplay.length < 1 && (
+                    <div className="flex flex-col items-center justify-center h-96 bg-white p-5 w-[80%] mt-4 rounded-lg">
+                        
+                        <p className="mt-2 text-sm">
+                            No members to Show.
+                        </p>
+                       
                     </div>
                 )}
             </div>
