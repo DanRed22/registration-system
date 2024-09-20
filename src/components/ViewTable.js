@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { CiSearch } from 'react-icons/ci';
 import RemarksModal from '../components/RemarksModal';
@@ -18,11 +18,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [search, setSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState([]); // Ensure data is an array initially
+    const [paginatedData, setPaginatedData] = useState([]);
     const itemsPerPage = 16; // adjust this if necessary
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const fileNameExport = config.eventName; //change this if necessary
     const [currentPage, setCurrentPage] = useState(0);
     const navigate = useNavigate();
+    const optionsDropdownRef = useRef(null);
+    const filtersDropdownRef = useRef(null);
+    const [organizations, setOrganizations] = useState([]);
 
     //Options Toggles
     const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
@@ -50,6 +54,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showReset, setShowReset] = useState(false);
     const [exportCSV, setExportCSV] = useState(false);
     const [resetType, setResetType] = useState('');
+    const [exportData, setExportData] = useState([]);
 
     //Filters
     const [coursesFilter, setCoursesFilter] = useState({
@@ -63,34 +68,71 @@ const ViewTable = ({ showNotif, setMessage }) => {
         Junior: true,
         Senior: true,
     });
+    const [orgsFilter, setOrgsFilter] = useState({}); // State to hold organization filters
     const [onlyPresent, setOnlyPresent] = useState(false);
+    const [orderBy, setOrderBy] = useState('asc');
+    const [showOrgDropDown, setShowOrgDropDown] = useState(false);
 
-    const handleCoursesFilterSelect = useCallback(
-        
-        debounce((course) => {
-            setShowCoursesDropDown(false);
-            setShowFiltersDropDown(false);
-            setCoursesFilter((prev) => ({
+
+    const toggleOrder = () => {
+        setOrderBy((prevOrder) => {
+            if (prevOrder === 'asc') return 'desc';
+            if (prevOrder === 'desc') return 'asc';
+            return prevOrder; // Prevent unnecessary state updates
+        });
+    };
+    
+    useEffect(() => {
+        const fetchOrganizations = async () => {
+            try {
+                const response = await axios.get(`${API}organizations`);
+                setOrganizations(response.data);
+                // Set initial org filter state after fetching organizations
+                const initialFilterState = response.data.reduce((acc, org) => {
+                    acc[org] = true; // All organizations checked initially
+                    return acc;
+                }, {});
+                setOrgsFilter(initialFilterState);
+            } catch (error) {
+                console.error('Error fetching organizations:', error);
+            }
+        };
+    
+        fetchOrganizations();
+    }, []);
+
+
+
+
+
+    /*Filter Select HANDLES*/
+    const handleOrgFilterSelect = (org) => {
+        setOrgsFilter((prev) => {
+            const newFilter = {
                 ...prev,
-                [course]: !prev[course],
-            }));
-        }, 300),
-        []
-    );
+                [org]: !prev[org], // Toggle the checked state
+            };
+            handleSearch(newFilter); // Trigger search with updated filters
+            return newFilter;
+        });
+    };
 
-    const handleYearLevelFilterSelect = useCallback(
-        debounce(async (year) => {
-            setShowYearLevelDropDown(false);
-            setShowCoursesDropDown(false);
+    const handleCoursesFilterSelect = useCallback((course) => {
+        setCoursesFilter((prev) => ({
+            ...prev,
+            [course]: !prev[course],
+        }));
+    }, []);
+
+
+    const handleYearLevelFilterSelect = async (year) =>{
             setYearLevelFilter((prev) => ({
                 ...prev,
                 [year]: !prev[year],
             }));
 
-            console.log(year);
-        }, 300),
-        []
-    );
+
+    }
 
     const handleSetOnlyPresentClick = () =>{
         setOnlyPresent(!onlyPresent);
@@ -98,9 +140,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
     }
     
 
-    var paginatedData = Array.isArray(data) 
-    ? data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-    : [];
+    /*===================================*/ 
+
+
+
+
+    useEffect(() => {
+        refreshPaginatedData(); // Refresh when data or current page changes
+    }, [data, currentPage]);
+    
+    const refreshPaginatedData = useCallback(() => {
+        if (!Array.isArray(data)) return; // Guard for edge cases
+        setPaginatedData(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+    }, [data, currentPage]);
+    
+    
+    
 
     const nextPage = () => {
         if (currentPage < totalPages) {
@@ -138,6 +193,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     };
     const exportTableToPDF = async () => {
         setIsExporting(true);
+        setExportData(paginatedData); 
         const input = document.getElementById('table-container');
         const pdf = new jsPDF('l', 'mm', 'letter');
         const margin = 12; //12mm
@@ -147,7 +203,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         const verificationText = `Verified from (Attendance System © CACI SSC 2024) on ${new Date().toLocaleString()}`;
 
         // Set the initial page to 1
-        let currentPage = 1;
+        let currentPage = 2;
 
         // Function to capture and add a single page
         const addPageToPDF = async (pageNumber) => {
@@ -181,14 +237,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
         };
 
         // Iterate over all pages and add them to the PDF
-        for (let x = 1; x <= totalPages; x++) {
-            await addPageToPDF(x);
+        for (currentPage; currentPage <= totalPages+1; currentPage++) {
+            await addPageToPDF(currentPage);
         }
-        setCurrentPage(0);
 
         // Save the PDF
         pdf.save(`${fileNameExport}.pdf`);
         setIsExporting(false);
+        setCurrentPage(1);
     };
 
     const handleClickShowSig = () => {
@@ -211,40 +267,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
         navigate('/');
     };
 
-    const handleSearchChange = (e) => {
-        setSearch(e.target.value);
-    };
-
-
-    /*GET ALL DATA*/
-    const getAll = async () => {
-        setIsLoading(true);
-        try {
-            const data = await axios.get(`${API}allFiltered`, {
-                params: {
-                    coursesFilter: JSON.stringify(coursesFilter),
-                    yearLevelFilter: JSON.stringify(yearLevelFilter),
-                    onlyPresent: onlyPresent,
-                },
-            })
-            const response = (data.data.data)
-            // Ensure response.data is an array
-            if (Array.isArray(response)) {
-                console.log("HEYYY");
-                setData(response);
-            }
-            else {
-                setData([]); // Fallback to an empty array if unexpected format
-            }
-        } catch (error) {
-            setMessage(error.message);
-            showNotif(true);
-            console.error('Error fetching data: ', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    
+    const handleSearchChange = useCallback(debounce((value) => {
+        setSearch(value);
+       // handleSearch(); // Call the search function when the input changes
+    }, 10), []); // Use a reasonable debounce time, e.g., 300ms
+     // Adjust debounce time
     
 
     const handleKeyPress = (e) => {
@@ -252,28 +279,40 @@ const ViewTable = ({ showNotif, setMessage }) => {
             handleSearch();
         }
     };
-
-    const handleSearch = async () => {
-        if (search && search !== '') {
-            setIsLoading(true);
-            try {
-                const response = await axios.get(`${API}search`, {
-                    params: {
-                        searchTerm: search,
-                    },
-                });
-                setData(response.data)
-            } catch (error) {
-                console.error('Error searching data: ', error);
-            } finally {
-                setIsLoading(false);
+    
+    const handleSearch = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(`${API}searchFiltered`, {
+                params: {
+                    coursesFilter: JSON.stringify(coursesFilter),
+                    yearLevelFilter: JSON.stringify(yearLevelFilter),
+                    orgsFilter: JSON.stringify(orgsFilter),
+                    onlyPresent,
+                    searchParams: search, 
+                    orderName: orderBy,
+                },
+            });
+            if (response.status !== 200) {
+                throw new Error(response);
             }
+            setData(response.data.data);
+            setCurrentPage(1);
+            refreshPaginatedData();
+        } catch (error) {
+            setMessage(error.message);
+            showNotif(true);
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [coursesFilter, yearLevelFilter, onlyPresent, search, orderBy, orgsFilter]);
+    
 
     const handleExportCSV = () => {
         setIsExporting(false);
+        setExportData(data);
         try {
+            
             setExportCSV(true);
             const tableId = '#table-container-csv';
             ExportMatTableToCSV(tableId, fileNameExport);
@@ -289,10 +328,46 @@ const ViewTable = ({ showNotif, setMessage }) => {
         setShowReset(!showReset);
     };
 
+    const currentDataToDisplay = isLoading ? [] : (exportCSV ? exportData : paginatedData);
+
+
     useEffect(() => {
-        getAll(); // Fetch data whenever filters or search change
+        // Initialize the orgsFilter state based on fetched organizations
+        const initialFilterState = organizations.reduce((acc, org) => {
+            acc[org] = true; // Set all organizations to be initially checked
+            return acc;
+        }, {});
+        setOrgsFilter(initialFilterState);
+    }, [organizations]);
+
+    // Debounce search input changes to prevent immediate API calls on every keystroke
+
+    useEffect(() => {
+        handleSearch(); // Trigger search immediately when filters or sorting order changes
         setCurrentPage(1);
-    }, [coursesFilter, yearLevelFilter, onlyPresent]);
+    }, [coursesFilter, yearLevelFilter, onlyPresent, orderBy, orgsFilter]); // Separate the filters and order logic from search input
+    
+
+
+    // Close the dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsDropdownRef.current && !optionsDropdownRef.current.contains(event.target)) {
+                setShowOptionsDropdown(false); // Close options dropdown
+            }
+            if (filtersDropdownRef.current && !filtersDropdownRef.current.contains(event.target)) {
+                setShowFiltersDropDown(false); // Close filters dropdown
+            }
+        };
+
+        // Add event listener when the component mounts
+        document.addEventListener('mousedown', handleClickOutside);
+
+        // Remove event listener when the component unmounts
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="w-[90%]">
@@ -318,16 +393,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         type="text"
                         id="search-input"
                         className="w-72 border text-sm rounded-lg block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-                        onChange={handleSearchChange}
+                       value={search}
+                        onChange={(e)=>handleSearchChange(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        value={search}
+                        placeholder="Search..."
                     />
+                    
                     <button
-                        onClick={handleSearch}
+                        onClick={()=>handleSearch}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
                         Search
+                    </button>
+
+                    <button onClick={toggleOrder} className='mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800'>
+                        Order: {orderBy === 'asc' ? 'A->Z' : 'Z->A'}
                     </button>
                     
                     <button
@@ -383,7 +464,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 </div>
             </div>
             <div className=" items-center flex flex-row my-4 space-x-4 border-white border-solid border-2 rounded-lg p-4 text-white">
-               <div> {/*************************  OPTIONS *****************************************/}
+               <div ref={optionsDropdownRef}> {/*************************  OPTIONS *****************************************/}
                 <button
                     onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
                     className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
@@ -492,7 +573,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
             
 
             {/*************************  FILTERS *****************************************/}
-            <div>
+            <div ref={filtersDropdownRef}>
             <button
                     onClick={() => setShowFiltersDropDown(!showFiltersDropDown)}
                     className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
@@ -520,8 +601,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2 ">
                         <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowCoursesDropDown(!showCoursesDropDown)}>
                             {showCoursesDropDown ? (
-                                <div className='absolute ml-40 flex-col bg-white p-4 rounded-lg w-64 '>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                <div className='border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64 '>
+                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
+                                    onClick={() => handleCoursesFilterSelect('AMT')}>
                                         <input
                                             type="checkbox"
                                             checked={coursesFilter.AMT}
@@ -529,7 +611,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         />
                                         <label>AMT</label>
                                     </div>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
+                                    onClick={() => handleCoursesFilterSelect('AMGT')}>
                                         <input
                                             type="checkbox"
                                             checked={coursesFilter.AMGT}
@@ -537,7 +620,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         />
                                         <label>AMGT</label>
                                     </div>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
+                                    onClick={() => handleCoursesFilterSelect('AE')}>
                                         <input
                                             type="checkbox"
                                             checked={coursesFilter.AE}
@@ -553,8 +637,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                         <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowYearLevelDropDown(!showYearLevelDropDown)}>
                             {showYearLevelDropDown ? (
-                                <div className='absolute ml-40 flex-col bg-white p-4 rounded-lg w-64'>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                <div className='border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64'>
+                                    <div className='flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200'
+                                        onClick={() => handleYearLevelFilterSelect('Freshman')}>
                                         <input
                                             type="checkbox"
                                             checked={yearLevelFilter.Freshman}
@@ -562,7 +647,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         />
                                         <label>1st</label>
                                     </div>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
+                                        onClick={() => handleYearLevelFilterSelect('Sophomore')}>
                                         <input
                                             type="checkbox"
                                             checked={yearLevelFilter.Sophomore}
@@ -570,7 +656,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         />
                                         <label>2nd</label>
                                     </div>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
+                                        onClick={() => handleYearLevelFilterSelect('Junior')}>
                                         <input
                                             type="checkbox"
                                             checked={yearLevelFilter.Junior}
@@ -578,7 +665,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         />
                                         <label>3rd</label>
                                     </div>
-                                    <div className='flex-row border rounded-lg p-2'>
+                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
+                                        onClick={() => handleYearLevelFilterSelect('Senior')}>
                                         <input
                                             type="checkbox"
                                             checked={yearLevelFilter.Senior}
@@ -595,12 +683,30 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <input type='checkbox' name='onlyPresent' checked={onlyPresent}  onClick={()=>setOnlyPresent(!onlyPresent)}></input>
                             <label for="onlyPresent">Present Only</label>
                         </div>
+
+                        <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowOrgDropDown(!showOrgDropDown)}> 
+                            {"Select Organizations >"}
+                            {showOrgDropDown? (<div className='absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-64'>
+                                    {organizations.map((org, index) => (
+                                        <div key={index} className='flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start'
+                                            onClick={() =>handleOrgFilterSelect(org)}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={orgsFilter[org]}
+                                                onChange={() =>handleOrgFilterSelect(org)}
+                                            />
+                                            <label>{org}</label>
+                                        </div>
+                                    ))}
+                                </div>) : null}
+                        </button>
                     </div>
                 )}
 
                         </div>
                         <button
-                        onClick={getAll}
+                        onClick={handleSearch}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
@@ -736,13 +842,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                         {!isLoading //change paginatedData to data if you want to export all in CSV
-                            ? paginatedData.map((entry) => (
+                            ? currentDataToDisplay.map((entry, idx) => (
                                   <tr
                                       key={entry.id}
                                       className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
                                   >
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.id}
+                                      {(idx + 1) + ((currentPage - 1) * itemsPerPage)}
                                       </td>
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                           {entry.organization}
@@ -975,13 +1081,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 </thead>
                 <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                     {!isLoading //change paginatedData to data if you want to export all in CSV
-                        ? data.map((entry) => (
+                        ? data.map((entry, idx) => (
                               <tr
-                                  key={entry.id}
+                                  key={idx}
                                   className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
                               >
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {entry.id}
+                                      {idx + 1}
                                   </td>
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {entry.organization}

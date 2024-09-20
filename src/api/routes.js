@@ -48,7 +48,7 @@ router.get('/all', (req, res) => {
 });
 
 router.get('/allFiltered', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent } = req.query;
+    const { coursesFilter, yearLevelFilter, onlyPresent, order } = req.query;
     //console.log(req);
     console.log({ coursesFilter, yearLevelFilter, onlyPresent });
     const courseFilters = JSON.parse(coursesFilter);
@@ -56,7 +56,6 @@ router.get('/allFiltered', async (req, res) => {
 
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
-
     try {
         const members = await prisma.members.findMany({
             where: {
@@ -80,6 +79,9 @@ router.get('/allFiltered', async (req, res) => {
                     courseFilters.AE ? { course: 'AE' } : null,
                 ].filter(Boolean),
             },
+            orderBy:{
+                name: (!order || (order !== 'asc' && order !== 'desc')) ? 'asc' : order
+            }
         });
         const sanitizedMembers = members.map(member => ({
             ...member,
@@ -91,6 +93,93 @@ router.get('/allFiltered', async (req, res) => {
     } catch (error) {
         console.error('ERROR', error);
         res.status(500).send({ message: 'Failed to execute database query', error:error});
+    }
+});
+
+router.get('/searchFiltered', async (req, res) => {
+    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+
+    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+
+    const courseFilters = JSON.parse(coursesFilter);
+    const yearFilters = JSON.parse(yearLevelFilter);
+    const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
+
+    // Parse onlyPresent to a boolean
+    const isOnlyPresent = onlyPresent === 'true';
+
+    try {
+        const members = await prisma.members.findMany({
+            where: {
+                AND: [
+                    // Year level filters (AND condition)
+                    {
+                        OR: [
+                            yearFilters.Freshman ? { year: 1 } : null,
+                            yearFilters.Sophomore ? { year: 2 } : null,
+                            yearFilters.Junior ? { year: 3 } : null,
+                            yearFilters.Senior ? { year: 4 } : null,
+                        ].filter(Boolean),
+                    },
+                    // Course filters (OR condition)
+                    {
+                        OR: [
+                            courseFilters.AMT ? { course: 'AMT' } : null,
+                            courseFilters.AMGT ? { course: 'AMGT' } : null,
+                            courseFilters.AE ? { course: 'AE' } : null,
+                        ].filter(Boolean),
+                    },
+                    // Organization filters (OR condition)
+                    {
+                        OR: Object.keys(organizationFilters)
+                            .filter(org => organizationFilters[org]) // Only include selected organizations
+                            .map(org => ({ organization: org })),
+                    },
+                    // Apply search query across relevant fields
+                    searchParams
+                        ? {
+                            OR: [
+                                { name: { contains: searchParams.toLowerCase() } }, // Name
+                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
+                            ],
+                        }
+                        : null,
+                    // Presence filter (if applicable)
+                    isOnlyPresent ? { timeIn: { not: null } } : null,
+                ].filter(Boolean),
+            },
+            orderBy: {
+                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+            },
+        });
+
+        // Convert BigInt IDs to strings
+        const sanitizedMembers = members.map((member) => ({
+            ...member,
+            id: member.id.toString(),
+        }));
+
+        // Return filtered data
+        res.status(200).send({ data: sanitizedMembers });
+    } catch (error) {
+        console.error('ERROR', error);
+        res.status(500).send({ message: 'Failed to execute database query', error });
+    }
+});
+
+router.get('/organizations', async (req, res) => {
+    try {
+        const organizations = await prisma.members.findMany({
+            distinct: ['organization'], // Get distinct organizations
+            select: {
+                organization: true, // Only select the organization field
+            },
+        });
+
+        res.json(organizations.map(org => org.organization)); // Send back the list of organizations
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'An error occurred while fetching organizations.' });
     }
 });
 
