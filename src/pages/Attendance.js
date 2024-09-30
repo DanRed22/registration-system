@@ -16,8 +16,8 @@ export const Attendance = () => {
     const [paymentData, setPaymentData] = useState({
         totalPaid: 0,
         totalAmountPaid: 0,
-        totalNotYetPaid: 0
-    })
+        totalNotYetPaid: 0,
+    });
     const [data, setData] = useState({
         present: '100',
         absent: '50',
@@ -65,9 +65,11 @@ export const Attendance = () => {
                 )}
                 <div>
                     <h1 class="mb-4 text-3xl font-extrabold text-white md:text-5xl lg:text-6xl">
-                        <span class="bg-gradient-to-r from-green-700 to-yellow-500 text-transparent bg-clip-text font-bold py-2 px-4 rounded transition duration-300 hover:from-yellow-500 hover:to-green-700">
-                            {' '}
-                            {config.websiteName}{' '}
+                        <span class="bg-gradient-to-r from-[#ff6900] via-[#ffa600] to-[#fff8f0] text-transparent bg-clip-text font-bold py-2 px-4 rounded">
+                            <span class="inline-block bg-clip-text bg-gradient-to-r from-[#ff6900] via-[#ffa600] to-[#fff8f0] text-transparent">
+                                {' '}
+                                {config.websiteName}{' '}
+                            </span>
                         </span>
                     </h1>
                 </div>
@@ -99,8 +101,13 @@ export const Attendance = () => {
                             </p>
                         </div>
                         <div className="w-1/3 my-2 items-center text-start">
-                        <p className="text-white mr-4">Total Paid: <b>{paymentData.totalPaid}</b></p>
-                        <p className="text-white mr-4">Total Amount Paid: PHP <b>{paymentData.totalAmountPaid}</b></p>
+                            <p className="text-white mr-4">
+                                Total Paid: <b>{paymentData.totalPaid}</b>
+                            </p>
+                            <p className="text-white mr-4">
+                                Total Amount Paid: PHP{' '}
+                                <b>{paymentData.totalAmountPaid}</b>
+                            </p>
                         </div>
                         <div className="flex flex-row w-1/4 justify-end mx-5 my-2">
                             <button

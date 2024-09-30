@@ -8,15 +8,15 @@ const AddModal = ({ hide }) => {
     const [course, setCourse] = useState('');
     const [email, setEmail] = useState('');
     const [year, setYear] = useState('');
-    const [regular, setRegular] = useState(true);
+    const [isStudent, setIsStudent] = useState(true);
     const [organization, setOrganization] = useState('NONE');
     const [remarks, setRemarks] = useState('');
     const [timeIn, setTimeIn] = useState('');
     const [timeOut, setTimeOut] = useState('');
-    const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
-    const [showOrganizationDropDown, setShowOrganizationDropDown] =
-        useState(false);
-    const [showYearDropDown, setShowYearDropDown] = useState(false);
+    // const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
+    // const [showOrganizationDropDown, setShowOrganizationDropDown] =
+    //     useState(false);
+    // const [showYearDropDown, setShowYearDropDown] = useState(false);
 
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
@@ -26,21 +26,21 @@ const AddModal = ({ hide }) => {
         setName(e.target.value);
     };
 
-    const handleCourseChange = (name) => {
-        setCourse(name);
-        setShowCoursesDropdown(false);
-        console.log(course);
-    };
+    // const handleCourseChange = (name) => {
+    //     setCourse(name);
+    //     setShowCoursesDropdown(false);
+    //     console.log(course);
+    // };
 
     const handleOrgnameChange = (name) => {
         setOrganization(name);
-        setShowOrganizationDropDown(false);
+        // setShowOrganizationDropDown(false);
     };
 
-    const handleYearChange = (number) => {
-        setYear(number);
-        setShowYearDropDown(false);
-    };
+    // const handleYearChange = (number) => {
+    //     setYear(number);
+    //     // setShowYearDropDown(false);
+    // };
 
     const handleTimeInChange = () => {
         if (timeIn === '' || timeIn === null) {
@@ -76,7 +76,7 @@ const AddModal = ({ hide }) => {
             email: email,
             course: course,
             year: year,
-            regular: regular,
+            isStudent: isStudent,
             organization: organization,
             remarks: remarks,
             timeIn: timeIn,
@@ -88,9 +88,11 @@ const AddModal = ({ hide }) => {
         setEmail('');
         setName('');
         setCourse('');
-        setYear('');
+        setTimeIn(null);
+        setTimeOut(null);
+
         setOrganization('Normal');
-        setRegular(true);
+        setIsStudent(true);
         setRemarks('');
         setTimeIn('');
         setTimeOut('');
@@ -98,7 +100,7 @@ const AddModal = ({ hide }) => {
     };
 
     return (
-        <div className="w-[50rem] shadow-2xl bg-red-950 rounded-lg p-8 overflow-auto">
+        <div className="w-[50rem] shadow-2xl bg-gradient-to-r from-blue-900 to-blue-950 rounded-lg p-8 overflow-auto">
             <div className="grid ">
                 <button
                     onClick={hide}
@@ -144,244 +146,68 @@ const AddModal = ({ hide }) => {
                     <div>
                         <label
                             for="organization"
-                            className="block mb-2 text-sm font-medium text-white"
+                            className="block mb-2 text-sm  text-start font-medium text-white"
                         >
                             Organization
                         </label>
-                        <button
+                        <input
+                            type="text"
                             value={organization}
-                            onClick={() =>
-                                setShowOrganizationDropDown(
-                                    !showOrganizationDropDown
-                                )
+                            onChange={(e) =>
+                                handleOrgnameChange(e.target.value)
                             }
-                            type="button"
-                            id="organization"
-                            className="justify-center w-36 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            placeholder="Game Changer / Starter"
-                        >
-                            {organization}
-                            <svg
-                                class="w-2.5 h-2.5 ms-3"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 10 6"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="m1 1 4 4 4-4"
-                                />
-                            </svg>
-                        </button>
-                        {showOrganizationDropDown && (
-                            <div
-                                id="orgdrop"
-                                class="p-2 z-0 absolute bg-white rounded-lg shadow-lg w-[20rem] dark:bg-gray-700 text-center border-solid border border-black"
-                            >
-                                <button
-                                    onClick={() => handleOrgnameChange('NONE')}
-                                    className="p-1 h-10 border rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    NONE
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleOrgnameChange(
-                                            'SUPREME STUDENT COUNCIL'
-                                        )
-                                    }
-                                    className="p-1 h-10 rounded-lg border w-full hover:bg-blue-200"
-                                >
-                                    SUPREME STUDENT COUNCIL
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleOrgnameChange('THE AIRMEN TIMES')
-                                    }
-                                    className="p-1 h-10 rounded-lg w-full border hover:bg-blue-200"
-                                >
-                                    THE AIRMEN TIMES
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleOrgnameChange(
-                                            'DEPARTMENT OFFICER'
-                                        )
-                                    }
-                                    className="p-1 h-10 rounded-lg border w-full hover:bg-blue-200"
-                                >
-                                    DEPARTMENT OFFICER
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        handleOrgnameChange('EVENT COMMITTEE')
-                                    }
-                                    className="p-1 h-10 rounded-lg border w-full hover:bg-blue-200"
-                                >
-                                    EVENT COMMITTEE
-                                </button>
-                            </div>
-                        )}
+                            placeholder="Organization Name"
+                            className="h-10 text-black bg-white border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-start"
+                        />
                     </div>
                 </div>
 
-                <div className="flex items-center justify-center flex-row">
-                    <div className="mx-2">
-                        <button
-                            onClick={() =>
-                                setShowYearDropDown(!showYearDropDown)
-                            }
-                            class="w-44 flex items-center justify-center h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            type="button"
-                        >
-                            {year ? year : 'Select Year'}
-                            <svg
-                                class="w-2.5 h-2.5 ms-3"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 10 6"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="m1 1 4 4 4-4"
-                                />
-                            </svg>
-                        </button>
-
-                        {/* <!-- Dropdown menu --> */}
-                        {showYearDropDown && (
-                            <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
-                                <button
-                                    onClick={() => handleYearChange(null)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    Select Year
-                                </button>
-                                <button
-                                    onClick={() => handleYearChange(1)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    1st
-                                </button>
-                                <button
-                                    onClick={() => handleYearChange(2)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    2nd
-                                </button>
-                                <button
-                                    onClick={() => handleYearChange(3)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    3rd
-                                </button>
-                                <button
-                                    onClick={() => handleYearChange(4)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    4th
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                    <div className="mx-2">
-                        <button
-                            onClick={() =>
-                                setShowCoursesDropdown(!showCoursesDropDown)
-                            }
-                            class=" h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                            type="button"
-                        >
-                            {course ? course : 'Select Course'}
-                            <svg
-                                class="w-2.5 h-2.5 ms-3"
-                                aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 10 6"
-                            >
-                                <path
-                                    stroke="currentColor"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="m1 1 4 4 4-4"
-                                />
-                            </svg>
-                        </button>
-
-                        {/* <!-- Dropdown menu --> */}
-                        {showCoursesDropDown && (
-                            <div class="z-0 absolute bg-white rounded-lg shadow w-44 dark:bg-gray-700">
-                                <button
-                                    onClick={() => handleCourseChange(null)}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    Select Course
-                                </button>
-                                <button
-                                    name="AMT"
-                                    onClick={() => handleCourseChange('AMT')}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    AMT
-                                </button>
-                                <button
-                                    name="AE"
-                                    onClick={() => handleCourseChange('AE')}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    AE
-                                </button>
-                                <button
-                                    name="AMGT"
-                                    onClick={() => handleCourseChange('AMGT')}
-                                    className="h-10 rounded-lg w-full hover:bg-blue-200"
-                                >
-                                    AMGT
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                <div className="flex flex-col">
+                    <label
+                        for="course"
+                        className="text-white block mb-2 text-sm font-medium text-start"
+                    >
+                        Program and Year
+                    </label>
+                    <input
+                        type="text"
+                        value={course}
+                        onChange={(e) => setCourse(e.target.value)}
+                        placeholder="Course - Year"
+                        className="h-10 text-black bg-white border border-gray-300 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-start"
+                    />
                 </div>
 
                 <div className="flex flex-row">
                     <input
-                        value={regular}
-                        checked={regular}
-                        onClick={() => setRegular(!regular)}
+                        value={isStudent}
+                        checked={isStudent}
+                        onClick={() => setIsStudent(!isStudent)}
                         type="checkbox"
-                        id="regular"
+                        id="isStudent"
                         class="bg-gray-50 border border-gray-300  text-sm rounded-lg mr-2 block w-4 p-2.5  placeholder-gray-400 text-black"
                         placeholder="example@gmail.com"
                     />
-                    <label for="regular" className="text-white">
-                        Regular?{' '}
+                    <label for="isStudent" className="text-white">
+                        Are they a Student?{' '}
                     </label>
                 </div>
-
                 <div className="flex flex-row h-10">
                     <button
                         value={timeIn}
                         onClick={handleTimeInChange}
                         id="timein"
-                        class={`bg-gray-50 mx-2 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-white ${timeIn ? 'bg-green-700 hover:bg-green-800' : 'bg-blue-800 '}`}
+                        className={`bg-gray-50 border mx-2 border-gray-300 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 ${timeIn ? 'bg-green-700 hover:bg-green-800 text-white' : 'bg-blue-800 text-black'}`}
                     >
-                        {timeIn !== '' ? timeIn : 'Time In'}
+                        {timeIn ? timeIn : 'Time In'}
                     </button>
+                </div>
+                <div className="flex flex-row h-10">
                     <button
-                        value={timeIn}
+                        value={timeOut}
                         onClick={handleTimeOutChange}
                         id="timeout"
-                        className={`bg-gray-50 border mx-2  border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-white ${timeOut ? 'bg-green-700 hover:bg-green-800' : 'bg-blue-800 '}`}
+                        className={`bg-gray-50 border mx-2 border-gray-300 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 ${timeOut ? 'bg-green-700 hover:bg-green-800 text-white' : 'bg-blue-800 text-black'}`}
                     >
                         {timeOut ? timeOut : 'Time Out'}
                     </button>

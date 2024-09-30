@@ -12,7 +12,6 @@ export default function View() {
     };
     const hideNotif = () => {
         setShowNotif(false);
-        //console.log("closed notif")
     };
     return (
         <div className="flex items-center flex-col justify-center ">

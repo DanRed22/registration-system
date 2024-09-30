@@ -11,9 +11,8 @@ model members {
   id               BigInt   @id @default(autoincrement())
   name             String?  @db.Text
   email            String?  @db.Text
-  year             Int?
-  course           String?  @db.VarChar(100)
-  regular          Boolean?
+  program_year     String?  @db.VarChar(100)
+  isStudent        Boolean?
   organization     String?  @db.VarChar(100)
   position         String?  @db.VarChar(255)
   timeIn           String?  @db.VarChar(50)

@@ -37,13 +37,13 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [show, setShow] = useState({
         name: true,
         course: true,
-        email: false,
+        email: true,
         year: true,
-        regular: true,
+        isStudent: true,
         timeout: false, //default false if feature not needed
         remarks: true, //aka medical disclosure
         signature: true,
-        amount: true,
+        amount: false,
     });
 
     const handleFilterClick = (name) => {
@@ -74,29 +74,28 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         setAmountInput(entry.amount);
         setIsEditing(true); // Set editing mode to true
     };
-    
+
     const handleAmountSave = async (entry) => {
         await handleUpdate(entry.id, amountInput); // Call your existing update function
         setEditingEntryId(null); // Reset editing entry
         setIsEditing(false); // Exit editing mode
     };
-    
+
     const handleUpdate = async (id, amount) => {
-        console.log(id,amount)
+        console.log(id, amount);
         setIsEditing(false);
-        try{
-            await axios.post(`${API}setPaidAmount`,{
-            id: id, 
-            paid_amount: amount
-        });
+        try {
+            await axios.post(`${API}setPaidAmount`, {
+                id: id,
+                paid_amount: amount,
+            });
             showNotif(true);
             setMessage(`Successfully set amount`);
             handleSearch();
-        }catch(error){
+        } catch (error) {
             showNotif(true);
             setMessage(`Error: ${error.message}`);
         }
-       
     };
 
     const handleSignaturePress = (id, id_number, name) => {
@@ -269,7 +268,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                             setShowAddModal(!showAddModal);
                         }}
                         type="button"
-                        className="transition duration-300 ease-in-out text-white block mt-2 bg-gradient-to-br from-red-400 bg-red-800 hover:bg-red-600 hover:from-red-950 hover:cursor-pointer hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                        className="transition duration-300 ease-in-out text-white block mt-2 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
                     >
                         {' '}
                         Add Attendee
@@ -347,27 +346,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                     scope="col"
                                     className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                 >
-                                    Course
-                                </th>
-                            ) : (
-                                ''
-                            )}
-                            {show.year ? (
-                                <th
-                                    scope="col"
-                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                                >
-                                    Year Level
-                                </th>
-                            ) : (
-                                ''
-                            )}
-                            {show.regular ? (
-                                <th
-                                    scope="col"
-                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                                >
-                                    Regular
+                                    Program and Year
                                 </th>
                             ) : (
                                 ''
@@ -388,6 +367,16 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                     className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                 >
                                     Organization
+                                </th>
+                            ) : (
+                                ''
+                            )}
+                            {show.isStudent ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Student/Professional
                                 </th>
                             ) : (
                                 ''
@@ -448,17 +437,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         )}
                                         {show.course && (
                                             <td className="px-1 py-1 whitespace-nowrap">
-                                                {entry.course}
-                                            </td>
-                                        )}
-                                        {show.year && (
-                                            <td className="px-1 py-1 whitespace-nowrap">
-                                                {entry.year}
-                                            </td>
-                                        )}
-                                        {show.regular && (
-                                            <td className="px-1 py-1 whitespace-nowrap">
-                                                {entry.regular ? '✅' : '⛔'}
+                                                {entry.program_year}
                                             </td>
                                         )}
                                         {show.amount && (
@@ -467,21 +446,38 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                                     <input
                                                         type="number"
                                                         value={amountInput}
-                                                        onChange={handleAmountInputChange}
-                                                        onBlur={() => handleAmountSave(entry)}
+                                                        onChange={
+                                                            handleAmountInputChange
+                                                        }
+                                                        onBlur={() =>
+                                                            handleAmountSave(
+                                                                entry
+                                                            )
+                                                        }
                                                         onKeyPress={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                handleAmountSave(entry);
+                                                            if (
+                                                                e.key ===
+                                                                'Enter'
+                                                            ) {
+                                                                handleAmountSave(
+                                                                    entry
+                                                                );
                                                             }
                                                         }}
                                                         className="border rounded p-1"
                                                     />
                                                 ) : (
                                                     <button
-                                                        onClick={() => handleAmountClick(entry)}
+                                                        onClick={() =>
+                                                            handleAmountClick(
+                                                                entry
+                                                            )
+                                                        }
                                                         className={`${entry.paid ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
                                                     >
-                                                        {entry.paid ? `₱ ${entry.amount}` : 'Not Paid'}
+                                                        {entry.paid
+                                                            ? `₱ ${entry.amount}`
+                                                            : 'Not Paid'}
                                                     </button>
                                                 )}
                                             </td>
@@ -489,6 +485,13 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         {show.organization && (
                                             <td className="overflow-clip px-1 py-1">
                                                 {entry.organization}
+                                            </td>
+                                        )}
+                                        {show.isStudent && (
+                                            <td className="px-1 py-1 whitespace-nowrap">
+                                                {entry.isStudent
+                                                    ? 'Student'
+                                                    : 'Professional'}
                                             </td>
                                         )}
                                         {entry.timeIn ? (

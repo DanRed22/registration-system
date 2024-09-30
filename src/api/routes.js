@@ -48,11 +48,9 @@ router.get('/all', (req, res) => {
 });
 
 router.get('/allFiltered', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent, order } = req.query;
+    const { coursesFilter, onlyPresent, order } = req.query;
     //console.log(req);
-    console.log({ coursesFilter, yearLevelFilter, onlyPresent });
-    const courseFilters = JSON.parse(coursesFilter);
-    const yearFilters = JSON.parse(yearLevelFilter);
+    console.log({ coursesFilter, onlyPresent });
 
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
@@ -60,49 +58,45 @@ router.get('/allFiltered', async (req, res) => {
         const members = await prisma.members.findMany({
             where: {
                 AND: [
-                    // Year level filters (AND condition)
-                    {
-                        OR: [
-                            yearFilters.Freshman ? { year: 1 } : null,
-                            yearFilters.Sophomore ? { year: 2 } : null,
-                            yearFilters.Junior ? { year: 3 } : null,
-                            yearFilters.Senior ? { year: 4 } : null,
-                        ].filter(Boolean),
-                    },
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
                 ].filter(Boolean),
-                // Course filters (OR condition)
-                OR: [
-                    courseFilters.AMT ? { course: 'AMT' } : null,
-                    courseFilters.AMGT ? { course: 'AMGT' } : null,
-                    courseFilters.AE ? { course: 'AE' } : null,
-                ].filter(Boolean),
             },
-            orderBy:{
-                name: (!order || (order !== 'asc' && order !== 'desc')) ? 'asc' : order
-            }
+            orderBy: {
+                name:
+                    !order || (order !== 'asc' && order !== 'desc')
+                        ? 'asc'
+                        : order,
+            },
         });
-        const sanitizedMembers = members.map(member => ({
+        const sanitizedMembers = members.map((member) => ({
             ...member,
             id: member.id.toString(), // Ensure BigInt fields are converted to strings
         }));
-       // console.log(sanitizedMembers)
+        // console.log(sanitizedMembers)
 
-        res.status(200).send({ data: sanitizedMembers});
+        res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error:error});
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error: error,
+        });
     }
 });
 
 router.get('/searchFiltered', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+    const { coursesFilter, onlyPresent, orgsFilter, searchParams, orderName } =
+        req.query;
 
-    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+    console.log({
+        coursesFilter,
+        onlyPresent,
+        searchParams,
+        orgsFilter,
+    });
 
     const courseFilters = JSON.parse(coursesFilter);
-    const yearFilters = JSON.parse(yearLevelFilter);
     const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
 
     // Parse onlyPresent to a boolean
@@ -112,44 +106,51 @@ router.get('/searchFiltered', async (req, res) => {
         const members = await prisma.members.findMany({
             where: {
                 AND: [
-                    // Year level filters (AND condition)
+                    // Course filters (OR condition), including an option for all courses
                     {
                         OR: [
-                            yearFilters.Freshman ? { year: 1 } : null,
-                            yearFilters.Sophomore ? { year: 2 } : null,
-                            yearFilters.Junior ? { year: 3 } : null,
-                            yearFilters.Senior ? { year: 4 } : null,
-                        ].filter(Boolean),
-                    },
-                    // Course filters (OR condition)
-                    {
-                        OR: [
-                            courseFilters.AMT ? { course: 'AMT' } : null,
-                            courseFilters.AMGT ? { course: 'AMGT' } : null,
-                            courseFilters.AE ? { course: 'AE' } : null,
+                            ...Object.entries(courseFilters).map(
+                                ([course, isSelected]) =>
+                                    isSelected ? { year_course: course } : null
+                            ),
+                            // If no course is selected, include all courses
+                            Object.values(courseFilters).every((v) => !v)
+                                ? {}
+                                : null,
                         ].filter(Boolean),
                     },
                     // Organization filters (OR condition)
                     {
                         OR: Object.keys(organizationFilters)
-                            .filter(org => organizationFilters[org]) // Only include selected organizations
-                            .map(org => ({ organization: org })),
+                            .filter((org) => organizationFilters[org]) // Only include selected organizations
+                            .map((org) => ({ organization: org })),
                     },
                     // Apply search query across relevant fields
                     searchParams
                         ? {
-                            OR: [
-                                { name: { contains: searchParams.toLowerCase() } }, // Name
-                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
-                            ],
-                        }
+                              OR: [
+                                  {
+                                      name: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Name
+                                  {
+                                      organization: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Organization
+                              ],
+                          }
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
                 ].filter(Boolean),
             },
             orderBy: {
-                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+                name:
+                    orderName === 'asc' || orderName === 'desc'
+                        ? orderName
+                        : 'asc',
             },
         });
 
@@ -163,17 +164,43 @@ router.get('/searchFiltered', async (req, res) => {
         res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error });
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error,
+        });
+    }
+});
+router.get('/program-year', async (req, res) => {
+    try {
+        const yearCourses = await prisma.members.findMany({
+            distinct: ['program_year'], // Get unique year_course values from members table
+            select: {
+                program_year: true, // Select only the year_course field
+            },
+        });
+        console.log(yearCourses);
+        res.status(200).json(yearCourses); // Return the unique year_course types
+    } catch (error) {
+        console.error('Error fetching year courses:', error);
+        res.status(500).json({
+            message: 'Failed to fetch year courses',
+            error,
+        });
     }
 });
 
 router.get('/committeeMembers', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+    const { coursesFilter, onlyPresent, orgsFilter, searchParams, orderName } =
+        req.query;
 
-    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+    console.log({
+        coursesFilter,
+        onlyPresent,
+        searchParams,
+        orgsFilter,
+    });
 
     const courseFilters = JSON.parse(coursesFilter);
-    const yearFilters = JSON.parse(yearLevelFilter);
     const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
 
     // Parse onlyPresent to a boolean
@@ -184,44 +211,39 @@ router.get('/committeeMembers', async (req, res) => {
             where: {
                 AND: [
                     { isEventCommittee: true }, // Only include event committee members
-                    // Year level filters (AND condition)
-                    {
-                        OR: [
-                            yearFilters.Freshman ? { year: 1 } : null,
-                            yearFilters.Sophomore ? { year: 2 } : null,
-                            yearFilters.Junior ? { year: 3 } : null,
-                            yearFilters.Senior ? { year: 4 } : null,
-                        ].filter(Boolean),
-                    },
                     // Course filters (OR condition)
-                    {
-                        OR: [
-                            courseFilters.AMT ? { course: 'AMT' } : null,
-                            courseFilters.AMGT ? { course: 'AMGT' } : null,
-                            courseFilters.AE ? { course: 'AE' } : null,
-                        ].filter(Boolean),
-                    },
                     // Organization filters (OR condition)
                     {
                         OR: Object.keys(organizationFilters)
-                            .filter(org => organizationFilters[org]) // Only include selected organizations
-                            .map(org => ({ organization: org })),
+                            .filter((org) => organizationFilters[org]) // Only include selected organizations
+                            .map((org) => ({ organization: org })),
                     },
                     // Apply search query across relevant fields
                     searchParams
                         ? {
-                            OR: [
-                                { name: { contains: searchParams.toLowerCase() } }, // Name
-                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
-                            ],
-                        }
+                              OR: [
+                                  {
+                                      name: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Name
+                                  {
+                                      organization: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Organization
+                              ],
+                          }
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
                 ].filter(Boolean),
             },
             orderBy: {
-                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+                name:
+                    orderName === 'asc' || orderName === 'desc'
+                        ? orderName
+                        : 'asc',
             },
         });
 
@@ -235,13 +257,16 @@ router.get('/committeeMembers', async (req, res) => {
         res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error });
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error,
+        });
     }
 });
 
 router.post('/resetCommitteeMembers', async (req, res) => {
-    const {secret, password} = req.body;
-    if(secret !== password){
+    const { secret, password } = req.body;
+    if (secret !== password) {
         return res.status(403).send({ message: 'Wrong Password' });
     }
     try {
@@ -254,10 +279,15 @@ router.post('/resetCommitteeMembers', async (req, res) => {
             },
         });
 
-        res.status(200).send({ message: `${updatedMembers.count} members have been reset to non-committee members.` });
+        res.status(200).send({
+            message: `${updatedMembers.count} members have been reset to non-committee members.`,
+        });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to reset committee members', error });
+        res.status(500).send({
+            message: 'Failed to reset committee members',
+            error,
+        });
     }
 });
 
@@ -270,10 +300,12 @@ router.get('/organizations', async (req, res) => {
             },
         });
 
-        res.json(organizations.map(org => org.organization)); // Send back the list of organizations
+        res.json(organizations.map((org) => org.organization)); // Send back the list of organizations
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while fetching organizations.' });
+        res.status(500).json({
+            error: 'An error occurred while fetching organizations.',
+        });
     }
 });
 
@@ -355,31 +387,36 @@ router.post('/clear-signature', (req, res) => {
     });
 });
 
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
     const searchTerm = req.query.searchTerm;
-    // Construct the SQL query with the LIKE operator
-    const SQLquery =
-        'SELECT * FROM members WHERE name LIKE ? OR email LIKE ? OR organization LIKE ? LIMIT 15';
+    // Use Prisma client to query the database
+    try {
+        const members = await prisma.members.findMany({
+            where: {
+                OR: [
+                    { name: { contains: searchTerm.toLowerCase() } },
+                    { email: { contains: searchTerm.toLowerCase() } },
+                    { organization: { contains: searchTerm.toLowerCase() } },
+                ],
+            },
+            take: 20,
+            orderBy: {
+                name: 'asc',
+            },
+        });
 
-    // Prepare the values for the LIKE operator
-    const searchValue = `%${searchTerm}%`;
+        // Convert BigInt IDs to strings
+        const sanitizedMembers = members.map((member) => ({
+            ...member,
+            id: member.id.toString(),
+        }));
 
-    // Execute the query
-    pool.query(
-        SQLquery,
-        [searchValue, searchValue, searchValue],
-        (err, results) => {
-            if (err) {
-                console.error('Error executing database query:', err);
-                return res
-                    .status(500)
-                    .send({ message: 'Failed to execute database query' });
-            }
-
-            // Send the results back as a response
-            res.status(200).send(results);
-        }
-    );
+        // Send the sanitized results back as a response
+        res.status(200).json(sanitizedMembers);
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        res.status(500).json({ message: 'Failed to execute database query' });
+    }
 });
 
 router.post('/claim', (req, res) => {
@@ -488,30 +525,29 @@ router.post('/update-timeout', (req, res) => {
 });
 
 router.post('/togglePaid', async (req, res) => {
-    const {id} = req.body;
+    const { id } = req.body;
 
-    try{
+    try {
         const data = await prisma.members.findUnique({
-            where:{
-                id:id
-            }
+            where: {
+                id: id,
+            },
         });
         const isPaid = data.paid;
         const response = await prisma.members.update({
-            where:{
-                id: id
+            where: {
+                id: id,
             },
-            data:{
-                paid: isPaid == 0? true : false,
-            }
-        })
-        res.status(201).json({message: 'Updated Payment'})
-    }catch(error){
-        res.status(500).json({message:error.message})
-    }finally{
+            data: {
+                paid: isPaid == 0 ? true : false,
+            },
+        });
+        res.status(201).json({ message: 'Updated Payment' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    } finally {
         prisma.$disconnect();
     }
-    
 });
 
 router.post('/setPaidAmount', async (req, res) => {
@@ -524,53 +560,55 @@ router.post('/setPaidAmount', async (req, res) => {
     try {
         const response = await prisma.members.update({
             where: {
-                id: id
+                id: id,
             },
             data: {
-                paid: (paid_amount > 0) ? true : false,
+                paid: paid_amount > 0 ? true : false,
                 amount: parseInt(paid_amount) || 0,
-            }
+            },
         });
-        res.status(200).json({ message: `Updated Payment Amount to ${paid_amount}` });
+        res.status(200).json({
+            message: `Updated Payment Amount to ${paid_amount}`,
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
-    }finally{
+    } finally {
         prisma.$disconnect();
     }
 });
-
 
 router.get('/paymentTotal', async (req, res) => {
     try {
         const totalPaid = await prisma.members.count({
             where: {
                 paid: true,
-            }
+            },
         });
         const totalAmountPaid = await prisma.members.aggregate({
             _sum: {
-                amount: true
+                amount: true,
             },
             where: {
                 paid: true,
-            }
+            },
         });
         const totalNotYetPaid = await prisma.members.count({
             where: {
                 paid: false,
-            }
-        })
+            },
+        });
         res.status(200).json({
             totalPaid: totalPaid,
-            totalAmountPaid: totalAmountPaid._sum.amount!= null ? totalAmountPaid._sum.amount : 0,
-            totalNotYetPaid: totalNotYetPaid
+            totalAmountPaid:
+                totalAmountPaid._sum.amount != null
+                    ? totalAmountPaid._sum.amount
+                    : 0,
+            totalNotYetPaid: totalNotYetPaid,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
-
-
 
 router.post('/reset-timeout', (req, res) => {
     const { id } = req.body; // Assuming id is sent in the request body
@@ -607,87 +645,81 @@ router.post('/update-remarks', (req, res) => {
     });
 });
 
-router.post('/add', (req, res) => {
+router.post('/add', async (req, res) => {
     const {
         name,
         email,
-        year,
         course,
-        regular,
+        isStudent,
         remarks,
         organization,
         timeIn,
         timeOut,
     } = req.body;
-    //console.log(req.body)
-    const query = `INSERT INTO members (name, email, year, course, regular, remarks, organization, timeIn, timeOut)
-    VALUES (?,?,?,?,?,?,?,?, ?);
-    `;
 
-    const timeInValue = timeIn || null;
-    const timeOutValue = timeOut || null;
-
-    pool.query(
-        query,
-        [
-            name,
-            email,
-            year,
-            course,
-            regular,
-            remarks,
-            organization,
-            timeInValue,
-            timeOutValue,
-        ],
-        (err, result) => {
-            if (err) {
-                console.error('Error Adding Record!', err);
-                res.status(400).json({ error: 'Bad Request' });
-            } else {
-                res.status(200).json({ message: 'Added Record' });
-            }
-        }
-    );
-});
-
-router.post('/reset-all-time', (req, res) => {
-    const { password, secret} = req.body;
-    console.log(password);
-    const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'NONE'`;
-    if (password == secret) {
-        pool.query(query, (err, result) => {
-            if (err) {
-                res.status(200).json({ message: 'DB Error' });
-            } else {
-                res.status(200).json({ message: 'Database Resetted' });
-            }
+    try {
+        await prisma.members.create({
+            data: {
+                name,
+                email,
+                program_year: course, // this is used as program_year
+                isStudent: isStudent, // this is used as isStudent
+                remarks,
+                organization,
+                timeIn: timeIn || null,
+                timeOut: timeOut || null,
+            },
         });
-    } else {
-        res.status(200).json({ message: 'Retype Password Correctly.' });
+
+        res.status(200).json({ message: 'Added Record' });
+    } catch (error) {
+        console.error('Error Adding Record!', error);
+        res.status(400).json({ error: 'Bad Request', details: error.message });
     }
 });
 
-router.post('/reset-all-payments', async(req, res)=>{
-    const {secret, password} = req.body;
-    try{
+router.post('/reset-all-time', async (req, res) => {
+    const { password, secret } = req.body;
+    console.log(password);
+
+    if (password === secret) {
+        try {
+            await prisma.members.updateMany({
+                data: {
+                    timeIn: null,
+                    timeOut: null,
+                },
+            });
+            res.status(200).json({ message: 'Database Resetted' });
+        } catch (err) {
+            console.error('DB Error', err);
+            res.status(500).json({ message: 'DB Error' });
+        }
+    } else {
+        res.status(400).json({ message: 'Retype Password Correctly.' });
+    }
+});
+
+router.post('/reset-all-payments', async (req, res) => {
+    const { secret, password } = req.body;
+    try {
         if (secret !== password) {
-            res.status(400).json({message: 'Incorrect Password!'});
+            res.status(400).json({ message: 'Incorrect Password!' });
             return;
         }
         await prisma.members.updateMany({
-            data:{
+            data: {
                 paid: false,
-                amount: 0
-            }
-        })
+                amount: 0,
+            },
+        });
         res.status(200).json({ message: 'Resetted Payments' });
-    }catch(error){
+    } catch (error) {
         res.status(500).json({ message: `Database Error: ${error.message}` });
-    }finally{
+    } finally {
         prisma.$disconnect();
     }
-})
+});
 
 router.get('/status', (req, res) => {
     const query = `SELECT 
