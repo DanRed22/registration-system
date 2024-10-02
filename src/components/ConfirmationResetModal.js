@@ -11,16 +11,15 @@ export default function ConfirmationResetModal({ close, type }) {
         setInput(e.target.value);
     };
 
-
     const handleClick = async () => {
         let endpoint = '';
-        if(type === 'time'){
+        if (type === 'time') {
             endpoint = 'reset-all-time';
         }
-        if(type === 'payment'){
+        if (type === 'payment') {
             endpoint = 'reset-all-payments';
         }
-        if(type === 'committee'){
+        if (type === 'committee') {
             endpoint = 'resetCommitteeMembers';
         }
         try {
@@ -32,7 +31,7 @@ export default function ConfirmationResetModal({ close, type }) {
             alert(response.data.message);
             window.location.reload();
         } catch (error) {
-            alert(error.message);
+            alert(error.response.data.message);
             console.error(error);
         } finally {
             close();

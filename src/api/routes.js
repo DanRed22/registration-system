@@ -2,7 +2,7 @@ const { createPool } = require('mysql2');
 const { PrismaClient } = require('@prisma/client');
 const express = require('express');
 const router = express.Router();
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
@@ -86,14 +86,23 @@ router.get('/allFiltered', async (req, res) => {
 });
 
 router.get('/searchFiltered', async (req, res) => {
-    const { coursesFilter, onlyPresent, orgsFilter, searchParams, orderName } =
-        req.query;
+    const {
+        coursesFilter,
+        onlyPresent,
+        orgsFilter,
+        searchParams,
+        orderName,
+        onlyAbsent,
+        notTimedOut,
+    } = req.query;
 
     console.log({
         coursesFilter,
         onlyPresent,
         searchParams,
         orgsFilter,
+        onlyAbsent,
+        notTimedOut,
     });
 
     const courseFilters = JSON.parse(coursesFilter);
@@ -101,7 +110,8 @@ router.get('/searchFiltered', async (req, res) => {
 
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
-
+    const isOnlyAbsent = onlyAbsent === 'true';
+    const isNotTimedOut = notTimedOut === 'true';
     try {
         const members = await prisma.members.findMany({
             where: {
@@ -144,6 +154,8 @@ router.get('/searchFiltered', async (req, res) => {
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
+                    isOnlyAbsent ? { timeIn: null } : null,
+                    isNotTimedOut ? { timeOut: null } : null,
                 ].filter(Boolean),
             },
             orderBy: {
@@ -190,22 +202,30 @@ router.get('/program-year', async (req, res) => {
 });
 
 router.get('/committeeMembers', async (req, res) => {
-    const { coursesFilter, onlyPresent, orgsFilter, searchParams, orderName } =
-        req.query;
+    const {
+        coursesFilter,
+        onlyPresent,
+        orgsFilter,
+        searchParams,
+        orderName,
+        onlyAbsent,
+        notTimedOut,
+    } = req.query;
 
     console.log({
         coursesFilter,
         onlyPresent,
         searchParams,
         orgsFilter,
+        onlyAbsent,
     });
 
-    const courseFilters = JSON.parse(coursesFilter);
     const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
 
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
-
+    const isOnlyAbsent = onlyAbsent === 'true';
+    const isNotTimedOut = notTimedOut === 'true';
     try {
         const committeeMembers = await prisma.members.findMany({
             where: {
@@ -237,6 +257,8 @@ router.get('/committeeMembers', async (req, res) => {
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
+                    isOnlyAbsent ? { timeIn: null } : null,
+                    isNotTimedOut ? { timeOut: null } : null,
                 ].filter(Boolean),
             },
             orderBy: {
@@ -534,12 +556,12 @@ router.post('/togglePaid', async (req, res) => {
             },
         });
         const isPaid = data.paid;
-        const response = await prisma.members.update({
+        await prisma.members.update({
             where: {
                 id: id,
             },
             data: {
-                paid: isPaid == 0 ? true : false,
+                paid: isPaid === 0 ? true : false,
             },
         });
         res.status(201).json({ message: 'Updated Payment' });
@@ -558,7 +580,7 @@ router.post('/setPaidAmount', async (req, res) => {
     }
 
     try {
-        const response = await prisma.members.update({
+        await prisma.members.update({
             where: {
                 id: id,
             },
@@ -696,7 +718,7 @@ router.post('/reset-all-time', async (req, res) => {
             res.status(500).json({ message: 'DB Error' });
         }
     } else {
-        res.status(400).json({ message: 'Retype Password Correctly.' });
+        res.status(403).json({ message: 'Incorrect Password!' });
     }
 });
 

@@ -32,7 +32,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
     const [showSig, setShowSig] = useState(true);
     const [sig, setSig] = useState(true);
-    const [showCourse, setShowCourse] = useState(false);
+    const [showCourse, setShowCourse] = useState(true);
     const [showRegular, setShowRegular] = useState(false);
     const [showRemarks, setShowRemarks] = useState(true);
     const [showSignatureModal, setShowSignatureModal] = useState(false);
@@ -65,6 +65,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
     });
     const [orgsFilter, setOrgsFilter] = useState({}); // State to hold organization filters
     const [onlyPresent, setOnlyPresent] = useState(false);
+    const [onlyAbsent, setOnlyAbsent] = useState(false);
+    const [notTimedOut, setNotTimedOut] = useState(false);
     const [orderBy, setOrderBy] = useState('asc');
     const [showOrgDropDown, setShowOrgDropDown] = useState(false);
 
@@ -116,6 +118,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
     const handleSetOnlyPresentClick = () => {
         setOnlyPresent(!onlyPresent);
+        setShowFiltersDropDown(false);
+    };
+
+    const handleSetOnlyAbsentClick = () => {
+        setOnlyAbsent(!onlyAbsent);
         setShowFiltersDropDown(false);
     };
 
@@ -245,6 +252,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
         navigate('/');
     };
 
+    const handleClickNotTimedOut = () => {
+        setNotTimedOut(!notTimedOut);
+    };
+
     const handleSearchChange = useCallback(
         debounce((value) => {
             setSearch(value);
@@ -267,6 +278,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     coursesFilter: JSON.stringify(yearCourses),
                     orgsFilter: JSON.stringify(orgsFilter),
                     onlyPresent,
+                    onlyAbsent,
+                    notTimedOut,
                     searchParams: search,
                     orderName: orderBy,
                 },
@@ -293,6 +306,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     coursesFilter: JSON.stringify(yearCourses),
                     orgsFilter: JSON.stringify(orgsFilter),
                     onlyPresent,
+                    onlyAbsent,
+                    notTimedOut,
                     searchParams: search,
                     orderName: orderBy,
                 },
@@ -600,7 +615,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     onClick={handleClickProgram}
                                 />
                                 <label htmlFor="show-prog" className="ml-2">
-                                    Course
+                                    Program and Year
                                 </label>
                             </div>
                             <div className="flex items-center mb-2">
@@ -719,9 +734,32 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 ) : null}
                                 {'Select Courses >'}
                             </button>
-
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg cursor-pointer space-x-2"
+                                onClick={() => setNotTimedOut(!notTimedOut)}
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="notTimedOut"
+                                    checked={notTimedOut}
+                                    onClick={() => setNotTimedOut(!notTimedOut)}
+                                ></input>
+                                <label for="notTimedOut">Not Timed Out</label>
+                            </button>
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg cursor-pointer space-x-2"
+                                onClick={() => setOnlyAbsent(!onlyAbsent)}
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="onlyAbsent"
+                                    checked={onlyAbsent}
+                                    onClick={() => setOnlyAbsent(!onlyAbsent)}
+                                ></input>
+                                <label for="onlyAbsent">Absent Only</label>
+                            </button>
                             <div
-                                className="flex-row hover:bg-blue-200 p-2 rounded-lg "
+                                className="flex-row hover:bg-blue-200 p-2 rounded-lg cursor-pointer space-x-2"
                                 onClick={() => handleSetOnlyPresentClick()}
                             >
                                 <input
@@ -798,6 +836,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         </div>
                     )}
                 </div>
+
                 <button
                     onClick={handleSearch}
                     type="button"
@@ -1135,6 +1174,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         >
                             Name
                         </th>
+                        <th
+                            scope="col"
+                            className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        >
+                            Student/Professional
+                        </th>
                         {/* <th
                             scope="col"
                             className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -1156,7 +1201,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 scope="col"
                                 className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                             >
-                                Course
+                                Program and Year
                             </th>
                         ) : (
                             ''
@@ -1220,6 +1265,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   </td>
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {entry.name}
+                                  </td>
+                                  <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                      {entry.isStudent
+                                          ? 'Student'
+                                          : 'Professional'}
                                   </td>
                                   {/* <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {entry.year}

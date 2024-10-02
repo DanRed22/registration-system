@@ -7,7 +7,6 @@ const AddModal = ({ hide }) => {
     const [name, setName] = useState('');
     const [course, setCourse] = useState('');
     const [email, setEmail] = useState('');
-    const [year, setYear] = useState('');
     const [isStudent, setIsStudent] = useState(true);
     const [organization, setOrganization] = useState('NONE');
     const [remarks, setRemarks] = useState('');
@@ -75,7 +74,6 @@ const AddModal = ({ hide }) => {
             name: name,
             email: email,
             course: course,
-            year: year,
             isStudent: isStudent,
             organization: organization,
             remarks: remarks,

@@ -44,6 +44,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         remarks: true, //aka medical disclosure
         signature: true,
         amount: false,
+        organization: true,
     });
 
     const handleFilterClick = (name) => {
