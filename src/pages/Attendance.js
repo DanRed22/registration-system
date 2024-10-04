@@ -87,21 +87,21 @@ export const Attendance = () => {
                 ) : (
                     ''
                 )}
-                <div className="mt-10 p-2 border border-solid rounded-lg border-white z-0 overflow-auto">
-                    <div className="flex flex-row w-[30rem]">
-                        <div className="w-1/3 my-2 items-center text-start">
-                            <p className="text-white mr-4">
+                <div className="mt-10 p-2 border border-solid rounded-lg w-[90%]  border-white z-0 overflow-auto ">
+                    <div className="grid grid-cols-2 lg:grid-cols-3 justify-items-center gap-5">
+                        <div className="w-1/3 my-2 items-center text-start gap-5">
+                            <p className="text-white mr-4 mb-5 md:mb-0">
                                 Present: {data.present}
                             </p>
-                            <p className="text-white mr-4">
+                            <p className="text-white mr-4 mb-5 md:mb-0">
                                 Absent: {data.absent}
                             </p>
-                            <p className="text-white mr-4">
+                            <p className="text-white mr-4 mb-5 md:mb-0">
                                 Total: {data.total}
                             </p>
                         </div>
-                        <div className="w-1/3 my-2 items-center text-start">
-                            <p className="text-white mr-4">
+                        <div className="w-1/2 my-2 items-center text-start">
+                            <p className="text-white mr-4 mb-5 md:mb-0">
                                 Total Paid: <b>{paymentData.totalPaid}</b>
                             </p>
                             <p className="text-white mr-4">
@@ -109,7 +109,7 @@ export const Attendance = () => {
                                 <b>{paymentData.totalAmountPaid}</b>
                             </p>
                         </div>
-                        <div className="flex flex-row w-1/4 justify-end mx-5 my-2">
+                        <div className="col-span-2 lg:col-span-1 mx-5 my-0 md:my-2">
                             <button
                                 type="button"
                                 className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"

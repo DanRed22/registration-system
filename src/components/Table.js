@@ -262,8 +262,8 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                     refresh={handleSearch}
                 />
             )}
-            <div className="flex justify-items-end border border-white rounded-lg border-solid w-full my-4">
-                <div class="m-2 flex justify-items-center items-center">
+            <div className="flex flex-col lg:flex-row justify-items-end border border-white rounded-lg border-solid w-full my-4">
+                <div class="m-2 flex justify-center justify-items-center items-center">
                     <button
                         onClick={() => {
                             setShowAddModal(!showAddModal);
@@ -276,22 +276,25 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                     </button>
                 </div>
 
-                <div class="m-2 flex justify-items-center items-center">
+                <div class="m-2 flex flex-col lg:flex-row justify-items-center items-center ">
                     <label
                         for="search-input"
                         class="block ml-4 text-sm font-medium text-white"
                     >
                         Search{' '}
                     </label>
-                    <CiSearch className=" text-white mx-2" />
-                    <input
-                        type="text"
-                        id="search-input"
-                        class=" w-72 border text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-                        onChange={handleSearchChange}
-                        onKeyPress={handleKeyPress}
-                        value={search}
-                    />
+                    <div className="flex md:flex-row align-middle justify-center items-center mr-2">
+                        <CiSearch className=" text-white mx-2 " />
+                        <input
+                            type="text"
+                            id="search-input"
+                            class=" w-72 border text-sm rounded-lg  block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
+                            onChange={handleSearchChange}
+                            onKeyPress={handleKeyPress}
+                            value={search}
+                        />
+                    </div>
+
                     <button
                         onClick={handleSearch}
                         type="button"
@@ -301,7 +304,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                     </button>
                 </div>
 
-                <div className="flex flex-row items-center">
+                <div className="grid grid-cols-4 lg:grid-cols-10 items-center">
                     {Object.keys(show)
                         .filter((key) => key !== 'name')
                         .map((key) => (
