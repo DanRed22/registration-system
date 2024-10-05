@@ -1154,7 +1154,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       )}
                                       {showRemarks ? (
                                           <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.remarks}
+                                              {entry.remarks &&
+                                                  entry.remarks
+                                                      .split('\n')
+                                                      .map((line, index) => (
+                                                          <span key={index}>
+                                                              {line}
+                                                              <br />
+                                                          </span>
+                                                      ))}
                                           </td>
                                       ) : (
                                           ''
