@@ -79,32 +79,53 @@ router.get('/allFiltered', async (req, res) => {
                     courseFilters.AE ? { course: 'AE' } : null,
                 ].filter(Boolean),
             },
-            orderBy:{
-                name: (!order || (order !== 'asc' && order !== 'desc')) ? 'asc' : order
-            }
+            orderBy: {
+                name:
+                    !order || (order !== 'asc' && order !== 'desc')
+                        ? 'asc'
+                        : order,
+            },
         });
-        const sanitizedMembers = members.map(member => ({
+        const sanitizedMembers = members.map((member) => ({
             ...member,
             id: member.id.toString(), // Ensure BigInt fields are converted to strings
         }));
-       // console.log(sanitizedMembers)
+        // console.log(sanitizedMembers)
 
-        res.status(200).send({ data: sanitizedMembers});
+        res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error:error});
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error: error,
+        });
     }
 });
 
 router.get('/searchFiltered', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+    const {
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        orgsFilter,
+        searchParams,
+        orderName,
+        paidFilter,
+    } = req.query;
 
-    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+    console.log({
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        searchParams,
+        orgsFilter,
+        orderName,
+        paidFilter,
+    });
 
     const courseFilters = JSON.parse(coursesFilter);
     const yearFilters = JSON.parse(yearLevelFilter);
     const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
-
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
 
@@ -132,24 +153,41 @@ router.get('/searchFiltered', async (req, res) => {
                     // Organization filters (OR condition)
                     {
                         OR: Object.keys(organizationFilters)
-                            .filter(org => organizationFilters[org]) // Only include selected organizations
-                            .map(org => ({ organization: org })),
+                            .filter((org) => organizationFilters[org]) // Only include selected organizations
+                            .map((org) => ({ organization: org })),
                     },
                     // Apply search query across relevant fields
                     searchParams
                         ? {
-                            OR: [
-                                { name: { contains: searchParams.toLowerCase() } }, // Name
-                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
-                            ],
-                        }
+                              OR: [
+                                  {
+                                      name: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Name
+                                  {
+                                      organization: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Organization
+                              ],
+                          }
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
+                    // Paid filter logic
+                    !paidFilter || paidFilter === 'ALL'
+                        ? null
+                        : paidFilter === 'UNPAID'
+                          ? { paid: false } // Only unpaid
+                          : { paid: true }, // Only paid
                 ].filter(Boolean),
             },
             orderBy: {
-                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+                name:
+                    orderName === 'asc' || orderName === 'desc'
+                        ? orderName
+                        : 'asc',
             },
         });
 
@@ -163,14 +201,30 @@ router.get('/searchFiltered', async (req, res) => {
         res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error });
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error,
+        });
     }
 });
 
 router.get('/committeeMembers', async (req, res) => {
-    const { coursesFilter, yearLevelFilter, onlyPresent, orgsFilter, searchParams, orderName } = req.query;
+    const {
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        orgsFilter,
+        searchParams,
+        orderName,
+    } = req.query;
 
-    console.log({ coursesFilter, yearLevelFilter, onlyPresent, searchParams, orgsFilter });
+    console.log({
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        searchParams,
+        orgsFilter,
+    });
 
     const courseFilters = JSON.parse(coursesFilter);
     const yearFilters = JSON.parse(yearLevelFilter);
@@ -204,24 +258,35 @@ router.get('/committeeMembers', async (req, res) => {
                     // Organization filters (OR condition)
                     {
                         OR: Object.keys(organizationFilters)
-                            .filter(org => organizationFilters[org]) // Only include selected organizations
-                            .map(org => ({ organization: org })),
+                            .filter((org) => organizationFilters[org]) // Only include selected organizations
+                            .map((org) => ({ organization: org })),
                     },
                     // Apply search query across relevant fields
                     searchParams
                         ? {
-                            OR: [
-                                { name: { contains: searchParams.toLowerCase() } }, // Name
-                                { organization: { contains: searchParams.toLowerCase() } }, // Organization
-                            ],
-                        }
+                              OR: [
+                                  {
+                                      name: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Name
+                                  {
+                                      organization: {
+                                          contains: searchParams.toLowerCase(),
+                                      },
+                                  }, // Organization
+                              ],
+                          }
                         : null,
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
                 ].filter(Boolean),
             },
             orderBy: {
-                name: orderName === 'asc' || orderName === 'desc' ? orderName : 'asc',
+                name:
+                    orderName === 'asc' || orderName === 'desc'
+                        ? orderName
+                        : 'asc',
             },
         });
 
@@ -235,13 +300,16 @@ router.get('/committeeMembers', async (req, res) => {
         res.status(200).send({ data: sanitizedMembers });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to execute database query', error });
+        res.status(500).send({
+            message: 'Failed to execute database query',
+            error,
+        });
     }
 });
 
 router.post('/resetCommitteeMembers', async (req, res) => {
-    const {secret, password} = req.body;
-    if(secret !== password){
+    const { secret, password } = req.body;
+    if (secret !== password) {
         return res.status(403).send({ message: 'Wrong Password' });
     }
     try {
@@ -254,10 +322,15 @@ router.post('/resetCommitteeMembers', async (req, res) => {
             },
         });
 
-        res.status(200).send({ message: `${updatedMembers.count} members have been reset to non-committee members.` });
+        res.status(200).send({
+            message: `${updatedMembers.count} members have been reset to non-committee members.`,
+        });
     } catch (error) {
         console.error('ERROR', error);
-        res.status(500).send({ message: 'Failed to reset committee members', error });
+        res.status(500).send({
+            message: 'Failed to reset committee members',
+            error,
+        });
     }
 });
 
@@ -270,10 +343,12 @@ router.get('/organizations', async (req, res) => {
             },
         });
 
-        res.json(organizations.map(org => org.organization)); // Send back the list of organizations
+        res.json(organizations.map((org) => org.organization)); // Send back the list of organizations
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'An error occurred while fetching organizations.' });
+        res.status(500).json({
+            error: 'An error occurred while fetching organizations.',
+        });
     }
 });
 
@@ -488,30 +563,29 @@ router.post('/update-timeout', (req, res) => {
 });
 
 router.post('/togglePaid', async (req, res) => {
-    const {id} = req.body;
+    const { id } = req.body;
 
-    try{
+    try {
         const data = await prisma.members.findUnique({
-            where:{
-                id:id
-            }
+            where: {
+                id: id,
+            },
         });
         const isPaid = data.paid;
         const response = await prisma.members.update({
-            where:{
-                id: id
+            where: {
+                id: id,
             },
-            data:{
-                paid: isPaid == 0? true : false,
-            }
-        })
-        res.status(201).json({message: 'Updated Payment'})
-    }catch(error){
-        res.status(500).json({message:error.message})
-    }finally{
+            data: {
+                paid: isPaid == 0 ? true : false,
+            },
+        });
+        res.status(201).json({ message: 'Updated Payment' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    } finally {
         prisma.$disconnect();
     }
-    
 });
 
 router.post('/setPaidAmount', async (req, res) => {
@@ -524,53 +598,55 @@ router.post('/setPaidAmount', async (req, res) => {
     try {
         const response = await prisma.members.update({
             where: {
-                id: id
+                id: id,
             },
             data: {
-                paid: (paid_amount > 0) ? true : false,
+                paid: paid_amount > 0 ? true : false,
                 amount: parseInt(paid_amount) || 0,
-            }
+            },
         });
-        res.status(200).json({ message: `Updated Payment Amount to ${paid_amount}` });
+        res.status(200).json({
+            message: `Updated Payment Amount to ${paid_amount}`,
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
-    }finally{
+    } finally {
         prisma.$disconnect();
     }
 });
-
 
 router.get('/paymentTotal', async (req, res) => {
     try {
         const totalPaid = await prisma.members.count({
             where: {
                 paid: true,
-            }
+            },
         });
         const totalAmountPaid = await prisma.members.aggregate({
             _sum: {
-                amount: true
+                amount: true,
             },
             where: {
                 paid: true,
-            }
+            },
         });
         const totalNotYetPaid = await prisma.members.count({
             where: {
                 paid: false,
-            }
-        })
+            },
+        });
         res.status(200).json({
             totalPaid: totalPaid,
-            totalAmountPaid: totalAmountPaid._sum.amount!= null ? totalAmountPaid._sum.amount : 0,
-            totalNotYetPaid: totalNotYetPaid
+            totalAmountPaid:
+                totalAmountPaid._sum.amount != null
+                    ? totalAmountPaid._sum.amount
+                    : 0,
+            totalNotYetPaid: totalNotYetPaid,
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
-
-
 
 router.post('/reset-timeout', (req, res) => {
     const { id } = req.body; // Assuming id is sent in the request body
@@ -652,7 +728,7 @@ router.post('/add', (req, res) => {
 });
 
 router.post('/reset-all-time', (req, res) => {
-    const { password, secret} = req.body;
+    const { password, secret } = req.body;
     console.log(password);
     const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'NONE'`;
     if (password == secret) {
@@ -668,26 +744,26 @@ router.post('/reset-all-time', (req, res) => {
     }
 });
 
-router.post('/reset-all-payments', async(req, res)=>{
-    const {secret, password} = req.body;
-    try{
+router.post('/reset-all-payments', async (req, res) => {
+    const { secret, password } = req.body;
+    try {
         if (secret !== password) {
-            res.status(400).json({message: 'Incorrect Password!'});
+            res.status(400).json({ message: 'Incorrect Password!' });
             return;
         }
         await prisma.members.updateMany({
-            data:{
+            data: {
                 paid: false,
-                amount: 0
-            }
-        })
+                amount: 0,
+            },
+        });
         res.status(200).json({ message: 'Resetted Payments' });
-    }catch(error){
+    } catch (error) {
         res.status(500).json({ message: `Database Error: ${error.message}` });
-    }finally{
+    } finally {
         prisma.$disconnect();
     }
-})
+});
 
 router.get('/status', (req, res) => {
     const query = `SELECT 

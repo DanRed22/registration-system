@@ -43,6 +43,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showFiltersDropDown, setShowFiltersDropDown] = useState(false);
     const [showYearLevelDropDown, setShowYearLevelDropDown] = useState(false);
     const [showPaid, setShowPaid] = useState(true);
+    const [showTimeOut, setShowTimeOut] = useState(true);
 
     //SelectedRecord
     const [selectedName, setSelectedName] = useState('');
@@ -72,6 +73,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [onlyPresent, setOnlyPresent] = useState(false);
     const [orderBy, setOrderBy] = useState('asc');
     const [showOrgDropDown, setShowOrgDropDown] = useState(false);
+    const [paidFilter, setPaidFilter] = useState('ALL'); //ALL, PAID, UNPAID
+    const [showPaidDropDown, setShowPaidDropDown] = useState(false);
+    const [showOrg, setShowOrg] = useState(false);
 
     const toggleOrder = () => {
         setOrderBy((prevOrder) => {
@@ -313,7 +317,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     coursesFilter: JSON.stringify(coursesFilter),
                     yearLevelFilter: JSON.stringify(yearLevelFilter),
                     orgsFilter: JSON.stringify(orgsFilter),
-                    onlyPresent,
+                    onlyPresent: onlyPresent,
+                    paidFilter: paidFilter,
                     searchParams: search,
                     orderName: orderBy,
                 },
@@ -337,6 +342,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         search,
         orderBy,
         orgsFilter,
+        paidFilter,
     ]);
 
     const handleExportCSV = () => {
@@ -378,7 +384,18 @@ const ViewTable = ({ showNotif, setMessage }) => {
     useEffect(() => {
         handleSearch(); // Trigger search immediately when filters or sorting order changes
         setCurrentPage(1);
-    }, [coursesFilter, yearLevelFilter, onlyPresent, orderBy, orgsFilter]); // Separate the filters and order logic from search input
+    }, [
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        orderBy,
+        orgsFilter,
+        paidFilter,
+    ]); // Separate the filters and order logic from search input
+
+    const handlePaidFilter = (value) => {
+        setPaidFilter(value);
+    };
 
     // Close the dropdowns when clicking outside
     useEffect(() => {
@@ -387,19 +404,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 optionsDropdownRef.current &&
                 !optionsDropdownRef.current.contains(event.target)
             ) {
-                setShowOptionsDropdown(false); // Close options dropdown
+                // Only close options dropdown if clicking outside the dropdown
+                setShowOptionsDropdown(false);
             }
             if (
                 filtersDropdownRef.current &&
                 !filtersDropdownRef.current.contains(event.target)
             ) {
-                setShowFiltersDropDown(false); // Close filters dropdown
+                // Only close filters dropdown if clicking outside the dropdown
+                setShowFiltersDropDown(false);
+                setShowYearLevelDropDown(false);
+                setShowCoursesDropDown(false);
+                setShowOrgDropDown(false);
             }
         };
-
         // Add event listener when the component mounts
         document.addEventListener('mousedown', handleClickOutside);
-
         // Remove event listener when the component unmounts
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -622,6 +642,28 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 />
                                 <label htmlFor="email" className="ml-2">
                                     Emails
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="org"
+                                    checked={showOrg}
+                                    onClick={() => setShowOrg(!showOrg)}
+                                />
+                                <label htmlFor="org" className="ml-2">
+                                    Show Organizations
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="email"
+                                    checked={showTimeOut}
+                                    onClick={() => setShowTimeOut(!showTimeOut)}
+                                />
+                                <label htmlFor="email" className="ml-2">
+                                    Show Time Out
                                 </label>
                             </div>
                             <div className="flex items-center mb-2">
@@ -851,39 +893,110 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 ></input>
                                 <label for="onlyPresent">Present Only</label>
                             </div>
-
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() =>
+                                    setShowPaidDropDown(!showPaidDropDown)
+                                }
+                            >
+                                Payment Filter &gt;
+                            </button>
+                            {showPaidDropDown && (
+                                <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-[35rem] space-x-4">
+                                    <button
+                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'PAID' ? 'bg-green-600 text-white' : ''}`}
+                                        onClick={() => handlePaidFilter('PAID')}
+                                    >
+                                        Show Paid
+                                    </button>
+                                    <button
+                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'UNPAID' ? 'bg-green-600 text-white' : ''}`}
+                                        onClick={() =>
+                                            handlePaidFilter('UNPAID')
+                                        }
+                                    >
+                                        Show Unpaid
+                                    </button>
+                                    <button
+                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'ALL' || paidFilter === null || paidFilter === undefined || paidFilter === '' ? 'bg-green-600 text-white' : ''}`}
+                                        onClick={() => handlePaidFilter('ALL')}
+                                    >
+                                        Show All
+                                    </button>
+                                </div>
+                            )}
                             <button
                                 className="hover:bg-blue-200 p-2 rounded-lg"
                                 onClick={() =>
                                     setShowOrgDropDown(!showOrgDropDown)
                                 }
                             >
+                                {' '}
                                 {'Select Organizations >'}
-                                {showOrgDropDown ? (
-                                    <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-64">
-                                        {organizations.map((org, index) => (
-                                            <div
-                                                key={index}
-                                                className="flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start"
-                                                onClick={() =>
-                                                    handleOrgFilterSelect(org)
-                                                }
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    checked={orgsFilter[org]}
-                                                    onChange={() =>
+                            </button>
+
+                            {showOrgDropDown ? (
+                                <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-[35rem]">
+                                    <div className="flex flex-row flex-wrap justify-center">
+                                        {organizations
+                                            .slice(0, 4)
+                                            .map((org, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex flex-col border rounded-lg p-2 hover:bg-blue-300 items-start space-y-2 my-2 mx-2"
+                                                    onClick={() =>
                                                         handleOrgFilterSelect(
                                                             org
                                                         )
                                                     }
-                                                />
-                                                <label>{org}</label>
-                                            </div>
-                                        ))}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={
+                                                            orgsFilter[org]
+                                                        }
+                                                        onChange={() =>
+                                                            handleOrgFilterSelect(
+                                                                org
+                                                            )
+                                                        }
+                                                    />
+                                                    <label>{org}</label>
+                                                </div>
+                                            ))}
                                     </div>
-                                ) : null}
-                            </button>
+                                    {organizations.length > 4 && (
+                                        <div className="flex flex-row flex-wrap">
+                                            {organizations
+                                                .slice(4)
+                                                .map((org, index) => (
+                                                    <div
+                                                        key={index + 4}
+                                                        className="flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start w-1/2"
+                                                        onClick={() =>
+                                                            handleOrgFilterSelect(
+                                                                org
+                                                            )
+                                                        }
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={
+                                                                orgsFilter[org]
+                                                            }
+                                                            onChange={() =>
+                                                                handleOrgFilterSelect(
+                                                                    org
+                                                                )
+                                                            }
+                                                        />
+                                                        <label>{org}</label>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
                         </div>
                     )}
                 </div>
@@ -938,12 +1051,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             >
                                 {' '}
                             </th>
-                            <th
-                                scope="col"
-                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                            >
-                                Organization
-                            </th>
+                            {showOrg ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Organization
+                                </th>
+                            ) : null}
                             <th
                                 scope="col"
                                 className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -1002,12 +1117,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             >
                                 Time In
                             </th>
-                            <th
-                                scope="col"
-                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                            >
-                                Time Out
-                            </th>
+                            {showTimeOut && (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Time Out
+                                </th>
+                            )}
                             {sig ? (
                                 <th
                                     scope="col"
@@ -1042,12 +1159,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                               1 +
                                               (currentPage - 1) * itemsPerPage}
                                       </td>
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.organization}{' '}
-                                          {entry.position
-                                              ? `: ${entry.position}`
-                                              : null}
-                                      </td>
+                                      {showOrg ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.organization}{' '}
+                                              {entry.position
+                                                  ? `: ${entry.position}`
+                                                  : null}
+                                          </td>
+                                      ) : null}
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                           {entry.name}
                                       </td>
@@ -1103,23 +1222,24 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                               )}
                                           </td>
                                       )}
-                                      {!truncTime ? (
-                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeOut}
-                                          </td>
-                                      ) : (
-                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeOut ? (
-                                                  <span className="text-green-500">
-                                                      YES
-                                                  </span>
-                                              ) : (
-                                                  <span className="text-red-500">
-                                                      NO
-                                                  </span>
-                                              )}
-                                          </td>
-                                      )}
+                                      {showTimeOut &&
+                                          (!truncTime ? (
+                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                  {entry.timeOut}
+                                              </td>
+                                          ) : (
+                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                  {entry.timeOut ? (
+                                                      <span className="text-green-500">
+                                                          YES
+                                                      </span>
+                                                  ) : (
+                                                      <span className="text-red-500">
+                                                          NO
+                                                      </span>
+                                                  )}
+                                              </td>
+                                          ))}
 
                                       {sig === true && (
                                           <td className="px-1 py-1 whitespace-nowrap ">
@@ -1211,12 +1331,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         >
                             {' '}
                         </th>
-                        <th
-                            scope="col"
-                            className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                            Organization
-                        </th>
+                        {showOrg ? (
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                Organization
+                            </th>
+                        ) : null}
                         <th
                             scope="col"
                             className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -1265,12 +1387,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         >
                             Time In
                         </th>
-                        <th
-                            scope="col"
-                            className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                            Time Out
-                        </th>
+                        {showTimeOut && (
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                Time Out
+                            </th>
+                        )}
                         {sig ? (
                             <th
                                 scope="col"
@@ -1303,9 +1427,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {idx + 1}
                                   </td>
-                                  <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {entry.organization}
-                                  </td>
+                                  {showOrg ? (
+                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                          {entry.organization}
+                                      </td>
+                                  ) : null}
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {entry.name}
                                   </td>
@@ -1350,23 +1476,24 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                           )}
                                       </td>
                                   )}
-                                  {!truncTime ? (
-                                      <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.timeOut}
-                                      </td>
-                                  ) : (
-                                      <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.timeOut ? (
-                                              <span className="text-green-500">
-                                                  YES
-                                              </span>
-                                          ) : (
-                                              <span className="text-red-500">
-                                                  NO
-                                              </span>
-                                          )}
-                                      </td>
-                                  )}
+                                  {showTimeOut &&
+                                      (!truncTime ? (
+                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                              {entry.timeOut}
+                                          </td>
+                                      ) : (
+                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                              {entry.timeOut ? (
+                                                  <span className="text-green-500">
+                                                      YES
+                                                  </span>
+                                              ) : (
+                                                  <span className="text-red-500">
+                                                      NO
+                                                  </span>
+                                              )}
+                                          </td>
+                                      ))}
 
                                   {sig === true && (
                                       <td className="px-1 py-1 whitespace-nowrap ">
