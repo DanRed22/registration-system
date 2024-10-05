@@ -16,13 +16,14 @@ export const Attendance = () => {
     const [paymentData, setPaymentData] = useState({
         totalPaid: 0,
         totalAmountPaid: 0,
-        totalNotYetPaid: 0
-    })
+        totalNotYetPaid: 0,
+    });
     const [data, setData] = useState({
         present: '100',
         absent: '50',
         total: '150',
     });
+    const [showTotalPaid, setShowTotalPaid] = useState(false);
 
     const ExportPreview = () => {
         navigate('/view');
@@ -99,13 +100,34 @@ export const Attendance = () => {
                             </p>
                         </div>
                         <div className="w-1/3 my-2 items-center text-start">
-                        <p className="text-white mr-4">Total Paid: <b>{paymentData.totalPaid}</b></p>
-                        <p className="text-white mr-4">Total Amount Paid: PHP <b>{paymentData.totalAmountPaid}</b></p>
+                            <p className="text-white mr-4">
+                                Total Paid:{' '}
+                                <b>
+                                    {showTotalPaid
+                                        ? paymentData.totalPaid
+                                        : '-------'}
+                                </b>
+                            </p>
+                            <p className="text-white mr-4">
+                                Total Amount Paid: PHP{' '}
+                                <b>
+                                    {showTotalPaid
+                                        ? paymentData.totalAmountPaid
+                                        : '--------'}
+                                </b>
+                            </p>
                         </div>
-                        <div className="flex flex-row w-1/4 justify-end mx-5 my-2">
+                        <div className="flex flex-col w-1/4 justify-end space-y-2">
                             <button
                                 type="button"
-                                className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                                onClick={() => setShowTotalPaid(!showTotalPaid)}
+                            >
+                                {showTotalPaid ? 'Hide' : 'Show'}
+                            </button>
+                            <button
+                                type="button"
+                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
                                 onClick={ExportPreview}
                             >
                                 Export
