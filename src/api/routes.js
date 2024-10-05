@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const prisma = new PrismaClient();
 
+const BigInt = require('big-integer');
 const dir = '../../public/signatures';
 
 const pool = createPool({
@@ -97,6 +98,67 @@ router.get('/allFiltered', async (req, res) => {
         console.error('ERROR', error);
         res.status(500).send({
             message: 'Failed to execute database query',
+            error: error,
+        });
+    }
+});
+
+router.get('/member', async (req, res) => {
+    if (req.query.memberId) {
+        return res.status(400).send({ error: 'memberId is required' });
+    }
+    const id = BigInt(req.query.id); // Directly convert memberId to BigInt
+    const member = await prisma.members.findUnique({
+        where: { id: id }, // Use the converted BigInt id
+    });
+
+    if (!member) {
+        return res.status(404).send({ error: 'Member not found' });
+    }
+
+    res.status(200).send({ data: { ...member, id: member.id.toString() } });
+});
+
+router.put('/editMember', async (req, res) => {
+    const {
+        id,
+        name,
+        email,
+        course,
+        year,
+        regular,
+        organization,
+        remarks,
+        timeIn,
+        timeOut,
+    } = req.body;
+
+    try {
+        console.log(req.body);
+        const updatedMember = await prisma.members.update({
+            where: { id: BigInt(id) },
+            data: {
+                name,
+                email,
+                course,
+                year,
+                regular,
+                organization,
+                remarks,
+                timeIn,
+                timeOut,
+            },
+        });
+        console.log('UPDATED MEMBER', updatedMember);
+
+        res.status(200).send({
+            message: 'Member updated successfully',
+            data: { ...updatedMember, id: updatedMember.id.toString() },
+        });
+    } catch (error) {
+        console.error('Error updating member:', error);
+        res.status(500).send({
+            message: 'Failed to update member',
             error: error,
         });
     }
@@ -731,7 +793,7 @@ router.post('/reset-all-time', (req, res) => {
     const { password, secret } = req.body;
     console.log(password);
     const query = `UPDATE members SET timeIn = NULL, timeOut = NULL, organization = 'NONE'`;
-    if (password == secret) {
+    if (password === secret) {
         pool.query(query, (err, result) => {
             if (err) {
                 res.status(200).json({ message: 'DB Error' });

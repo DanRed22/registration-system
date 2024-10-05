@@ -8,6 +8,7 @@ import { FaPencilAlt, FaRegEye } from 'react-icons/fa';
 import ClipLoader from 'react-spinners/ClipLoader';
 import SignatureModal from './SignatureModal';
 import ShowSignatureModal from './ShowSignatureModal';
+import EditModal from './EditModal';
 
 const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [search, setSearch] = useState('');
@@ -24,6 +25,8 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [showUserSig, setShowUserSig] = useState(false);
     const [imageSrc, setImageSrc] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [edit, setEdit] = useState(null);
     const hideRemarksModal = () => {
         setShowRemarksModal(false);
     };
@@ -74,29 +77,28 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         setAmountInput(entry.amount);
         setIsEditing(true); // Set editing mode to true
     };
-    
+
     const handleAmountSave = async (entry) => {
         await handleUpdate(entry.id, amountInput); // Call your existing update function
         setEditingEntryId(null); // Reset editing entry
         setIsEditing(false); // Exit editing mode
     };
-    
+
     const handleUpdate = async (id, amount) => {
-        console.log(id,amount)
+        console.log(id, amount);
         setIsEditing(false);
-        try{
-            await axios.post(`${API}setPaidAmount`,{
-            id: id, 
-            paid_amount: amount
-        });
+        try {
+            await axios.post(`${API}setPaidAmount`, {
+                id: id,
+                paid_amount: amount,
+            });
             showNotif(true);
             setMessage(`Successfully set amount`);
             handleSearch();
-        }catch(error){
+        } catch (error) {
             showNotif(true);
             setMessage(`Error: ${error.message}`);
         }
-       
     };
 
     const handleSignaturePress = (id, id_number, name) => {
@@ -111,6 +113,11 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         setSelectedIDNumber(id_number);
         setSelectedName(name);
         setShowUserSig(!showUserSig);
+    };
+
+    const handleEdit = (id) => {
+        setEdit(id);
+        setShowEditModal(true);
     };
 
     const handleSearch = async () => {
@@ -238,6 +245,15 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     //console.log(data)
     return (
         <div className="w-[90%]">
+            {showEditModal && (
+                <EditModal
+                    memberId={edit}
+                    hide={() => setShowEditModal(false)}
+                    refresh={handleSearch}
+                    showNotif={showNotif}
+                    setMessage={setMessage}
+                />
+            )}
             {showUserSig && (
                 <ShowSignatureModal
                     id={selectedID}
@@ -438,8 +454,16 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         key={entry.id}
                                         className="border-b-2 border-gray-200 dark:border-gray-700 text-sm"
                                     >
-                                        <td className="px-1 py-1 whitespace-nowrap">
-                                            {entry.name}
+                                        <td className="flex flex-row items-center justify-center px-1 py-1 whitespace-nowrap space-x-2">
+                                            <button
+                                                className="hover:text-orange-500 duration-100"
+                                                onClick={() =>
+                                                    handleEdit(entry.id)
+                                                }
+                                            >
+                                                <FaPencilAlt />
+                                            </button>
+                                            <p>{entry.name}</p>
                                         </td>
                                         {show.email && (
                                             <td className="px-1 py-1 whitespace-nowrap">
@@ -467,21 +491,38 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                                     <input
                                                         type="number"
                                                         value={amountInput}
-                                                        onChange={handleAmountInputChange}
-                                                        onBlur={() => handleAmountSave(entry)}
+                                                        onChange={
+                                                            handleAmountInputChange
+                                                        }
+                                                        onBlur={() =>
+                                                            handleAmountSave(
+                                                                entry
+                                                            )
+                                                        }
                                                         onKeyPress={(e) => {
-                                                            if (e.key === 'Enter') {
-                                                                handleAmountSave(entry);
+                                                            if (
+                                                                e.key ===
+                                                                'Enter'
+                                                            ) {
+                                                                handleAmountSave(
+                                                                    entry
+                                                                );
                                                             }
                                                         }}
                                                         className="border rounded p-1"
                                                     />
                                                 ) : (
                                                     <button
-                                                        onClick={() => handleAmountClick(entry)}
+                                                        onClick={() =>
+                                                            handleAmountClick(
+                                                                entry
+                                                            )
+                                                        }
                                                         className={`${entry.paid ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
                                                     >
-                                                        {entry.paid ? `₱ ${entry.amount}` : 'Not Paid'}
+                                                        {entry.paid
+                                                            ? `₱ ${entry.amount}`
+                                                            : 'Not Paid'}
                                                     </button>
                                                 )}
                                             </td>
