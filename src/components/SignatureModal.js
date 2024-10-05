@@ -50,7 +50,7 @@ const SignatureModal = ({ id, name, close }) => {
                     <SignatureCanvas
                         ref={sigCanvas}
                         penColor="black"
-                        throttle="12"
+                        throttle="4"
                         canvasProps={{
                             width: 400,
                             height: 300,
