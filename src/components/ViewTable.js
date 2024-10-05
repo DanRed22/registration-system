@@ -49,7 +49,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [selectedIDNumber, setSelectedIDNumber] = useState('');
     const [isExporting, setIsExporting] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState('');
-    
+
     //Utilities
     const [showReset, setShowReset] = useState(false);
     const [exportCSV, setExportCSV] = useState(false);
@@ -73,7 +73,6 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [orderBy, setOrderBy] = useState('asc');
     const [showOrgDropDown, setShowOrgDropDown] = useState(false);
 
-
     const toggleOrder = () => {
         setOrderBy((prevOrder) => {
             if (prevOrder === 'asc') return 'desc';
@@ -81,7 +80,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
             return prevOrder; // Prevent unnecessary state updates
         });
     };
-    
+
     useEffect(() => {
         const fetchOrganizations = async () => {
             try {
@@ -97,13 +96,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 console.error('Error fetching organizations:', error);
             }
         };
-    
+
         fetchOrganizations();
     }, []);
-
-
-
-
 
     /*Filter Select HANDLES*/
     const handleOrgFilterSelect = (org) => {
@@ -124,38 +119,33 @@ const ViewTable = ({ showNotif, setMessage }) => {
         }));
     }, []);
 
+    const handleYearLevelFilterSelect = async (year) => {
+        setYearLevelFilter((prev) => ({
+            ...prev,
+            [year]: !prev[year],
+        }));
+    };
 
-    const handleYearLevelFilterSelect = async (year) =>{
-            setYearLevelFilter((prev) => ({
-                ...prev,
-                [year]: !prev[year],
-            }));
-
-
-    }
-
-    const handleSetOnlyPresentClick = () =>{
+    const handleSetOnlyPresentClick = () => {
         setOnlyPresent(!onlyPresent);
         setShowFiltersDropDown(false);
-    }
-    
+    };
 
-    /*===================================*/ 
-
-
-
+    /*===================================*/
 
     useEffect(() => {
         refreshPaginatedData(); // Refresh when data or current page changes
     }, [data, currentPage]);
-    
+
     const refreshPaginatedData = useCallback(() => {
         if (!Array.isArray(data)) return; // Guard for edge cases
-        setPaginatedData(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+        setPaginatedData(
+            data.slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage
+            )
+        );
     }, [data, currentPage]);
-    
-    
-    
 
     const nextPage = () => {
         if (currentPage < totalPages) {
@@ -193,7 +183,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     };
     const exportTableToPDF = async () => {
         setIsExporting(true);
-        setExportData(paginatedData); 
+        setExportData(paginatedData);
         const input = document.getElementById('table-container');
         const pdf = new jsPDF('l', 'mm', 'letter');
         const margin = 12; //12mm
@@ -237,7 +227,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         };
 
         // Iterate over all pages and add them to the PDF
-        for (currentPage; currentPage <= totalPages+1; currentPage++) {
+        for (currentPage; currentPage <= totalPages + 1; currentPage++) {
             await addPageToPDF(currentPage);
         }
 
@@ -267,12 +257,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
         navigate('/');
     };
 
-    const handleSearchChange = useCallback(debounce((value) => {
-        setSearch(value);
-       // handleSearch(); // Call the search function when the input changes
-    }, 10), []); // Use a reasonable debounce time, e.g., 300ms
-     // Adjust debounce time
-    
+    const handleSearchChange = useCallback(
+        debounce((value) => {
+            setSearch(value);
+            // handleSearch(); // Call the search function when the input changes
+        }, 10),
+        []
+    ); // Use a reasonable debounce time, e.g., 300ms
+    // Adjust debounce time
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -288,7 +280,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     yearLevelFilter: JSON.stringify(yearLevelFilter),
                     orgsFilter: JSON.stringify(orgsFilter),
                     onlyPresent,
-                    searchParams: search, 
+                    searchParams: search,
                     orderName: orderBy,
                 },
             });
@@ -304,9 +296,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [coursesFilter, yearLevelFilter, onlyPresent, search, orderBy, orgsFilter]);
-    
-    
+    }, [
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        search,
+        orderBy,
+        orgsFilter,
+    ]);
+
     const handleSearch = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -316,7 +314,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     yearLevelFilter: JSON.stringify(yearLevelFilter),
                     orgsFilter: JSON.stringify(orgsFilter),
                     onlyPresent,
-                    searchParams: search, 
+                    searchParams: search,
                     orderName: orderBy,
                 },
             });
@@ -332,14 +330,19 @@ const ViewTable = ({ showNotif, setMessage }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [coursesFilter, yearLevelFilter, onlyPresent, search, orderBy, orgsFilter]);
-    
+    }, [
+        coursesFilter,
+        yearLevelFilter,
+        onlyPresent,
+        search,
+        orderBy,
+        orgsFilter,
+    ]);
 
     const handleExportCSV = () => {
         setIsExporting(false);
         setExportData(data);
         try {
-            
             setExportCSV(true);
             const tableId = '#table-container-csv';
             ExportMatTableToCSV(tableId, fileNameExport);
@@ -355,8 +358,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
         setShowReset(!showReset);
     };
 
-    const currentDataToDisplay = isLoading ? [] : (exportCSV ? exportData : paginatedData);
-
+    const currentDataToDisplay = isLoading
+        ? []
+        : exportCSV
+          ? exportData
+          : paginatedData;
 
     useEffect(() => {
         // Initialize the orgsFilter state based on fetched organizations
@@ -373,16 +379,20 @@ const ViewTable = ({ showNotif, setMessage }) => {
         handleSearch(); // Trigger search immediately when filters or sorting order changes
         setCurrentPage(1);
     }, [coursesFilter, yearLevelFilter, onlyPresent, orderBy, orgsFilter]); // Separate the filters and order logic from search input
-    
-
 
     // Close the dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (optionsDropdownRef.current && !optionsDropdownRef.current.contains(event.target)) {
+            if (
+                optionsDropdownRef.current &&
+                !optionsDropdownRef.current.contains(event.target)
+            ) {
                 setShowOptionsDropdown(false); // Close options dropdown
             }
-            if (filtersDropdownRef.current && !filtersDropdownRef.current.contains(event.target)) {
+            if (
+                filtersDropdownRef.current &&
+                !filtersDropdownRef.current.contains(event.target)
+            ) {
                 setShowFiltersDropDown(false); // Close filters dropdown
             }
         };
@@ -398,7 +408,13 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
     return (
         <div className="w-[90%]">
-            {showReset && <ConfirmationResetModal className='z-20' close={handleShowReset} type={resetType} />}
+            {showReset && (
+                <ConfirmationResetModal
+                    className="z-20"
+                    close={handleShowReset}
+                    type={resetType}
+                />
+            )}
             {showSignatureModal && (
                 <ViewOnlyShowSignatureModal
                     id={selectedID}
@@ -420,24 +436,27 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         type="text"
                         id="search-input"
                         className="w-72 border text-sm rounded-lg block p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-blue-500 focus:border-blue-500"
-                       value={search}
-                        onChange={(e)=>handleSearchChange(e.target.value)}
+                        value={search}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder="Search..."
                     />
-                    
+
                     <button
-                        onClick={()=>handleSearch}
+                        onClick={() => handleSearch}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
                         Search
                     </button>
 
-                    <button onClick={toggleOrder} className='mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800'>
+                    <button
+                        onClick={toggleOrder}
+                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                    >
                         Order: {orderBy === 'asc' ? 'A->Z' : 'Z->A'}
                     </button>
-                    
+
                     <button
                         onClick={goHome}
                         type="button"
@@ -456,8 +475,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                     <button
                         onClick={() => {
-                            setShowReset(true)
-                            setResetType('time')
+                            setShowReset(true);
+                            setResetType('time');
                         }}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -467,8 +486,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                     <button
                         onClick={() => {
-                            setShowReset(true)
-                            setResetType('payment')
+                            setShowReset(true);
+                            setResetType('payment');
                         }}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -478,8 +497,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                     <button
                         onClick={() => {
-                            setShowReset(true)
-                            setResetType('committee')
+                            setShowReset(true);
+                            setResetType('committee');
                         }}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -502,262 +521,387 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 </div>
             </div>
             <div className=" items-center flex flex-row my-4 space-x-4 border-white border-solid border-2 rounded-lg p-4 text-white">
-               <div ref={optionsDropdownRef}> {/*************************  OPTIONS *****************************************/}
-                <button
-                    onClick={() => setShowOptionsDropdown(!showOptionsDropdown)}
-                    className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
-                    type="button"
-                >
-                    Options
-                    <svg
-                        className="w-2.5 h-2.5 ms-3"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 10 6"
+                <div ref={optionsDropdownRef}>
+                    {' '}
+                    {/*************************  OPTIONS *****************************************/}
+                    <button
+                        onClick={() =>
+                            setShowOptionsDropdown(!showOptionsDropdown)
+                        }
+                        className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+                        type="button"
                     >
-                        <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m1 1 4 4 4-4"
-                        />
-                    </svg>
-                </button>
-                    
-                {showOptionsDropdown && (
-                    <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2">
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="sig"
-                                checked={sig}
-                                onClick={handleClickSig}
+                        Options
+                        <svg
+                            className="w-2.5 h-2.5 ms-3"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 10 6"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="m1 1 4 4 4-4"
                             />
-                            <label htmlFor="sig" className="ml-2">Show Signatures</label>
-                        </div>
-                        {sig && (
-                            
+                        </svg>
+                    </button>
+                    {showOptionsDropdown && (
+                        <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2">
                             <div className="flex items-center mb-2">
                                 <input
                                     type="checkbox"
-                                    name="show-sig"
-                                    checked={showSig}
-                                    onClick={handleClickShowSig}
+                                    name="sig"
+                                    checked={sig}
+                                    onClick={handleClickSig}
                                 />
-                                <label htmlFor="show-sig" className="ml-2 text-start">
-                                    Image Signatures <span className="text-[0.75rem] italic">(Uncheck for CSV)</span>
+                                <label htmlFor="sig" className="ml-2">
+                                    Show Signatures
                                 </label>
                             </div>
-                        )}
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="show-prog"
-                                checked={showPaid}
-                                onClick={()=>setShowPaid(!showPaid)}
-                            />
-                            <label htmlFor="show-prog" className="ml-2">Show Paid</label>
+                            {sig && (
+                                <div className="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        name="show-sig"
+                                        checked={showSig}
+                                        onClick={handleClickShowSig}
+                                    />
+                                    <label
+                                        htmlFor="show-sig"
+                                        className="ml-2 text-start"
+                                    >
+                                        Image Signatures{' '}
+                                        <span className="text-[0.75rem] italic">
+                                            (Uncheck for CSV)
+                                        </span>
+                                    </label>
+                                </div>
+                            )}
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="show-prog"
+                                    checked={showPaid}
+                                    onClick={() => setShowPaid(!showPaid)}
+                                />
+                                <label htmlFor="show-prog" className="ml-2">
+                                    Show Paid
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="show-prog"
+                                    checked={showCourse}
+                                    onClick={handleClickProgram}
+                                />
+                                <label htmlFor="show-prog" className="ml-2">
+                                    Course
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="show-add"
+                                    checked={showRegular}
+                                    onClick={handleClickAdditional}
+                                />
+                                <label htmlFor="show-add" className="ml-2">
+                                    Regular
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="email"
+                                    checked={showEmail}
+                                    onClick={handleShowEmail}
+                                />
+                                <label htmlFor="email" className="ml-2">
+                                    Emails
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="truncTime"
+                                    checked={truncTime}
+                                    onClick={handleTruncTime}
+                                />
+                                <label htmlFor="truncTime" className="ml-2">
+                                    Truncate Time
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="remarks"
+                                    checked={showRemarks}
+                                    onClick={handleClickRemarks}
+                                />
+                                <label htmlFor="remarks" className="ml-2">
+                                    Remarks
+                                </label>
+                            </div>
                         </div>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="show-prog"
-                                checked={showCourse}
-                                onClick={handleClickProgram}
-                            />
-                            <label htmlFor="show-prog" className="ml-2">Course</label>
-                        </div>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="show-add"
-                                checked={showRegular}
-                                onClick={handleClickAdditional}
-                            />
-                            <label htmlFor="show-add" className="ml-2">Regular</label>
-                        </div>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="email"
-                                checked={showEmail}
-                                onClick={handleShowEmail}
-                            />
-                            <label htmlFor="email" className="ml-2">Emails</label>
-                        </div>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="truncTime"
-                                checked={truncTime}
-                                onClick={handleTruncTime}
-                            />
-                            <label htmlFor="truncTime" className="ml-2">Truncate Time</label>
-                        </div>
-                        <div className="flex items-center mb-2">
-                            <input
-                                type="checkbox"
-                                name="remarks"
-                                checked={showRemarks}
-                                onClick={handleClickRemarks}
-                            />
-                            <label htmlFor="remarks" className="ml-2">Remarks</label>
-                        </div>
-                    </div>
-                )}
+                    )}
                 </div>
-            
 
-            {/*************************  FILTERS *****************************************/}
-            <div ref={filtersDropdownRef}>
-            <button
-                    onClick={() => setShowFiltersDropDown(!showFiltersDropDown)}
-                    className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
-                    type="button"
-                >
-                    Filters
-                    <svg
-                        className="w-2.5 h-2.5 ms-3"
-                        aria-hidden="true"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 10 6"
+                {/*************************  FILTERS *****************************************/}
+                <div ref={filtersDropdownRef}>
+                    <button
+                        onClick={() =>
+                            setShowFiltersDropDown(!showFiltersDropDown)
+                        }
+                        className="w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+                        type="button"
                     >
-                        <path
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="m1 1 4 4 4-4"
-                        />
-                    </svg>
-                </button>
+                        Filters
+                        <svg
+                            className="w-2.5 h-2.5 ms-3"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 10 6"
+                        >
+                            <path
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="m1 1 4 4 4-4"
+                            />
+                        </svg>
+                    </button>
 
-                {showFiltersDropDown && (
-                    <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2 ">
-                        <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowCoursesDropDown(!showCoursesDropDown)}>
-                            {showCoursesDropDown ? (
-                                <div className='border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64 '>
-                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
-                                    onClick={() => handleCoursesFilterSelect('AMT')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={coursesFilter.AMT}
-                                            onChange={() => handleCoursesFilterSelect('AMT')}
-                                        />
-                                        <label>AMT</label>
-                                    </div>
-                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
-                                    onClick={() => handleCoursesFilterSelect('AMGT')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={coursesFilter.AMGT}
-                                            onChange={() => handleCoursesFilterSelect('AMGT')}
-                                        />
-                                        <label>AMGT</label>
-                                    </div>
-                                    <div className='hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2'
-                                    onClick={() => handleCoursesFilterSelect('AE')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={coursesFilter.AE}
-                                            onChange={() => handleCoursesFilterSelect('AE')}
-                                        />
-                                        <label>AE</label>
-                                    </div>
-                                    
-                                </div>
-                            ) : null}
-                            {"Select Courses >"}
-                        </button>
-
-                        <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowYearLevelDropDown(!showYearLevelDropDown)}>
-                            {showYearLevelDropDown ? (
-                                <div className='border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64'>
-                                    <div className='flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200'
-                                        onClick={() => handleYearLevelFilterSelect('Freshman')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={yearLevelFilter.Freshman}
-                                            onChange={() => handleYearLevelFilterSelect('Freshman')}
-                                        />
-                                        <label>1st</label>
-                                    </div>
-                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
-                                        onClick={() => handleYearLevelFilterSelect('Sophomore')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={yearLevelFilter.Sophomore}
-                                            onChange={() => handleYearLevelFilterSelect('Sophomore')}
-                                        />
-                                        <label>2nd</label>
-                                    </div>
-                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
-                                        onClick={() => handleYearLevelFilterSelect('Junior')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={yearLevelFilter.Junior}
-                                            onChange={() => handleYearLevelFilterSelect('Junior')}
-                                        />
-                                        <label>3rd</label>
-                                    </div>
-                                    <div className='flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200'
-                                        onClick={() => handleYearLevelFilterSelect('Senior')}>
-                                        <input
-                                            type="checkbox"
-                                            checked={yearLevelFilter.Senior}
-                                            onChange={() => handleYearLevelFilterSelect('Senior')}
-                                        />
-                                        <label>4th</label>
-                                    </div>
-                                </div>
-                            ) : null}
-                            {"Select Year Level >"}
-                        </button>
-                        <div className='flex-row hover:bg-blue-200 p-2 rounded-lg '
-                             onClick={()=>handleSetOnlyPresentClick()}>
-                            <input type='checkbox' name='onlyPresent' checked={onlyPresent}  onClick={()=>setOnlyPresent(!onlyPresent)}></input>
-                            <label for="onlyPresent">Present Only</label>
-                        </div>
-
-                        <button className="hover:bg-blue-200 p-2 rounded-lg" onClick={() => setShowOrgDropDown(!showOrgDropDown)}> 
-                            {"Select Organizations >"}
-                            {showOrgDropDown? (<div className='absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-64'>
-                                    {organizations.map((org, index) => (
-                                        <div key={index} className='flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start'
-                                            onClick={() =>handleOrgFilterSelect(org)}
+                    {showFiltersDropDown && (
+                        <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2 ">
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() =>
+                                    setShowCoursesDropDown(!showCoursesDropDown)
+                                }
+                            >
+                                {showCoursesDropDown ? (
+                                    <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64 ">
+                                        <div
+                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                            onClick={() =>
+                                                handleCoursesFilterSelect('AMT')
+                                            }
                                         >
                                             <input
                                                 type="checkbox"
-                                                checked={orgsFilter[org]}
-                                                onChange={() =>handleOrgFilterSelect(org)}
+                                                checked={coursesFilter.AMT}
+                                                onChange={() =>
+                                                    handleCoursesFilterSelect(
+                                                        'AMT'
+                                                    )
+                                                }
                                             />
-                                            <label>{org}</label>
+                                            <label>AMT</label>
                                         </div>
-                                    ))}
-                                </div>) : null}
-                        </button>
-                    </div>
-                )}
+                                        <div
+                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                            onClick={() =>
+                                                handleCoursesFilterSelect(
+                                                    'AMGT'
+                                                )
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={coursesFilter.AMGT}
+                                                onChange={() =>
+                                                    handleCoursesFilterSelect(
+                                                        'AMGT'
+                                                    )
+                                                }
+                                            />
+                                            <label>AMGT</label>
+                                        </div>
+                                        <div
+                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                            onClick={() =>
+                                                handleCoursesFilterSelect('AE')
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={coursesFilter.AE}
+                                                onChange={() =>
+                                                    handleCoursesFilterSelect(
+                                                        'AE'
+                                                    )
+                                                }
+                                            />
+                                            <label>AE</label>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {'Select Courses >'}
+                            </button>
 
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() =>
+                                    setShowYearLevelDropDown(
+                                        !showYearLevelDropDown
+                                    )
+                                }
+                            >
+                                {showYearLevelDropDown ? (
+                                    <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64">
+                                        <div
+                                            className="flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onClick={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Freshman'
+                                                )
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    yearLevelFilter.Freshman
+                                                }
+                                                onChange={() =>
+                                                    handleYearLevelFilterSelect(
+                                                        'Freshman'
+                                                    )
+                                                }
+                                            />
+                                            <label>1st</label>
+                                        </div>
+                                        <div
+                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onClick={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Sophomore'
+                                                )
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    yearLevelFilter.Sophomore
+                                                }
+                                                onChange={() =>
+                                                    handleYearLevelFilterSelect(
+                                                        'Sophomore'
+                                                    )
+                                                }
+                                            />
+                                            <label>2nd</label>
+                                        </div>
+                                        <div
+                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onClick={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Junior'
+                                                )
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={yearLevelFilter.Junior}
+                                                onChange={() =>
+                                                    handleYearLevelFilterSelect(
+                                                        'Junior'
+                                                    )
+                                                }
+                                            />
+                                            <label>3rd</label>
+                                        </div>
+                                        <div
+                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onClick={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Senior'
+                                                )
+                                            }
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                checked={yearLevelFilter.Senior}
+                                                onChange={() =>
+                                                    handleYearLevelFilterSelect(
+                                                        'Senior'
+                                                    )
+                                                }
+                                            />
+                                            <label>4th</label>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {'Select Year Level >'}
+                            </button>
+                            <div
+                                className="flex-row hover:bg-blue-200 p-2 rounded-lg "
+                                onClick={() => handleSetOnlyPresentClick()}
+                            >
+                                <input
+                                    type="checkbox"
+                                    name="onlyPresent"
+                                    checked={onlyPresent}
+                                    onClick={() => setOnlyPresent(!onlyPresent)}
+                                ></input>
+                                <label for="onlyPresent">Present Only</label>
+                            </div>
+
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() =>
+                                    setShowOrgDropDown(!showOrgDropDown)
+                                }
+                            >
+                                {'Select Organizations >'}
+                                {showOrgDropDown ? (
+                                    <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-64">
+                                        {organizations.map((org, index) => (
+                                            <div
+                                                key={index}
+                                                className="flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start"
+                                                onClick={() =>
+                                                    handleOrgFilterSelect(org)
+                                                }
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={orgsFilter[org]}
+                                                    onChange={() =>
+                                                        handleOrgFilterSelect(
+                                                            org
+                                                        )
+                                                    }
+                                                />
+                                                <label>{org}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : null}
+                            </button>
                         </div>
-                        <button
-                        onClick={handleSearch}
-                        type="button"
-                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    >
-                        Display All
-                    </button>
+                    )}
+                </div>
+                <button
+                    onClick={handleSearch}
+                    type="button"
+                    className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                >
+                    Display All
+                </button>
 
-                    <button
-                        onClick={handleCommitteeOnly}
-                        type="button"
-                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    >
-                        Only List Committee
-                    </button>
+                <button
+                    onClick={handleCommitteeOnly}
+                    type="button"
+                    className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                >
+                    Only List Committee
+                </button>
             </div>
 
             <div className="w-[100%] overflow-x-auto overflow-y-auto shadow-md flex flex-col justify-center items-center">
@@ -894,10 +1038,15 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
                                   >
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {(idx + 1) + ((currentPage - 1) * itemsPerPage)}
+                                          {idx +
+                                              1 +
+                                              (currentPage - 1) * itemsPerPage}
                                       </td>
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.organization} {entry.position? `: ${entry.position}`: null}
+                                          {entry.organization}{' '}
+                                          {entry.position
+                                              ? `: ${entry.position}`
+                                              : null}
                                       </td>
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                           {entry.name}
@@ -927,9 +1076,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                           ''
                                       )}
 
-                                        {showPaid ? (
+                                      {showPaid ? (
                                           <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.amount > 0 ? entry.amount : '❌'}
+                                              {entry.amount > 0
+                                                  ? entry.amount
+                                                  : '❌'}
                                           </td>
                                       ) : (
                                           ''
@@ -972,7 +1123,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                                       {sig === true && (
                                           <td className="px-1 py-1 whitespace-nowrap ">
-                                              {entry.signature && entry.timeIn? (
+                                              {entry.signature &&
+                                              entry.timeIn ? (
                                                   showSig ? (
                                                       <img
                                                           onClick={() =>
@@ -993,7 +1145,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                                   )
                                               ) : (
                                                   <span className="text-xs font-light italic">
-                                                      {entry.timeIn? 'Present, No Sig.': 'Absent'}
+                                                      {entry.timeIn
+                                                          ? 'Present, No Sig.'
+                                                          : 'Absent'}
                                                   </span>
                                               )}
                                           </td>
@@ -1008,7 +1162,6 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   </tr>
                               ))
                             : ''}
-                            
                     </tbody>
                 </table>
                 {isLoading && (
@@ -1029,13 +1182,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </div>
                 )}
 
-            {!isLoading && currentDataToDisplay.length < 1 && (
+                {!isLoading && currentDataToDisplay.length < 1 && (
                     <div className="flex flex-col items-center justify-center h-96 bg-white p-5 w-[80%] mt-4 rounded-lg">
-                        
-                        <p className="mt-2 text-sm">
-                            No members to Show.
-                        </p>
-                       
+                        <p className="mt-2 text-sm">No members to Show.</p>
                     </div>
                 )}
             </div>
@@ -1241,7 +1390,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   )}
                                   {showRemarks ? (
                                       <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.remarks}
+                                          {entry.remarks
+                                              .split('\n')
+                                              .map((line, index) => (
+                                                  <span key={index}>
+                                                      {line}
+                                                      <br />
+                                                  </span>
+                                              ))}
                                       </td>
                                   ) : (
                                       ''
