@@ -835,6 +835,9 @@ router.post('/add', (req, res) => {
         timeOut,
     } = req.body;
     //console.log(req.body)
+    if (!name || name === '') {
+        return res.status(400).json({ error: 'No Name' });
+    }
     const query = `INSERT INTO members (name, email, year, course, regular, remarks, organization, timeIn, timeOut)
     VALUES (?,?,?,?,?,?,?,?, ?);
     `;

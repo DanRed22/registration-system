@@ -71,6 +71,10 @@ const AddModal = ({ hide }) => {
     };
 
     const handleSubmit = async () => {
+        if (!name || name === '') {
+            alert('No name is inputted');
+            return;
+        }
         const response = await axios.post(`${API}add`, {
             name: name,
             email: email,
