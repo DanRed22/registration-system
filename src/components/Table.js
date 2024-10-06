@@ -9,6 +9,7 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import SignatureModal from './SignatureModal';
 import ShowSignatureModal from './ShowSignatureModal';
 import EditModal from './EditModal';
+import config from '../configuration';
 
 const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [search, setSearch] = useState('');
@@ -25,6 +26,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [showUserSig, setShowUserSig] = useState(false);
     const [imageSrc, setImageSrc] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [isEditing2, setIsEditing2] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [edit, setEdit] = useState(null);
     const hideRemarksModal = () => {
@@ -32,9 +34,13 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     };
     const [editingEntryId, setEditingEntryId] = useState(null);
     const [amountInput, setAmountInput] = useState('');
+    const [amountInput2, setAmountInput2] = useState('');
 
     const handleAmountInputChange = (e) => {
         setAmountInput(e.target.value);
+    };
+    const handleAmountInput2Change = (e) => {
+        setAmountInput2(e.target.value);
     };
 
     const [show, setShow] = useState({
@@ -47,6 +53,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         remarks: true, //aka medical disclosure
         signature: true,
         amount: true,
+        amount_2: true,
     });
 
     const handleFilterClick = (name) => {
@@ -76,16 +83,48 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         setEditingEntryId(entry.id);
         setAmountInput(entry.amount);
         setIsEditing(true); // Set editing mode to true
+        setIsEditing2(false);
+    };
+
+    const handleAmount2Click = (entry) => {
+        setEditingEntryId(entry.id);
+        setAmountInput(entry.amount_2);
+        setIsEditing2(true); // Set editing mode to true
+        setIsEditing(false);
     };
 
     const handleAmountSave = async (entry) => {
-        await handleUpdate(entry.id, amountInput); // Call your existing update function
+        await handleUpdateAmount(entry.id, amountInput); // Call your existing update function
         setEditingEntryId(null); // Reset editing entry
         setIsEditing(false); // Exit editing mode
     };
 
-    const handleUpdate = async (id, amount) => {
-        console.log(id, amount);
+    const handleAmount2Save = async (entry) => {
+        await handleUpdateAmount2(entry.id, amountInput2); // Call your existing update function
+        setEditingEntryId(null); // Reset editing entry
+        setIsEditing2(false); // Exit editing mode
+    };
+
+    const handleUpdateAmount2 = async (id, amount) => {
+        setIsEditing2(false);
+        try {
+            await axios.post(`${API}setPaidAmount2`, {
+                id: id,
+                paid_amount: amount,
+            });
+            showNotif(true);
+            setMessage(`Successfully set amount`);
+            handleSearch();
+        } catch (error) {
+            showNotif(true);
+            setMessage(`Error: ${error.message}`);
+        } finally {
+            setEditingEntryId(null);
+            setAmountInput2(null);
+        }
+    };
+
+    const handleUpdateAmount = async (id, amount) => {
         setIsEditing(false);
         try {
             await axios.post(`${API}setPaidAmount`, {
@@ -98,6 +137,9 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         } catch (error) {
             showNotif(true);
             setMessage(`Error: ${error.message}`);
+        } finally {
+            setEditingEntryId(null);
+            setAmountInput(null);
         }
     };
 
@@ -129,6 +171,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                         searchTerm: search,
                     },
                 });
+                console.log(response.data);
                 setData(response.data);
                 setIsLoading(false);
             } catch (error) {
@@ -393,7 +436,17 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                     scope="col"
                                     className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                 >
-                                    Amount
+                                    {config.amount_1_name}
+                                </th>
+                            ) : (
+                                ''
+                            )}
+                            {show.amount_2 ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    {config.amount_2_name}
                                 </th>
                             ) : (
                                 ''
@@ -487,30 +540,49 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         )}
                                         {show.amount && (
                                             <td className="px-1 py-1 whitespace-nowrap">
-                                                {editingEntryId === entry.id ? (
-                                                    <input
-                                                        type="number"
-                                                        value={amountInput}
-                                                        onChange={
-                                                            handleAmountInputChange
-                                                        }
-                                                        onBlur={() =>
-                                                            handleAmountSave(
-                                                                entry
-                                                            )
-                                                        }
-                                                        onKeyPress={(e) => {
-                                                            if (
-                                                                e.key ===
-                                                                'Enter'
-                                                            ) {
+                                                {isEditing &&
+                                                editingEntryId === entry.id ? (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={amountInput}
+                                                            onChange={
+                                                                handleAmountInputChange
+                                                            }
+                                                            onBlur={() =>
                                                                 handleAmountSave(
                                                                     entry
-                                                                );
+                                                                )
                                                             }
-                                                        }}
-                                                        className="border rounded p-1"
-                                                    />
+                                                            onKeyDown={(e) => {
+                                                                if (
+                                                                    e.key ===
+                                                                    'Enter'
+                                                                ) {
+                                                                    handleAmountSave(
+                                                                        entry
+                                                                    );
+                                                                }
+
+                                                                if (
+                                                                    e.key ===
+                                                                    'Escape'
+                                                                ) {
+                                                                    setIsEditing(
+                                                                        false
+                                                                    );
+                                                                    setEditingEntryId(
+                                                                        null
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className="border rounded p-1"
+                                                        />
+                                                        <p>
+                                                            Press 'ESC' to
+                                                            Cancel
+                                                        </p>
+                                                    </>
                                                 ) : (
                                                     <button
                                                         onClick={() =>
@@ -518,10 +590,70 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                                                 entry
                                                             )
                                                         }
-                                                        className={`${entry.paid ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
+                                                        className={`${entry.amount ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
                                                     >
-                                                        {entry.paid
+                                                        {entry.amount
                                                             ? `₱ ${entry.amount}`
+                                                            : 'Not Paid'}
+                                                    </button>
+                                                )}
+                                            </td>
+                                        )}
+                                        {show.amount_2 && (
+                                            <td className="px-1 py-1 whitespace-nowrap">
+                                                {isEditing2 &&
+                                                editingEntryId === entry.id ? (
+                                                    <>
+                                                        <input
+                                                            type="number"
+                                                            value={amountInput2}
+                                                            onChange={
+                                                                handleAmountInput2Change
+                                                            }
+                                                            onBlur={() =>
+                                                                handleAmount2Save(
+                                                                    entry
+                                                                )
+                                                            }
+                                                            onKeyDown={(e) => {
+                                                                if (
+                                                                    e.key ===
+                                                                    'Enter'
+                                                                ) {
+                                                                    handleAmount2Save(
+                                                                        entry
+                                                                    );
+                                                                }
+                                                                if (
+                                                                    e.key ===
+                                                                    'Escape'
+                                                                ) {
+                                                                    setIsEditing2(
+                                                                        false
+                                                                    );
+                                                                    setEditingEntryId(
+                                                                        null
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className="border rounded p-1"
+                                                        />
+                                                        <p>
+                                                            Press 'ESC' to
+                                                            Cancel
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleAmount2Click(
+                                                                entry
+                                                            )
+                                                        }
+                                                        className={`${entry.amount_2 ? 'bg-green-700' : 'bg-red-700'} text-white p-2 rounded-lg hover:shadow-xl`}
+                                                    >
+                                                        {entry.amount_2
+                                                            ? `₱ ${entry.amount_2}`
                                                             : 'Not Paid'}
                                                     </button>
                                                 )}

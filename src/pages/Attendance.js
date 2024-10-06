@@ -18,6 +18,11 @@ export const Attendance = () => {
         totalAmountPaid: 0,
         totalNotYetPaid: 0,
     });
+    const [paymentData2, setPaymentData2] = useState({
+        totalPaid: 0,
+        totalAmountPaid: 0,
+        totalNotYetPaid: 0,
+    });
     const [data, setData] = useState({
         present: '100',
         absent: '50',
@@ -32,9 +37,16 @@ export const Attendance = () => {
     const refreshStatus = async () => {
         const response = await axios.get(`${API}status`);
         const paymentData = await axios.get(`${API}paymentTotal`);
-        if (response.status == 200 && paymentData.status == 200) {
+        if (response.status === 200 && paymentData.status === 200) {
             setData(response.data);
             setPaymentData(paymentData.data);
+        } else {
+            setMessage('Error Connecting to Database!');
+            setShowNotif(true);
+        }
+        const data = await axios.get(`${API}paymentTotal2`);
+        if (response.status === 200 && data.status === 200) {
+            setPaymentData2(data.data);
         } else {
             setMessage('Error Connecting to Database!');
             setShowNotif(true);
@@ -86,59 +98,79 @@ export const Attendance = () => {
                 ) : (
                     ''
                 )}
-                <div className="mt-10 p-2 border border-solid rounded-lg border-white z-0 overflow-auto">
-                    <div className="flex flex-row w-[30rem]">
-                        <div className="w-1/3 my-2 items-center text-start">
-                            <p className="text-white mr-4">
-                                Present: {data.present}
-                            </p>
-                            <p className="text-white mr-4">
-                                Absent: {data.absent}
-                            </p>
-                            <p className="text-white mr-4">
-                                Total: {data.total}
-                            </p>
-                        </div>
-                        <div className="w-1/3 my-2 items-center text-start">
-                            <p className="text-white mr-4">
-                                Total Paid:{' '}
-                                <b>
-                                    {showTotalPaid
-                                        ? paymentData.totalPaid
-                                        : '-------'}
-                                </b>
-                            </p>
-                            <p className="text-white mr-4">
-                                Total Amount Paid: PHP{' '}
-                                <b>
-                                    {showTotalPaid
-                                        ? paymentData.totalAmountPaid
-                                        : '--------'}
-                                </b>
-                            </p>
-                        </div>
-                        <div className="flex flex-col w-1/4 justify-end space-y-2">
-                            <button
-                                type="button"
-                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
-                                onClick={() => setShowTotalPaid(!showTotalPaid)}
-                            >
-                                {showTotalPaid ? 'Hide' : 'Show'}
-                            </button>
-                            <button
-                                type="button"
-                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
-                                onClick={ExportPreview}
-                            >
-                                Export
-                            </button>
 
-                            {
-                                //this is hidden so the export capabilities will not be abused since it can significantly slow down the server
-                            }
-                        </div>
+                <div className="border border-white p-4 rounded-lg flex flex-row md:[40rem] lg:w-[60rem]">
+                    <div className="w-1/4 my-2 items-center text-start">
+                        <p className="text-white mr-4">
+                            Present: {data.present}
+                        </p>
+                        <p className="text-white mr-4">Absent: {data.absent}</p>
+                        <p className="text-white mr-4">Total: {data.total}</p>
+                    </div>
+                    <div className="flex flex-col w-1/4 my-2 items-start justify-start">
+                        <p className="text-white font-bold">
+                            {config.amount_1_name}
+                        </p>
+                        <p className="text-white">
+                            Total Paid:{' '}
+                            <b>
+                                {showTotalPaid
+                                    ? paymentData.totalPaid
+                                    : '-------'}
+                            </b>
+                        </p>
+                        <p className="text-white">
+                            Total Amount Paid: PHP <br />
+                            <b>
+                                {showTotalPaid
+                                    ? paymentData.totalAmountPaid
+                                    : '--------'}
+                            </b>
+                        </p>
+                    </div>
+                    <div className="flex flex-col w-1/4 justify-start items-start">
+                        <p className="text-white font-bold">
+                            {config.amount_2_name}
+                        </p>
+                        <p className="text-white">
+                            Total Paid:{' '}
+                            <b>
+                                {showTotalPaid
+                                    ? paymentData2.totalPaid
+                                    : '-------'}
+                            </b>
+                        </p>
+                        <p className="text-white mr-4">
+                            Total Amount Paid: PHP <br />
+                            <b>
+                                {showTotalPaid
+                                    ? paymentData2.totalAmountPaid
+                                    : '--------'}
+                            </b>
+                        </p>
+                    </div>
+                    <div className="flex flex-col w-1/4 justify-end space-y-2">
+                        <button
+                            type="button"
+                            className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                            onClick={() => setShowTotalPaid(!showTotalPaid)}
+                        >
+                            {showTotalPaid ? 'Hide' : 'Show'}
+                        </button>
+                        <button
+                            type="button"
+                            className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                            onClick={ExportPreview}
+                        >
+                            Export
+                        </button>
+
+                        {
+                            //this is hidden so the export capabilities will not be abused since it can significantly slow down the server
+                        }
                     </div>
                 </div>
+
                 <Table
                     setShowAddModal={setShowAddModal}
                     showAddModal={showAddModal}

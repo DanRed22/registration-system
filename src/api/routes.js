@@ -131,8 +131,9 @@ router.put('/editMember', async (req, res) => {
         remarks,
         timeIn,
         timeOut,
+        amount,
+        amount_2,
     } = req.body;
-
     try {
         console.log(req.body);
         const updatedMember = await prisma.members.update({
@@ -147,6 +148,8 @@ router.put('/editMember', async (req, res) => {
                 remarks,
                 timeIn,
                 timeOut,
+                amount: !parseInt(amount) ? parseInt(amount) : null,
+                amount_2: !parseInt(amount_2) ? parseInt(amount_2) : null,
             },
         });
         console.log('UPDATED MEMBER', updatedMember);
@@ -492,31 +495,45 @@ router.post('/clear-signature', (req, res) => {
     });
 });
 
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
     const searchTerm = req.query.searchTerm;
-    // Construct the SQL query with the LIKE operator
-    const SQLquery =
-        'SELECT * FROM members WHERE name LIKE ? OR email LIKE ? OR organization LIKE ? LIMIT 15';
 
-    // Prepare the values for the LIKE operator
-    const searchValue = `%${searchTerm}%`;
+    try {
+        const members = await prisma.members.findMany({
+            where: {
+                OR: [
+                    {
+                        name: {
+                            contains: searchTerm.toLowerCase(),
+                        },
+                    },
+                    {
+                        email: {
+                            contains: searchTerm.toLowerCase(),
+                        },
+                    },
+                    {
+                        organization: {
+                            contains: searchTerm.toLowerCase(),
+                        },
+                    },
+                ],
+            },
+            take: 15, // Limit the results to 15
+        });
 
-    // Execute the query
-    pool.query(
-        SQLquery,
-        [searchValue, searchValue, searchValue],
-        (err, results) => {
-            if (err) {
-                console.error('Error executing database query:', err);
-                return res
-                    .status(500)
-                    .send({ message: 'Failed to execute database query' });
-            }
-
-            // Send the results back as a response
-            res.status(200).send(results);
-        }
-    );
+        // Send the results back as a response
+        const sanitizedMembers = members.map((member) => ({
+            ...member,
+            id: member.id.toString(), // Sanitize BigInt ID to string
+        }));
+        res.status(200).send(sanitizedMembers);
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        return res
+            .status(500)
+            .send({ message: 'Failed to execute database query' });
+    }
 });
 
 router.post('/claim', (req, res) => {
@@ -677,6 +694,33 @@ router.post('/setPaidAmount', async (req, res) => {
     }
 });
 
+router.post('/setPaidAmount2', async (req, res) => {
+    const { id, paid_amount } = req.body;
+
+    if (!id || paid_amount === undefined) {
+        return res.status(400).json({ message: 'Missing id or paid_amount' });
+    }
+
+    try {
+        const response = await prisma.members.update({
+            where: {
+                id: id,
+            },
+            data: {
+                paid_2: paid_amount > 0 ? true : false,
+                amount_2: parseInt(paid_amount) || null,
+            },
+        });
+        res.status(200).json({
+            message: `Updated Payment Amount to ${paid_amount}`,
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    } finally {
+        prisma.$disconnect();
+    }
+});
+
 router.get('/paymentTotal', async (req, res) => {
     try {
         const totalPaid = await prisma.members.count({
@@ -702,6 +746,39 @@ router.get('/paymentTotal', async (req, res) => {
             totalAmountPaid:
                 totalAmountPaid._sum.amount != null
                     ? totalAmountPaid._sum.amount
+                    : 0,
+            totalNotYetPaid: totalNotYetPaid,
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get('/paymentTotal2', async (req, res) => {
+    try {
+        const totalPaid = await prisma.members.count({
+            where: {
+                paid_2: true,
+            },
+        });
+        const totalAmountPaid = await prisma.members.aggregate({
+            _sum: {
+                amount_2: true,
+            },
+            where: {
+                paid_2: true,
+            },
+        });
+        const totalNotYetPaid = await prisma.members.count({
+            where: {
+                paid_2: false,
+            },
+        });
+        res.status(200).json({
+            totalPaid: totalPaid,
+            totalAmountPaid:
+                totalAmountPaid._sum.amount_2 != null
+                    ? totalAmountPaid._sum.amount_2
                     : 0,
             totalNotYetPaid: totalNotYetPaid,
         });

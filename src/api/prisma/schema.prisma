@@ -21,6 +21,8 @@ model members {
   remarks          String?  @db.Text
   signature        String?  @db.Text
   paid             Boolean  @default(false)
+  paid_2           Boolean  @default(false)
   amount           Int      @default(0)
+  amount_2         Int?
   isEventCommittee Boolean  @default(false)
 }

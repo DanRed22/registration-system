@@ -43,6 +43,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showFiltersDropDown, setShowFiltersDropDown] = useState(false);
     const [showYearLevelDropDown, setShowYearLevelDropDown] = useState(false);
     const [showPaid, setShowPaid] = useState(true);
+    const [showPaid2, setShowPaid2] = useState(true);
     const [showTimeOut, setShowTimeOut] = useState(true);
 
     //SelectedRecord
@@ -478,14 +479,6 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </button>
 
                     <button
-                        onClick={goHome}
-                        type="button"
-                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
-                    >
-                        Go Home
-                    </button>
-
-                    <button
                         onClick={exportTableToPDF}
                         type="button"
                         className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
@@ -603,12 +596,23 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <div className="flex items-center mb-2">
                                 <input
                                     type="checkbox"
-                                    name="show-prog"
+                                    name="show-amount"
                                     checked={showPaid}
                                     onClick={() => setShowPaid(!showPaid)}
                                 />
-                                <label htmlFor="show-prog" className="ml-2">
-                                    Show Paid
+                                <label htmlFor="show-amount" className="ml-2">
+                                    {'Show ' + config.amount_1_name}
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="show-amount2"
+                                    checked={showPaid2}
+                                    onClick={() => setShowPaid2(!showPaid2)}
+                                />
+                                <label htmlFor="show-amount2" className="ml-2">
+                                    {'Show ' + config.amount_2_name}
                                 </label>
                             </div>
                             <div className="flex items-center mb-2">
@@ -1106,7 +1110,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     scope="col"
                                     className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                 >
-                                    Paid
+                                    {config.amount_1_name}
+                                </th>
+                            ) : (
+                                ''
+                            )}
+                            {showPaid2 ? (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    {config.amount_2_name}
                                 </th>
                             ) : (
                                 ''
@@ -1199,6 +1213,18 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                           <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                               {entry.amount > 0
                                                   ? entry.amount
+                                                  : '❌'}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+
+                                      {showPaid2 ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.amount_2 !== '' &&
+                                              entry.amount_2 &&
+                                              entry.amount_2 > 0
+                                                  ? entry.amount_2
                                                   : '❌'}
                                           </td>
                                       ) : (
@@ -1381,6 +1407,26 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         ) : (
                             ''
                         )}
+                        {showPaid ? (
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {config.amount_1_name}
+                            </th>
+                        ) : (
+                            ''
+                        )}
+                        {showPaid2 ? (
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                {config.amount_2_name}
+                            </th>
+                        ) : (
+                            ''
+                        )}
                         <th
                             scope="col"
                             className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
@@ -1454,7 +1500,25 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   )}
                                   {showRegular ? (
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.regular ? '✅' : '❌'}
+                                          {entry.regular ? 'YES' : 'NO'}
+                                      </td>
+                                  ) : (
+                                      ''
+                                  )}
+                                  {showPaid ? (
+                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                          {entry.amount && entry.amount > 0
+                                              ? entry.amount
+                                              : 0}
+                                      </td>
+                                  ) : (
+                                      ''
+                                  )}
+                                  {showPaid2 ? (
+                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                          {entry.amount_2 && entry.amount_2 > 0
+                                              ? entry.amount_2
+                                              : 0}
                                       </td>
                                   ) : (
                                       ''

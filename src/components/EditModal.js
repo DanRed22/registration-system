@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaWindowClose } from 'react-icons/fa';
 import API from '../components/Config';
+import config from '../configuration';
 
 const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
     const [name, setName] = useState('');
@@ -17,6 +18,8 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
     const [showOrganizationDropDown, setShowOrganizationDropDown] =
         useState(false);
     const [showYearDropDown, setShowYearDropDown] = useState(false);
+    const [amount, setAmount] = useState(null);
+    const [amount_2, setAmount_2] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -37,6 +40,8 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                 setRemarks(data.remarks);
                 setTimeIn(data.timeIn);
                 setTimeOut(data.timeOut);
+                setAmount(data.amount);
+                setAmount_2(data.amount_2);
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
@@ -82,6 +87,8 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                 remarks,
                 timeIn,
                 timeOut,
+                amount,
+                amount_2,
             });
             if (response) {
                 alert(response.data.message);
@@ -229,6 +236,38 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                     </button>
                                 </div>
                             )}
+                        </div>
+                        <div className="flex flex-col mt-2">
+                            <label
+                                for="amount"
+                                class="block mb-2 text-sm font-medium  text-white"
+                            >
+                                {config.amount_1_name}
+                            </label>
+                            <input
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                type="number"
+                                id="amount"
+                                class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black "
+                                placeholder="100"
+                            />
+                        </div>
+                        <div className="mt-2 flex flex-col">
+                            <label
+                                for="amount_2"
+                                class="block mb-2 text-sm font-medium  text-white"
+                            >
+                                {config.amount_2_name}
+                            </label>
+                            <input
+                                value={amount_2}
+                                onChange={(e) => setAmount_2(e.target.value)}
+                                type="number"
+                                id="amount_2"
+                                class="bg-gray-50 border border-gray-300  text-sm rounded-lg  block w-full p-2.5  placeholder-gray-400 text-black "
+                                placeholder="100"
+                            />
                         </div>
                     </div>
 
