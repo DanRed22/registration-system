@@ -2,17 +2,22 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaWindowClose } from 'react-icons/fa';
 import API from '../components/Config';
+import { Oval } from 'react-loader-spinner';
 
 const AddModal = ({ hide }) => {
     const [name, setName] = useState('');
     const [course, setCourse] = useState('');
     const [email, setEmail] = useState('');
-    const [year, setYear] = useState('');
+    const [year, setYear] = useState(null);
     const [regular, setRegular] = useState(true);
     const [organization, setOrganization] = useState('NONE');
     const [remarks, setRemarks] = useState('');
     const [timeIn, setTimeIn] = useState('');
     const [timeOut, setTimeOut] = useState('');
+    const [amount, setAmount] = useState(0);
+    const [amount2, setAmount2] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isNameTaken, setIsNameTaken] = useState(false);
     const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
     const [showOrganizationDropDown, setShowOrganizationDropDown] =
         useState(false);
@@ -24,6 +29,12 @@ const AddModal = ({ hide }) => {
 
     const handleNameChange = (e) => {
         setName(e.target.value);
+        checkNameTaken(e.target.value);
+    };
+
+    const checkNameTaken = async (name) => {
+        const response = await axios.get(`${API}is-name-taken?name=${name}`);
+        setIsNameTaken(response.data.isTaken);
     };
 
     const handleCourseChange = (name) => {
@@ -40,6 +51,32 @@ const AddModal = ({ hide }) => {
     const handleYearChange = (number) => {
         setYear(number);
         setShowYearDropDown(false);
+    };
+
+    const handleAmountChange = (e) => {
+        if (
+            e.target.value === '' ||
+            e.target.value === null ||
+            e.target.value === undefined ||
+            isNaN(e.target.value)
+        ) {
+            setAmount(0);
+        } else {
+            setAmount(e.target.value);
+        }
+    };
+
+    const handleAmount2Change = (e) => {
+        if (
+            e.target.value === '' ||
+            e.target.value === null ||
+            e.target.value === undefined ||
+            isNaN(e.target.value)
+        ) {
+            setAmount2(0);
+        } else {
+            setAmount2(e.target.value);
+        }
     };
 
     const handleTimeInChange = () => {
@@ -71,9 +108,13 @@ const AddModal = ({ hide }) => {
     };
 
     const handleSubmit = async () => {
+        setIsLoading(true);
         if (!name || name === '') {
             alert('No name is inputted');
             return;
+        }
+        if (!year || year === '') {
+            setYear(null);
         }
         const response = await axios.post(`${API}add`, {
             name: name,
@@ -85,19 +126,25 @@ const AddModal = ({ hide }) => {
             remarks: remarks,
             timeIn: timeIn,
             timeOut: timeOut,
+            amount: parseInt(amount),
+            amount_2: parseInt(amount2),
         });
         if (response) {
             alert(response.data.message);
+            setIsLoading(false);
         }
         setEmail('');
         setName('');
         setCourse('');
-        setYear('');
+        setYear(null);
         setOrganization('Normal');
         setRegular(true);
         setRemarks('');
         setTimeIn('');
         setTimeOut('');
+        setAmount(0);
+        setAmount2(0);
+        setIsLoading(false);
         hide();
     };
 
@@ -125,6 +172,11 @@ const AddModal = ({ hide }) => {
                             >
                                 Full Name
                             </label>
+                            {isNameTaken && (
+                                <p className="text-red-500 text-sm my-2">
+                                    Warning: Member already exists!
+                                </p>
+                            )}
                             <input
                                 value={name}
                                 onChange={handleNameChange}
@@ -241,6 +293,41 @@ const AddModal = ({ hide }) => {
                                         </button>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                        <div className="grid gap-6 mb-6 md:grid-cols-2">
+                            {/* ... existing input fields ... */}
+                            <div>
+                                <label
+                                    htmlFor="amount"
+                                    className="block mb-2 text-sm font-medium text-white"
+                                >
+                                    Amount
+                                </label>
+                                <input
+                                    value={amount}
+                                    onChange={handleAmountChange}
+                                    type="number"
+                                    id="amount"
+                                    className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 text-black"
+                                    placeholder="Enter amount"
+                                />
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor="amount_2"
+                                    className="block mb-2 text-sm font-medium text-white"
+                                >
+                                    Amount 2
+                                </label>
+                                <input
+                                    value={amount2}
+                                    onChange={handleAmount2Change}
+                                    type="number"
+                                    id="amount_2"
+                                    className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 placeholder-gray-400 text-black"
+                                    placeholder="Enter amount 2"
+                                />
                             </div>
                         </div>
 
@@ -437,6 +524,12 @@ const AddModal = ({ hide }) => {
                         class="w-[12rem] transition duration-200 focus:outline-none text-black hover:text-white bg-green-400 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
                         Add Attendee
+                        <Oval
+                            visible={isLoading}
+                            height={20}
+                            width={20}
+                            color="#000000"
+                        />
                     </button>
                 </div>
             </div>

@@ -148,8 +148,10 @@ router.put('/editMember', async (req, res) => {
                 remarks,
                 timeIn,
                 timeOut,
-                amount: !parseInt(amount) ? parseInt(amount) : null,
-                amount_2: !parseInt(amount_2) ? parseInt(amount_2) : null,
+                amount: !isNaN(parseInt(amount)) ? parseInt(amount) : null,
+                amount_2: !isNaN(parseInt(amount_2))
+                    ? parseInt(amount_2)
+                    : null,
             },
         });
         console.log('UPDATED MEMBER', updatedMember);
@@ -176,6 +178,7 @@ router.get('/searchFiltered', async (req, res) => {
         searchParams,
         orderName,
         paidFilter,
+        paidFilter2,
     } = req.query;
 
     console.log({
@@ -186,6 +189,7 @@ router.get('/searchFiltered', async (req, res) => {
         orgsFilter,
         orderName,
         paidFilter,
+        paidFilter2,
     });
 
     const courseFilters = JSON.parse(coursesFilter);
@@ -238,14 +242,52 @@ router.get('/searchFiltered', async (req, res) => {
                               ],
                           }
                         : null,
+
+                    paidFilter === 'PAID' &&
+                    (paidFilter2 === 'OFF' || paidFilter2 === 'ALL')
+                        ? { paid: true }
+                        : null,
+
+                    paidFilter2 === 'PAID' &&
+                    (paidFilter === 'OFF' || paidFilter === 'ALL')
+                        ? { paid_2: true }
+                        : null,
+
+                    paidFilter === 'UNPAID' &&
+                    (paidFilter2 === 'OFF' || paidFilter2 === 'ALL')
+                        ? { paid: false }
+                        : null,
+
+                    paidFilter2 === 'UNPAID' &&
+                    (paidFilter === 'OFF' || paidFilter === 'ALL')
+                        ? { paid_2: false }
+                        : null,
+
                     // Presence filter (if applicable)
                     isOnlyPresent ? { timeIn: { not: null } } : null,
                     // Paid filter logic
-                    !paidFilter || paidFilter === 'ALL'
-                        ? null
-                        : paidFilter === 'UNPAID'
-                          ? { paid: false } // Only unpaid
-                          : { paid: true }, // Only paid
+                    paidFilter === 'PAID' && paidFilter2 === 'PAID'
+                        ? {
+                              AND: [
+                                  { paid: true }, // Only paid for amount
+                                  { paid_2: true }, // Only paid for amount_2
+                              ],
+                          }
+                        : null,
+
+                    paidFilter === 'UNPAID' && paidFilter2 === 'UNPAID'
+                        ? {
+                              AND: [{ paid: false }, { paid_2: false }],
+                          }
+                        : null,
+
+                    paidFilter === 'PAID' && paidFilter2 === 'UNPAID'
+                        ? { AND: [{ paid: true }, { paid_2: false }] }
+                        : null,
+
+                    paidFilter === 'UNPAID' && paidFilter2 === 'PAID'
+                        ? { AND: [{ paid: false }, { paid_2: true }] }
+                        : null,
                 ].filter(Boolean),
             },
             orderBy: {
@@ -822,7 +864,17 @@ router.post('/update-remarks', (req, res) => {
     });
 });
 
-router.post('/add', (req, res) => {
+router.get('/is-name-taken', async (req, res) => {
+    const { name } = req.query;
+    const isTaken = await prisma.members.findFirst({
+        where: {
+            name: name.toLowerCase(),
+        },
+    });
+    res.status(200).json({ isTaken: isTaken ? true : false });
+});
+
+router.post('/add', async (req, res) => {
     const {
         name,
         email,
@@ -833,40 +885,42 @@ router.post('/add', (req, res) => {
         organization,
         timeIn,
         timeOut,
+        amount,
+        amount_2,
     } = req.body;
     //console.log(req.body)
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    await delay(2000);
     if (!name || name === '') {
         return res.status(400).json({ error: 'No Name' });
     }
-    const query = `INSERT INTO members (name, email, year, course, regular, remarks, organization, timeIn, timeOut)
-    VALUES (?,?,?,?,?,?,?,?, ?);
-    `;
 
     const timeInValue = timeIn || null;
     const timeOutValue = timeOut || null;
 
-    pool.query(
-        query,
-        [
-            name,
-            email,
-            year,
-            course,
-            regular,
-            remarks,
-            organization,
-            timeInValue,
-            timeOutValue,
-        ],
-        (err, result) => {
-            if (err) {
-                console.error('Error Adding Record!', err);
-                res.status(400).json({ error: 'Bad Request' });
-            } else {
-                res.status(200).json({ message: 'Added Record' });
-            }
-        }
-    );
+    prisma.members
+        .create({
+            data: {
+                name,
+                email,
+                year,
+                course,
+                regular,
+                remarks,
+                organization,
+                timeIn: timeInValue,
+                timeOut: timeOutValue,
+                amount,
+                amount_2,
+            },
+        })
+        .then(() => {
+            res.status(200).json({ message: 'Added Record' });
+        })
+        .catch((err) => {
+            console.error('Error Adding Record!', err);
+            res.status(400).json({ error: 'Bad Request' });
+        });
 });
 
 router.post('/reset-all-time', (req, res) => {

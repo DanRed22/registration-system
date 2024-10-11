@@ -13,6 +13,7 @@ import ExportMatTableToCSV from './ExportMatTableToCSV';
 import config from '../configuration';
 import ConfirmationResetModal from './ConfirmationResetModal';
 import { debounce } from 'lodash';
+import PaymentFilter from './dropdowns/PaymentFilter';
 const ViewTable = ({ showNotif, setMessage }) => {
     const filePath = '/signatures/';
     const [search, setSearch] = useState('');
@@ -74,8 +75,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [onlyPresent, setOnlyPresent] = useState(false);
     const [orderBy, setOrderBy] = useState('asc');
     const [showOrgDropDown, setShowOrgDropDown] = useState(false);
-    const [paidFilter, setPaidFilter] = useState('ALL'); //ALL, PAID, UNPAID
+    const [paidFilter, setPaidFilter] = useState('OFF'); //ALL, PAID, UNPAID
+    const [paymentFilter2, setPaymentFilter2] = useState('OFF'); //ALL, PAID, UNPAID
     const [showPaidDropDown, setShowPaidDropDown] = useState(false);
+    const [showPaid2DropDown, setShowPaid2DropDown] = useState(false);
     const [showOrg, setShowOrg] = useState(false);
 
     const toggleOrder = () => {
@@ -320,6 +323,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     orgsFilter: JSON.stringify(orgsFilter),
                     onlyPresent: onlyPresent,
                     paidFilter: paidFilter,
+                    paidFilter2: paymentFilter2,
                     searchParams: search,
                     orderName: orderBy,
                 },
@@ -344,6 +348,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orderBy,
         orgsFilter,
         paidFilter,
+        paymentFilter2,
     ]);
 
     const handleExportCSV = () => {
@@ -392,11 +397,8 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orderBy,
         orgsFilter,
         paidFilter,
+        paymentFilter2,
     ]); // Separate the filters and order logic from search input
-
-    const handlePaidFilter = (value) => {
-        setPaidFilter(value);
-    };
 
     // Close the dropdowns when clicking outside
     useEffect(() => {
@@ -903,32 +905,32 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     setShowPaidDropDown(!showPaidDropDown)
                                 }
                             >
-                                Payment Filter &gt;
+                                {config.amount_1_name} Filter &gt;
                             </button>
                             {showPaidDropDown && (
-                                <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-[35rem] space-x-4">
-                                    <button
-                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'PAID' ? 'bg-green-600 text-white' : ''}`}
-                                        onClick={() => handlePaidFilter('PAID')}
-                                    >
-                                        Show Paid
-                                    </button>
-                                    <button
-                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'UNPAID' ? 'bg-green-600 text-white' : ''}`}
-                                        onClick={() =>
-                                            handlePaidFilter('UNPAID')
-                                        }
-                                    >
-                                        Show Unpaid
-                                    </button>
-                                    <button
-                                        className={`border border-black hover:bg-blue-200 p-2 rounded-lg duration-100 ${paidFilter === 'ALL' || paidFilter === null || paidFilter === undefined || paidFilter === '' ? 'bg-green-600 text-white' : ''}`}
-                                        onClick={() => handlePaidFilter('ALL')}
-                                    >
-                                        Show All
-                                    </button>
-                                </div>
+                                <PaymentFilter
+                                    paymentFilter={paidFilter}
+                                    setPaymentFilter={setPaidFilter}
+                                    refresh={handleSearch}
+                                />
                             )}
+
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() =>
+                                    setShowPaid2DropDown(!showPaid2DropDown)
+                                }
+                            >
+                                {config.amount_2_name} Filter &gt;
+                            </button>
+                            {showPaid2DropDown && (
+                                <PaymentFilter
+                                    paymentFilter={paymentFilter2}
+                                    setPaymentFilter={setPaymentFilter2}
+                                    refresh={handleSearch}
+                                />
+                            )}
+
                             <button
                                 className="hover:bg-blue-200 p-2 rounded-lg"
                                 onClick={() =>
