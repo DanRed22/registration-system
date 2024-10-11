@@ -16,7 +16,7 @@ const AddModal = ({ hide }) => {
     const [timeOut, setTimeOut] = useState('');
     const [amount, setAmount] = useState(0);
     const [amount2, setAmount2] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [isNameTaken, setIsNameTaken] = useState(false);
     const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
     const [showOrganizationDropDown, setShowOrganizationDropDown] =
@@ -172,10 +172,27 @@ const AddModal = ({ hide }) => {
                             >
                                 Full Name
                             </label>
-                            {isNameTaken && (
-                                <p className="text-red-500 text-sm my-2">
-                                    Warning: Member already exists!
-                                </p>
+                            {isLoading && (
+                                <div className="flex flex-row justify-start items-center my-2 space-x-2">
+                                    <Oval
+                                        visible={isLoading}
+                                        height={20}
+                                        width={20}
+                                        secondaryColor="#FFFFFF"
+                                        strokeWidth={6}
+                                        color="#FFFFFF"
+                                    />
+                                    {isNameTaken && (
+                                        <p className="text-red-500 text-sm my-2">
+                                            Warning: Member already exists!
+                                        </p>
+                                    )}
+                                    {isLoading && (
+                                        <p className="text-white text-sm my-2 animate-pulse">
+                                            Searching member duplicates.
+                                        </p>
+                                    )}
+                                </div>
                             )}
                             <input
                                 value={name}
@@ -521,13 +538,15 @@ const AddModal = ({ hide }) => {
                     <button
                         onClick={handleSubmit}
                         type="button"
-                        class="w-[12rem] transition duration-200 focus:outline-none text-black hover:text-white bg-green-400 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                        class="flex flex-row items-center justify-center space-x-4 w-[12rem] transition duration-200 focus:outline-none text-black hover:text-white bg-green-400 hover:bg-green-500 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
                     >
-                        Add Attendee
+                        <p>Add Attendee </p>
                         <Oval
                             visible={isLoading}
                             height={20}
                             width={20}
+                            secondaryColor="#000000"
+                            strokeWidth={6}
                             color="#000000"
                         />
                     </button>

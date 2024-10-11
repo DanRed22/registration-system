@@ -733,65 +733,70 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     setShowCoursesDropDown(!showCoursesDropDown)
                                 }
                             >
-                                {showCoursesDropDown ? (
-                                    <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64 ">
-                                        <div
-                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                {'Select Courses >'}
+                            </button>
+                            {showCoursesDropDown ? (
+                                <div className="border border-black absolute ml-48 flex-col bg-white p-4 rounded-lg w-64 ">
+                                    <div
+                                        className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                        onClick={() =>
+                                            handleCoursesFilterSelect('AMT')
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={coursesFilter.AMT}
                                             onClick={() =>
                                                 handleCoursesFilterSelect('AMT')
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={coursesFilter.AMT}
-                                                onChange={() =>
-                                                    handleCoursesFilterSelect(
-                                                        'AMT'
-                                                    )
-                                                }
-                                            />
-                                            <label>AMT</label>
-                                        </div>
-                                        <div
-                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                            onChange={() =>
+                                                handleCoursesFilterSelect('AMT')
+                                            }
+                                        />
+                                        <label>AMT</label>
+                                    </div>
+                                    <div
+                                        className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                        onClick={() =>
+                                            handleCoursesFilterSelect('AMGT')
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={coursesFilter.AMGT}
                                             onClick={() =>
                                                 handleCoursesFilterSelect(
                                                     'AMGT'
                                                 )
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={coursesFilter.AMGT}
-                                                onChange={() =>
-                                                    handleCoursesFilterSelect(
-                                                        'AMGT'
-                                                    )
-                                                }
-                                            />
-                                            <label>AMGT</label>
-                                        </div>
-                                        <div
-                                            className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                            onChange={() =>
+                                                handleCoursesFilterSelect(
+                                                    'AMGT'
+                                                )
+                                            }
+                                        />
+                                        <label>AMGT</label>
+                                    </div>
+                                    <div
+                                        className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
+                                        onClick={() =>
+                                            handleCoursesFilterSelect('AE')
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={coursesFilter.AE}
                                             onClick={() =>
                                                 handleCoursesFilterSelect('AE')
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={coursesFilter.AE}
-                                                onChange={() =>
-                                                    handleCoursesFilterSelect(
-                                                        'AE'
-                                                    )
-                                                }
-                                            />
-                                            <label>AE</label>
-                                        </div>
+                                            onChange={() =>
+                                                handleCoursesFilterSelect('AE')
+                                            }
+                                        />
+                                        <label>AE</label>
                                     </div>
-                                ) : null}
-                                {'Select Courses >'}
-                            </button>
+                                </div>
+                            ) : null}
 
                             <button
                                 className="hover:bg-blue-200 p-2 rounded-lg"
@@ -801,92 +806,110 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     )
                                 }
                             >
-                                {showYearLevelDropDown ? (
-                                    <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64">
-                                        <div
-                                            className="flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                {' '}
+                                {'Select Year Level >'}
+                            </button>
+                            {showYearLevelDropDown ? (
+                                <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64">
+                                    <div
+                                        className="flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                        onClick={() =>
+                                            handleYearLevelFilterSelect(
+                                                'Freshman'
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={yearLevelFilter.Freshman}
                                             onClick={() =>
                                                 handleYearLevelFilterSelect(
                                                     'Freshman'
                                                 )
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={
-                                                    yearLevelFilter.Freshman
-                                                }
-                                                onChange={() =>
-                                                    handleYearLevelFilterSelect(
-                                                        'Freshman'
-                                                    )
-                                                }
-                                            />
-                                            <label>1st</label>
-                                        </div>
-                                        <div
-                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onChange={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Freshman'
+                                                )
+                                            }
+                                        />
+                                        <label>1st</label>
+                                    </div>
+                                    <div
+                                        className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                        onClick={() =>
+                                            handleYearLevelFilterSelect(
+                                                'Sophomore'
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={yearLevelFilter.Sophomore}
                                             onClick={() =>
                                                 handleYearLevelFilterSelect(
                                                     'Sophomore'
                                                 )
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={
-                                                    yearLevelFilter.Sophomore
-                                                }
-                                                onChange={() =>
-                                                    handleYearLevelFilterSelect(
-                                                        'Sophomore'
-                                                    )
-                                                }
-                                            />
-                                            <label>2nd</label>
-                                        </div>
-                                        <div
-                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onChange={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Sophomore'
+                                                )
+                                            }
+                                        />
+                                        <label>2nd</label>
+                                    </div>
+                                    <div
+                                        className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                        onClick={() =>
+                                            handleYearLevelFilterSelect(
+                                                'Junior'
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={yearLevelFilter.Junior}
                                             onClick={() =>
                                                 handleYearLevelFilterSelect(
                                                     'Junior'
                                                 )
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={yearLevelFilter.Junior}
-                                                onChange={() =>
-                                                    handleYearLevelFilterSelect(
-                                                        'Junior'
-                                                    )
-                                                }
-                                            />
-                                            <label>3rd</label>
-                                        </div>
-                                        <div
-                                            className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                            onChange={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Junior'
+                                                )
+                                            }
+                                        />
+                                        <label>3rd</label>
+                                    </div>
+                                    <div
+                                        className="flex items-center justify-start space-x-3  flex-row border rounded-lg p-2 hover:bg-blue-200"
+                                        onClick={() =>
+                                            handleYearLevelFilterSelect(
+                                                'Senior'
+                                            )
+                                        }
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={yearLevelFilter.Senior}
                                             onClick={() =>
                                                 handleYearLevelFilterSelect(
                                                     'Senior'
                                                 )
                                             }
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                checked={yearLevelFilter.Senior}
-                                                onChange={() =>
-                                                    handleYearLevelFilterSelect(
-                                                        'Senior'
-                                                    )
-                                                }
-                                            />
-                                            <label>4th</label>
-                                        </div>
+                                            onChange={() =>
+                                                handleYearLevelFilterSelect(
+                                                    'Senior'
+                                                )
+                                            }
+                                        />
+                                        <label>4th</label>
                                     </div>
-                                ) : null}
-                                {'Select Year Level >'}
-                            </button>
+                                </div>
+                            ) : null}
+
                             <div
                                 className="flex-row hover:bg-blue-200 p-2 rounded-lg "
                                 onClick={() => handleSetOnlyPresentClick()}
