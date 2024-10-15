@@ -4,24 +4,32 @@ import axios from 'axios';
 import API from './Config';
 import config from '../configuration';
 
-export default function ConfirmationResetModal({ close, type }) {
+export default function ConfirmationResetModal({ close, type, action }) {
     const [input, setInput] = useState('');
 
     const handleInputChange = (e) => {
         setInput(e.target.value);
     };
 
-
     const handleClick = async () => {
         let endpoint = '';
-        if(type === 'time'){
+        if (type === 'time') {
             endpoint = 'reset-all-time';
         }
-        if(type === 'payment'){
+        if (type === 'payment') {
             endpoint = 'reset-all-payments';
         }
-        if(type === 'committee'){
+        if (type === 'committee') {
             endpoint = 'resetCommitteeMembers';
+        }
+        if (type === 'revealPayment') {
+            if (input === config.password) {
+                action(true);
+                close();
+            } else {
+                alert('Incorrect password');
+            }
+            return;
         }
         try {
             console.log(input);

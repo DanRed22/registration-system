@@ -7,12 +7,15 @@ import axios from 'axios';
 import API from '../components/Config';
 import { useNavigate } from 'react-router-dom';
 import config from '../configuration';
+import ConfirmationResetModal from '../components/ConfirmationResetModal';
 
 export const Attendance = () => {
     const navigate = useNavigate();
     const [showAddModal, setShowAddModal] = useState(false);
     const [showNotif, setShowNotif] = useState(false);
     const [message, setMessage] = useState('');
+    const [showConfirmationResetModal, setShowConfirmationResetModal] =
+        useState(false);
     const [paymentData, setPaymentData] = useState({
         totalPaid: 0,
         totalAmountPaid: 0,
@@ -75,6 +78,13 @@ export const Attendance = () => {
             <div className="flex flex-col items-center overflow-auto">
                 {showNotif && (
                     <Notification hideNotif={hideNotif} message={message} />
+                )}
+                {showConfirmationResetModal && (
+                    <ConfirmationResetModal
+                        type="revealPayment"
+                        close={() => setShowConfirmationResetModal(false)}
+                        action={setShowTotalPaid}
+                    />
                 )}
                 <div>
                     <h1 class="mb-4 text-3xl font-extrabold text-white md:text-5xl lg:text-6xl">
@@ -150,13 +160,26 @@ export const Attendance = () => {
                         </p>
                     </div>
                     <div className="flex flex-col w-1/4 justify-end space-y-2">
-                        <button
-                            type="button"
-                            className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
-                            onClick={() => setShowTotalPaid(!showTotalPaid)}
-                        >
-                            {showTotalPaid ? 'Hide' : 'Show'}
-                        </button>
+                        {!showTotalPaid ? (
+                            <button
+                                type="button"
+                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                                onClick={() =>
+                                    setShowConfirmationResetModal(true)
+                                }
+                            >
+                                Show
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
+                                onClick={() => setShowTotalPaid(false)}
+                            >
+                                Hide
+                            </button>
+                        )}
+
                         <button
                             type="button"
                             className="h-12 w-24 focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"

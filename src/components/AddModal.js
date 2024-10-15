@@ -16,7 +16,7 @@ const AddModal = ({ hide }) => {
     const [timeOut, setTimeOut] = useState('');
     const [amount, setAmount] = useState(0);
     const [amount2, setAmount2] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [isNameTaken, setIsNameTaken] = useState(false);
     const [showCoursesDropDown, setShowCoursesDropdown] = useState(false);
     const [showOrganizationDropDown, setShowOrganizationDropDown] =
