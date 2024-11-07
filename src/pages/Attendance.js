@@ -38,6 +38,7 @@ export const Attendance = () => {
     };
 
     const refreshStatus = async () => {
+        console.log(process.env.API_URL)
         const response = await axios.get(`${API}status`);
         const paymentData = await axios.get(`${API}paymentTotal`);
         if (response.status === 200 && paymentData.status === 200) {

@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(
     cors({
-        // origin: process.env.CORS_ORIGIN,
+        //origin: process.env.CORS_ORIGIN,
         origin: '*',
         methods: ['GET', 'POST', 'PUT'],
         credentials: true,
@@ -30,7 +30,7 @@ app.use(
 const routes = require('./routes');
 app.use('/', routes); // Use routes as middleware
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 7888;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
