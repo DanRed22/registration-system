@@ -174,7 +174,7 @@ const AddModal = ({ hide }) => {
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 backdrop-blur-sm">
             <div className="w-[50rem] shadow-2xl bg-blue-950 rounded-lg p-8 overflow-auto">
                 <div className="grid">
                     <h2 className="text-white text-2xl font-bold mb-4">

@@ -126,7 +126,7 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
     }, [memberId]);
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm z-50">
             <div className="w-[50rem] shadow-2xl bg-blue-950 rounded-lg p-8 overflow-auto">
                 <h2 className="text-white text-2xl font-bold mb-4">
                     Edit Member
@@ -314,12 +314,30 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                                         <input
                                                             id={`section_${item.id}`}
                                                             type="checkbox"
-                                                            checked={selectedSections.some(
-                                                                (section) =>
-                                                                    section.id ===
-                                                                    item.id
-                                                            )}
+                                                            checked={
+                                                                selectedSections &&
+                                                                Array.isArray(
+                                                                    selectedSections
+                                                                )
+                                                                    ? selectedSections.map(
+                                                                          (
+                                                                              section
+                                                                          ) =>
+                                                                              section.id ===
+                                                                              item.id
+                                                                      )
+                                                                    : undefined
+                                                            }
                                                             onChange={() => {
+                                                                if (
+                                                                    !selectedSections
+                                                                ) {
+                                                                    setSelectedSections(
+                                                                        [item]
+                                                                    );
+                                                                    return;
+                                                                }
+
                                                                 const isAlreadySelected =
                                                                     selectedSections.some(
                                                                         (
@@ -328,6 +346,7 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                                                             section.id ===
                                                                             item.id
                                                                     );
+
                                                                 if (
                                                                     isAlreadySelected
                                                                 ) {

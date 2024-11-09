@@ -32,7 +32,7 @@ const SignatureModal = ({ id, name, close }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 backdrop-blur-sm flex justify-center items-center">
             <div className="w-[50rem] rounded-xl flex justify-center items-center bg-white flex-col">
                 <div className="flex justify-end w-full px-10">
                     <button
