@@ -304,54 +304,57 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                         id="sectiondrop"
                                         class="p-2 z-0 absolute bg-white rounded-lg shadow-lg w-[9rem] dark:bg-gray-700 text-center border-solid border border-black"
                                     >
-                                        {sections?.map((item, index) => {
-                                            return (
-                                                <div className="p-1 indent-2 border border-solid border-slate-400 rounded-lg my-1 space-x-1 flex justify-start items-center">
-                                                    <input
-                                                        id={`section_${item.id}`}
-                                                        type="checkbox"
-                                                        checked={selectedSections.some(
-                                                            (section) =>
-                                                                section.id ===
-                                                                item.id
-                                                        )}
-                                                        onChange={() => {
-                                                            const isAlreadySelected =
-                                                                selectedSections.some(
-                                                                    (section) =>
-                                                                        section.id ===
-                                                                        item.id
-                                                                );
-                                                            if (
-                                                                isAlreadySelected
-                                                            ) {
-                                                                setSelectedSections(
-                                                                    selectedSections.filter(
+                                        {sections &&
+                                            sections?.map((item, index) => {
+                                                return (
+                                                    <div className="p-1 indent-2 border border-solid border-slate-400 rounded-lg my-1 space-x-1 flex justify-start items-center">
+                                                        <input
+                                                            id={`section_${item.id}`}
+                                                            type="checkbox"
+                                                            checked={selectedSections.some(
+                                                                (section) =>
+                                                                    section.id ===
+                                                                    item.id
+                                                            )}
+                                                            onChange={() => {
+                                                                const isAlreadySelected =
+                                                                    selectedSections.some(
                                                                         (
                                                                             section
                                                                         ) =>
-                                                                            section.id !==
+                                                                            section.id ===
                                                                             item.id
-                                                                    )
-                                                                );
-                                                            } else {
-                                                                setSelectedSections(
-                                                                    [
-                                                                        ...selectedSections,
-                                                                        item,
-                                                                    ]
-                                                                );
-                                                            }
-                                                        }}
-                                                    />
-                                                    <label
-                                                        for={`section_${item.id}`}
-                                                    >
-                                                        {item.name}
-                                                    </label>
-                                                </div>
-                                            );
-                                        })}
+                                                                    );
+                                                                if (
+                                                                    isAlreadySelected
+                                                                ) {
+                                                                    setSelectedSections(
+                                                                        selectedSections.filter(
+                                                                            (
+                                                                                section
+                                                                            ) =>
+                                                                                section.id !==
+                                                                                item.id
+                                                                        )
+                                                                    );
+                                                                } else {
+                                                                    setSelectedSections(
+                                                                        [
+                                                                            ...selectedSections,
+                                                                            item,
+                                                                        ]
+                                                                    );
+                                                                }
+                                                            }}
+                                                        />
+                                                        <label
+                                                            for={`section_${item.id}`}
+                                                        >
+                                                            {item.name}
+                                                        </label>
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                 )}
                             </div>

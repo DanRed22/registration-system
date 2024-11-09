@@ -28,6 +28,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isEditing2, setIsEditing2] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showFiltersDropDown, setShowFiltersDropDown] = useState(false);
     const [edit, setEdit] = useState(null);
     const hideRemarksModal = () => {
         setShowRemarksModal(false);
@@ -288,7 +289,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
 
     //console.log(data)
     return (
-        <div className="w-[90%]">
+        <div className="w-[90%] flex flex-col items-center">
             {showEditModal && (
                 <EditModal
                     memberId={edit}
@@ -322,7 +323,8 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                     refresh={handleSearch}
                 />
             )}
-            <div className="flex justify-items-end border border-white rounded-lg border-solid w-full my-4">
+
+            <div className="flex justify-items-end items-center border border-white rounded-lg border-solid w-full my-4">
                 <div class="m-2 flex justify-items-center items-center">
                     <button
                         onClick={() => {
@@ -361,26 +363,89 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                     </button>
                 </div>
 
-                <div className="flex flex-row items-center">
-                    {Object.keys(show)
-                        .filter((key) => key !== 'name')
-                        .map((key) => (
-                            <div className="mx-4" key={key}>
-                                <input
-                                    type="checkbox"
-                                    name={key}
-                                    checked={show[key]}
-                                    onChange={() => handleFilterClick(key)}
-                                />
-                                <label
-                                    htmlFor={key}
-                                    className="text-white text-xs mx-2"
-                                >
-                                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                                </label>
+                <div className="relative">
+                    <button
+                        className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                        onClick={() =>
+                            setShowFiltersDropDown(!showFiltersDropDown)
+                        }
+                    >
+                        Filters
+                        <svg
+                            className="w-4 h-4 ml-2 inline-block"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d={
+                                    showFiltersDropDown
+                                        ? 'M19 9l-7 7-7-7'
+                                        : 'M5 15l7-7 7 7'
+                                }
+                            />
+                        </svg>
+                    </button>
+                    {showFiltersDropDown && (
+                        <div className="transition duration-300 ease-in-out absolute left-4 bottom-full mb-2 bg-white rounded-lg shadow-lg p-4 z-50">
+                            <div className="flex flex-col space-y-3">
+                                {Object.keys(show)
+                                    .filter((key) => key !== 'name')
+                                    .map((key) => (
+                                        <div
+                                            className="flex items-center"
+                                            key={key}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                id={key}
+                                                name={key}
+                                                checked={show[key]}
+                                                onChange={() =>
+                                                    handleFilterClick(key)
+                                                }
+                                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                            />
+                                            <label
+                                                htmlFor={key}
+                                                className="ml-2 text-sm text-gray-700"
+                                            >
+                                                {key.charAt(0).toUpperCase() +
+                                                    key.slice(1)}
+                                            </label>
+                                        </div>
+                                    ))}
                             </div>
-                        ))}
+                        </div>
+                    )}
                 </div>
+                {/* 
+                {showFiltersDropDown && (
+                    <div className="relative flex flex-row items-center">
+                        {Object.keys(show)
+                            .filter((key) => key !== 'name')
+                            .map((key) => (
+                                <div className="mx-4" key={key}>
+                                    <input
+                                        type="checkbox"
+                                        name={key}
+                                        checked={show[key]}
+                                        onChange={() => handleFilterClick(key)}
+                                    />
+                                    <label
+                                        htmlFor={key}
+                                        className="text-white text-xs mx-2"
+                                    >
+                                        {key.charAt(0).toUpperCase() +
+                                            key.slice(1)}
+                                    </label>
+                                </div>
+                            ))}
+                    </div> */}
             </div>
             <div class="overflow-auto shadow-md w-full ">
                 <table className="w-full divide-gray-400 dark:divide-gray-700">
