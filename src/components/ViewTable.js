@@ -47,6 +47,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showPaid2, setShowPaid2] = useState(true);
     const [showTimeOut, setShowTimeOut] = useState(true);
     const [showDbId, setShowDbId] = useState(false);
+    const [showSection, setShowSection] = useState(true);
 
     //SelectedRecord
     const [selectedName, setSelectedName] = useState('');
@@ -706,6 +707,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     Remarks
                                 </label>
                             </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="section"
+                                    checked={showSection}
+                                    onClick={() => setShowSection(!showSection)}
+                                />
+                                <label htmlFor="section" className="ml-2">
+                                    Section
+                                </label>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -1114,6 +1126,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             >
                                 Year
                             </th>
+                            {showSection && (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Section
+                                </th>
+                            )}
                             {showEmail ? (
                                 <th
                                     scope="col"
@@ -1229,6 +1249,26 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                           {entry.year}
                                       </td>
+                                      {showSection && (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.section_ids !== null &&
+                                                  JSON.parse(
+                                                      entry.section_ids
+                                                  ).map((section, index) => (
+                                                      <span
+                                                          key={index}
+                                                          className="mr-1"
+                                                      >
+                                                          {section.name}
+                                                          {index <
+                                                              JSON.parse(
+                                                                  entry.section_ids
+                                                              ).length -
+                                                                  1 && ' • '}
+                                                      </span>
+                                                  ))}
+                                          </td>
+                                      )}
                                       {showEmail ? (
                                           <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
                                               {entry.email}
@@ -1419,6 +1459,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         >
                             Year
                         </th>
+                        {showSection && (
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                Section
+                            </th>
+                        )}
                         {showEmail ? (
                             <th
                                 scope="col"
@@ -1526,6 +1574,26 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                   <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
                                       {entry.year}
                                   </td>
+                                  {showSection && (
+                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                          {entry.section_ids !== null &&
+                                              JSON.parse(entry.section_ids).map(
+                                                  (section, index) => (
+                                                      <span
+                                                          key={index}
+                                                          className="mr-1"
+                                                      >
+                                                          {section.name}
+                                                          {index <
+                                                              JSON.parse(
+                                                                  entry.section_ids
+                                                              ).length -
+                                                                  1 && ' • '}
+                                                      </span>
+                                                  )
+                                              )}
+                                      </td>
+                                  )}
                                   {showEmail ? (
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
                                           {entry.email}
