@@ -82,6 +82,18 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showPaidDropDown, setShowPaidDropDown] = useState(false);
     const [showPaid2DropDown, setShowPaid2DropDown] = useState(false);
     const [showOrg, setShowOrg] = useState(false);
+    const [sections, setSections] = useState([]);
+    const [selectedSections, setSelectedSections] = useState([]);
+    const [showSectionDropDown, setShowSectionDropDown] = useState(false);
+
+    const handleSectionFilterSelect = (section) => {
+        if (selectedSections.includes(section)) {
+            setSelectedSections(selectedSections.filter((s) => s !== section));
+        } else {
+            setSelectedSections([...selectedSections, section]);
+        }
+        console.log(selectedSections);
+    };
 
     const toggleOrder = () => {
         setOrderBy((prevOrder) => {
@@ -89,6 +101,18 @@ const ViewTable = ({ showNotif, setMessage }) => {
             if (prevOrder === 'desc') return 'asc';
             return prevOrder; // Prevent unnecessary state updates
         });
+    };
+
+    const getAllSections = async () => {
+        try {
+            const response = await axios.get(`${API}sections`);
+            console.log(response);
+            setSections(response.data);
+        } catch (error) {
+            console.log(error.message);
+            console.log(error);
+            setSections([]);
+        }
     };
 
     useEffect(() => {
@@ -328,12 +352,38 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     paidFilter2: paymentFilter2,
                     searchParams: search,
                     orderName: orderBy,
+                    sections: JSON.stringify(selectedSections),
                 },
             });
             if (response.status !== 200) {
                 throw new Error(response);
             }
-            setData(response.data.data);
+            let tempData = [];
+            response.data.data.forEach((entry, idx) => {
+                if (selectedSections.length > 0) {
+                    // If entry has no section_ids, exclude it when sections are selected
+                    if (!entry.section_ids) {
+                        return null;
+                    }
+
+                    // If entry's sections don't match any selected sections, exclude it
+                    if (
+                        !JSON.parse(entry.section_ids).some((section) =>
+                            selectedSections.some(
+                                (selectedSection) =>
+                                    selectedSection.name === section.name
+                            )
+                        )
+                    ) {
+                        return null;
+                    }
+                }
+                tempData.push(entry);
+            });
+            setData(
+                selectedSections.length > 0 ? tempData : response.data.data
+            );
+
             setCurrentPage(1);
             refreshPaginatedData();
         } catch (error) {
@@ -351,6 +401,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orgsFilter,
         paidFilter,
         paymentFilter2,
+        selectedSections,
     ]);
 
     const handleExportCSV = () => {
@@ -390,6 +441,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
     // Debounce search input changes to prevent immediate API calls on every keystroke
 
     useEffect(() => {
+        getAllSections();
+    }, []);
+    useEffect(() => {
         handleSearch(); // Trigger search immediately when filters or sorting order changes
         setCurrentPage(1);
     }, [
@@ -400,6 +454,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orgsFilter,
         paidFilter,
         paymentFilter2,
+        selectedSections,
     ]); // Separate the filters and order logic from search input
 
     // Close the dropdowns when clicking outside
@@ -1050,6 +1105,56 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     )}
                                 </div>
                             ) : null}
+
+                            <button
+                                className="hover:bg-blue-200 p-2 rounded-lg"
+                                onClick={() => setShowSectionDropDown(true)}
+                            >
+                                Sections &gt;
+                            </button>
+
+                            {showSectionDropDown && (
+                                <div className="absolute ml-44 border-black border mt-[-2rem] flex-col bg-white p-4 rounded-lg w-[35rem]">
+                                    <div className="flex flex-row flex-wrap justify-center">
+                                        {sections &&
+                                            sections.map((section, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex flex-row border rounded-lg p-2 hover:bg-blue-300 items-center space-x-3 justify-start w-1/2"
+                                                    onClick={() =>
+                                                        handleSectionFilterSelect(
+                                                            section
+                                                        )
+                                                    }
+                                                >
+                                                    <input
+                                                        key={
+                                                            'section' +
+                                                            section.id
+                                                        }
+                                                        type="checkbox"
+                                                        checked={selectedSections.includes(
+                                                            section
+                                                        )}
+                                                        onChange={() =>
+                                                            handleSectionFilterSelect(
+                                                                section
+                                                            )
+                                                        }
+                                                    />
+                                                    <label
+                                                        for={
+                                                            'section' +
+                                                            section.id
+                                                        }
+                                                    >
+                                                        {section.name}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -1221,183 +1326,185 @@ const ViewTable = ({ showNotif, setMessage }) => {
                         </tr>
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
-                        {!isLoading && currentDataToDisplay.length > 0 //change paginatedData to data if you want to export all in CSV
-                            ? currentDataToDisplay.map((entry, idx) => (
-                                  <tr
-                                      key={entry.id}
-                                      className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
-                                  >
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {showDbId
-                                              ? entry.id
-                                              : idx +
-                                                1 +
-                                                (currentPage - 1) *
-                                                    itemsPerPage}
-                                      </td>
-                                      {showOrg ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.organization}{' '}
-                                              {entry.position
-                                                  ? `: ${entry.position}`
-                                                  : null}
-                                          </td>
-                                      ) : null}
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.name}
-                                      </td>
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.year}
-                                      </td>
-                                      {showSection && (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.section_ids !== null &&
-                                                  JSON.parse(
-                                                      entry.section_ids
-                                                  ).map((section, index) => (
-                                                      <span
-                                                          key={index}
-                                                          className="mr-1"
-                                                      >
-                                                          {section.name}
-                                                          {index <
-                                                              JSON.parse(
-                                                                  entry.section_ids
-                                                              ).length -
-                                                                  1 && ' • '}
-                                                      </span>
-                                                  ))}
-                                          </td>
-                                      )}
-                                      {showEmail ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
-                                              {entry.email}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
-                                      {showCourse ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.course}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
-                                      {showRegular ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.regular ? '✅' : '❌'}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
+                        {!isLoading &&
+                            currentDataToDisplay.length > 0 && //change paginatedData to data if you want to export all in CSV
+                            currentDataToDisplay.map((entry, idx) => {
+                                return (
+                                    <tr
+                                        key={entry.id}
+                                        className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
+                                    >
+                                        <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                            {showDbId
+                                                ? entry.id
+                                                : idx +
+                                                  1 +
+                                                  (currentPage - 1) *
+                                                      itemsPerPage}
+                                        </td>
+                                        {showOrg ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.organization}{' '}
+                                                {entry.position
+                                                    ? `: ${entry.position}`
+                                                    : null}
+                                            </td>
+                                        ) : null}
+                                        <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                            {entry.name}
+                                        </td>
+                                        <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                            {entry.year}
+                                        </td>
+                                        {showSection && (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.section_ids !== null &&
+                                                    JSON.parse(
+                                                        entry.section_ids
+                                                    ).map((section, index) => (
+                                                        <span
+                                                            key={index}
+                                                            className="mr-1"
+                                                        >
+                                                            {section.name}
+                                                            {index <
+                                                                JSON.parse(
+                                                                    entry.section_ids
+                                                                ).length -
+                                                                    1 && ' • '}
+                                                        </span>
+                                                    ))}
+                                            </td>
+                                        )}
+                                        {showEmail ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
+                                                {entry.email}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
+                                        {showCourse ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.course}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
+                                        {showRegular ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.regular ? '✅' : '❌'}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
 
-                                      {showPaid ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.amount > 0
-                                                  ? entry.amount
-                                                  : '❌'}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
+                                        {showPaid ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.amount > 0
+                                                    ? entry.amount
+                                                    : '❌'}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
 
-                                      {showPaid2 ? (
-                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                              {entry.amount_2 !== '' &&
-                                              entry.amount_2 &&
-                                              entry.amount_2 > 0
-                                                  ? entry.amount_2
-                                                  : '❌'}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
+                                        {showPaid2 ? (
+                                            <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                                {entry.amount_2 !== '' &&
+                                                entry.amount_2 &&
+                                                entry.amount_2 > 0
+                                                    ? entry.amount_2
+                                                    : '❌'}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
 
-                                      {!truncTime ? (
-                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeIn}
-                                          </td>
-                                      ) : (
-                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeIn ? (
-                                                  <span className="text-green-500">
-                                                      YES
-                                                  </span>
-                                              ) : (
-                                                  <span className="text-red-500">
-                                                      NO
-                                                  </span>
-                                              )}
-                                          </td>
-                                      )}
-                                      {showTimeOut &&
-                                          (!truncTime ? (
-                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                                  {entry.timeOut}
-                                              </td>
-                                          ) : (
-                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                                  {entry.timeOut ? (
-                                                      <span className="text-green-500">
-                                                          YES
-                                                      </span>
-                                                  ) : (
-                                                      <span className="text-red-500">
-                                                          NO
-                                                      </span>
-                                                  )}
-                                              </td>
-                                          ))}
+                                        {!truncTime ? (
+                                            <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                {entry.timeIn}
+                                            </td>
+                                        ) : (
+                                            <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                {entry.timeIn ? (
+                                                    <span className="text-green-500">
+                                                        YES
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-red-500">
+                                                        NO
+                                                    </span>
+                                                )}
+                                            </td>
+                                        )}
+                                        {showTimeOut &&
+                                            (!truncTime ? (
+                                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                    {entry.timeOut}
+                                                </td>
+                                            ) : (
+                                                <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                    {entry.timeOut ? (
+                                                        <span className="text-green-500">
+                                                            YES
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-red-500">
+                                                            NO
+                                                        </span>
+                                                    )}
+                                                </td>
+                                            ))}
 
-                                      {sig === true && (
-                                          <td className="px-1 py-1 whitespace-nowrap ">
-                                              {entry.signature &&
-                                              entry.timeIn ? (
-                                                  showSig ? (
-                                                      <img
-                                                          onClick={() =>
-                                                              handleViewSignature(
-                                                                  entry.id,
-                                                                  entry.id_number,
-                                                                  entry.name
-                                                              )
-                                                          }
-                                                          src={`${filePath}${entry.id}.png`}
-                                                          alt="Signature"
-                                                          className="h-10 object-fill"
-                                                      />
-                                                  ) : (
-                                                      <span className="text-xs font-bold italic text-green-600">
-                                                          Digitally Signed
-                                                      </span>
-                                                  )
-                                              ) : (
-                                                  <span className="text-xs font-light italic">
-                                                      {entry.timeIn
-                                                          ? 'Present, No Sig.'
-                                                          : 'Absent'}
-                                                  </span>
-                                              )}
-                                          </td>
-                                      )}
-                                      {showRemarks ? (
-                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.remarks &&
-                                                  entry.remarks
-                                                      .split('\n')
-                                                      .map((line, index) => (
-                                                          <span key={index}>
-                                                              {line}
-                                                              <br />
-                                                          </span>
-                                                      ))}
-                                          </td>
-                                      ) : (
-                                          ''
-                                      )}
-                                  </tr>
-                              ))
-                            : ''}
+                                        {sig === true && (
+                                            <td className="px-1 py-1 whitespace-nowrap ">
+                                                {entry.signature &&
+                                                entry.timeIn ? (
+                                                    showSig ? (
+                                                        <img
+                                                            onClick={() =>
+                                                                handleViewSignature(
+                                                                    entry.id,
+                                                                    entry.id_number,
+                                                                    entry.name
+                                                                )
+                                                            }
+                                                            src={`${filePath}${entry.id}.png`}
+                                                            alt="Signature"
+                                                            className="h-10 object-fill"
+                                                        />
+                                                    ) : (
+                                                        <span className="text-xs font-bold italic text-green-600">
+                                                            Digitally Signed
+                                                        </span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-xs font-light italic">
+                                                        {entry.timeIn
+                                                            ? 'Present, No Sig.'
+                                                            : 'Absent'}
+                                                    </span>
+                                                )}
+                                            </td>
+                                        )}
+                                        {showRemarks ? (
+                                            <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                {entry.remarks &&
+                                                    entry.remarks
+                                                        .split('\n')
+                                                        .map((line, index) => (
+                                                            <span key={index}>
+                                                                {line}
+                                                                <br />
+                                                            </span>
+                                                        ))}
+                                            </td>
+                                        ) : (
+                                            ''
+                                        )}
+                                    </tr>
+                                );
+                            })}
                     </tbody>
                 </table>
                 {isLoading && (
@@ -1425,6 +1532,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 )}
             </div>
 
+            {/* This is for the CSV TABLE */}
             <table
                 id="table-container-csv"
                 className="hidden w-[80%] divide-gray-200 dark:divide-gray-700"
@@ -1555,109 +1663,94 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 </thead>
                 <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
                     {!isLoading //change paginatedData to data if you want to export all in CSV
-                        ? data.map((entry, idx) => (
-                              <tr
-                                  key={idx}
-                                  className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
-                              >
-                                  <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {idx + 1}
-                                  </td>
-                                  {showOrg ? (
+                        ? data.map((entry, idx) => {
+                              return (
+                                  <tr
+                                      key={idx}
+                                      className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
+                                  >
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.organization}
+                                          {idx + 1}
                                       </td>
-                                  ) : null}
-                                  <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {entry.name}
-                                  </td>
-                                  <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                      {entry.year}
-                                  </td>
-                                  {showSection && (
+                                      {showOrg ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.organization}
+                                          </td>
+                                      ) : null}
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.section_ids !== null &&
-                                              JSON.parse(entry.section_ids).map(
-                                                  (section, index) => (
-                                                      <span
-                                                          key={index}
-                                                          className="mr-1"
-                                                      >
-                                                          {section.name}
-                                                          {index <
-                                                              JSON.parse(
-                                                                  entry.section_ids
-                                                              ).length -
-                                                                  1 && ' • '}
-                                                      </span>
-                                                  )
-                                              )}
+                                          {entry.name}
                                       </td>
-                                  )}
-                                  {showEmail ? (
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
-                                          {entry.email}
-                                      </td>
-                                  ) : (
-                                      ''
-                                  )}
-                                  {showCourse ? (
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.course}
+                                          {entry.year}
                                       </td>
-                                  ) : (
-                                      ''
-                                  )}
-                                  {showRegular ? (
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.regular ? 'YES' : 'NO'}
-                                      </td>
-                                  ) : (
-                                      ''
-                                  )}
-                                  {showPaid ? (
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.amount && entry.amount > 0
-                                              ? entry.amount
-                                              : 0}
-                                      </td>
-                                  ) : (
-                                      ''
-                                  )}
-                                  {showPaid2 ? (
-                                      <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {entry.amount_2 && entry.amount_2 > 0
-                                              ? entry.amount_2
-                                              : 0}
-                                      </td>
-                                  ) : (
-                                      ''
-                                  )}
-                                  {!truncTime ? (
-                                      <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.timeIn}
-                                      </td>
-                                  ) : (
-                                      <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.timeIn ? (
-                                              <span className="text-green-500">
-                                                  YES
-                                              </span>
-                                          ) : (
-                                              <span className="text-red-500">
-                                                  NO
-                                              </span>
-                                          )}
-                                      </td>
-                                  )}
-                                  {showTimeOut &&
-                                      (!truncTime ? (
+                                      {showSection && (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {/* {entry.section_ids !== null &&
+                                                  entry.section_ids.map(
+                                                      (section, index) => (
+                                                          <span
+                                                              key={index}
+                                                              className="mr-1"
+                                                          >
+                                                              {section.name}
+                                                              {index <
+                                                                  entry
+                                                                      .section_ids
+                                                                      .length -
+                                                                      1 &&
+                                                                  ' • '}
+                                                          </span>
+                                                      )
+                                                  )} */}
+                                          </td>
+                                      )}
+                                      {showEmail ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap ">
+                                              {entry.email}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                      {showCourse ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.course}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                      {showRegular ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.regular ? 'YES' : 'NO'}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                      {showPaid ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.amount && entry.amount > 0
+                                                  ? entry.amount
+                                                  : 0}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                      {showPaid2 ? (
+                                          <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
+                                              {entry.amount_2 &&
+                                              entry.amount_2 > 0
+                                                  ? entry.amount_2
+                                                  : 0}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                      {!truncTime ? (
                                           <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeOut}
+                                              {entry.timeIn}
                                           </td>
                                       ) : (
                                           <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                              {entry.timeOut ? (
+                                              {entry.timeIn ? (
                                                   <span className="text-green-500">
                                                       YES
                                                   </span>
@@ -1667,53 +1760,72 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                                   </span>
                                               )}
                                           </td>
-                                      ))}
-
-                                  {sig === true && (
-                                      <td className="px-1 py-1 whitespace-nowrap ">
-                                          {entry.signature ? (
-                                              showSig ? (
-                                                  <img
-                                                      onClick={() =>
-                                                          handleViewSignature(
-                                                              entry.id,
-                                                              entry.id_number,
-                                                              entry.name
-                                                          )
-                                                      }
-                                                      src={`${filePath}${entry.id}.png`}
-                                                      alt="Signature"
-                                                      className="h-10 object-fill"
-                                                  />
-                                              ) : (
-                                                  <span className="text-xs font-bold italic text-green-600">
-                                                      Digitally Signed
-                                                  </span>
-                                              )
+                                      )}
+                                      {showTimeOut &&
+                                          (!truncTime ? (
+                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                  {entry.timeOut}
+                                              </td>
                                           ) : (
-                                              <span className="text-xs font-light italic">
-                                                  No Signature
-                                              </span>
-                                          )}
-                                      </td>
-                                  )}
-                                  {showRemarks ? (
-                                      <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                          {entry.remarks &&
-                                              entry.remarks
-                                                  .split('\n')
-                                                  .map((line, index) => (
-                                                      <span key={index}>
-                                                          {line}
-                                                          <br />
+                                              <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                  {entry.timeOut ? (
+                                                      <span className="text-green-500">
+                                                          YES
                                                       </span>
-                                                  ))}
-                                      </td>
-                                  ) : (
-                                      ''
-                                  )}
-                              </tr>
-                          ))
+                                                  ) : (
+                                                      <span className="text-red-500">
+                                                          NO
+                                                      </span>
+                                                  )}
+                                              </td>
+                                          ))}
+
+                                      {sig === true && (
+                                          <td className="px-1 py-1 whitespace-nowrap ">
+                                              {entry.signature ? (
+                                                  showSig ? (
+                                                      <img
+                                                          onClick={() =>
+                                                              handleViewSignature(
+                                                                  entry.id,
+                                                                  entry.id_number,
+                                                                  entry.name
+                                                              )
+                                                          }
+                                                          src={`${filePath}${entry.id}.png`}
+                                                          alt="Signature"
+                                                          className="h-10 object-fill"
+                                                      />
+                                                  ) : (
+                                                      <span className="text-xs font-bold italic text-green-600">
+                                                          Digitally Signed
+                                                      </span>
+                                                  )
+                                              ) : (
+                                                  <span className="text-xs font-light italic">
+                                                      No Signature
+                                                  </span>
+                                              )}
+                                          </td>
+                                      )}
+                                      {showRemarks ? (
+                                          <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                              {entry.remarks &&
+                                                  entry.remarks
+                                                      .split('\n')
+                                                      .map((line, index) => (
+                                                          <span key={index}>
+                                                              {line}
+                                                              <br />
+                                                          </span>
+                                                      ))}
+                                          </td>
+                                      ) : (
+                                          ''
+                                      )}
+                                  </tr>
+                              );
+                          })
                         : ''}
                 </tbody>
             </table>
