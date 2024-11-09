@@ -278,11 +278,14 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                     selectedSections.length === 0 ? (
                                         <span>No Section Selected</span>
                                     ) : null}
-                                    {selectedSections.map((item, index) =>
-                                        index === selectedSections.length - 1
-                                            ? item.name
-                                            : item.name + ', '
-                                    )}
+                                    {selectedSections &&
+                                        Array.isArray(selectedSections) &&
+                                        selectedSections.map((item, index) =>
+                                            index ===
+                                            selectedSections.length - 1
+                                                ? item.name
+                                                : item.name + ', '
+                                        )}
                                     <svg
                                         class="w-2.5 h-2.5 ms-3"
                                         aria-hidden="true"
