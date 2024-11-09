@@ -54,6 +54,7 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
         signature: true,
         amount: true,
         amount_2: true,
+        section_ids: true,
     });
 
     const handleFilterClick = (name) => {
@@ -416,7 +417,10 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                     scope="col"
                                     className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                                 >
-                                    Year Level
+                                    Year{' '}
+                                    {show.section_ids
+                                        ? ' and Section(s)'
+                                        : null}
                                 </th>
                             ) : (
                                 ''
@@ -531,6 +535,30 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                         {show.year && (
                                             <td className="px-1 py-1 whitespace-nowrap">
                                                 {entry.year}
+                                                {show.section_ids ? (
+                                                    <p className="text-xs text-gray-500 dark:text-gray-300">
+                                                        {JSON.parse(
+                                                            entry.section_ids
+                                                        ).map(
+                                                            (
+                                                                section,
+                                                                index,
+                                                                array
+                                                            ) => (
+                                                                <p>
+                                                                    {
+                                                                        section.name
+                                                                    }
+                                                                    {index <
+                                                                    array.length -
+                                                                        1
+                                                                        ? ','
+                                                                        : ''}
+                                                                </p>
+                                                            )
+                                                        )}
+                                                    </p>
+                                                ) : null}
                                             </td>
                                         )}
                                         {show.regular && (

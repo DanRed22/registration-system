@@ -1,14 +1,14 @@
-const { createPool } = require('mysql2');
-const { PrismaClient } = require('@prisma/client');
-const express = require('express');
-const router = express.Router();
-const bodyParser = require('body-parser');
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
-const prisma = new PrismaClient();
+import { createPool } from 'mysql2';
+import { PrismaClient } from '@prisma/client';
+import express from 'express';
+import bodyParser from 'body-parser';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import BigInt from 'big-integer';
 
-const BigInt = require('big-integer');
+const router = express.Router();
+const prisma = new PrismaClient();
 const dir = '../../public/signatures';
 
 const pool = createPool({
@@ -133,6 +133,7 @@ router.put('/editMember', async (req, res) => {
         timeOut,
         amount,
         amount_2,
+        section_ids,
     } = req.body;
     try {
         console.log(req.body);
@@ -152,6 +153,7 @@ router.put('/editMember', async (req, res) => {
                 amount_2: !isNaN(parseInt(amount_2))
                     ? parseInt(amount_2)
                     : null,
+                section_ids,
             },
         });
         console.log('UPDATED MEMBER', updatedMember);
@@ -693,12 +695,12 @@ router.post('/togglePaid', async (req, res) => {
             },
         });
         const isPaid = data.paid;
-        const response = await prisma.members.update({
+        await prisma.members.update({
             where: {
                 id: id,
             },
             data: {
-                paid: isPaid == 0 ? true : false,
+                paid: isPaid === 0 ? true : false,
             },
         });
         res.status(201).json({ message: 'Updated Payment' });
@@ -717,7 +719,7 @@ router.post('/setPaidAmount', async (req, res) => {
     }
 
     try {
-        const response = await prisma.members.update({
+        await prisma.members.update({
             where: {
                 id: id,
             },
@@ -744,7 +746,7 @@ router.post('/setPaidAmount2', async (req, res) => {
     }
 
     try {
-        const response = await prisma.members.update({
+        await prisma.members.update({
             where: {
                 id: id,
             },
@@ -887,6 +889,7 @@ router.post('/add', async (req, res) => {
         timeOut,
         amount,
         amount_2,
+        section_ids,
     } = req.body;
     //console.log(req.body)
     const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -912,6 +915,7 @@ router.post('/add', async (req, res) => {
                 timeOut: timeOutValue,
                 amount,
                 amount_2,
+                section_ids,
             },
         })
         .then(() => {
@@ -988,4 +992,38 @@ FROM
         }
     });
 });
-module.exports = router;
+
+router.get('/sections', async (req, res) => {
+    try {
+        const data = await prisma.sections.findMany();
+        let sanitizedData = data.map((item) => ({
+            ...item,
+            id: item.id.toString(),
+        }));
+        res.status(200).json(sanitizedData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: true, error_msg: error.message });
+    }
+});
+
+router.get('/searchStudent', async (req, res) => {
+    const { searchTerm } = req.query;
+    try {
+        const data = await prisma.members.findMany({
+            where: {
+                name: { contains: searchTerm },
+            },
+            take: 8,
+        });
+        const sanitizedData = data.map((item) => ({
+            ...item,
+            id: item.id.toString(),
+        }));
+        res.status(200).json({ error: false, data: sanitizedData });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: true, error_msg: error.message });
+    }
+});
+export default router;

@@ -1,8 +1,11 @@
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const { createPool } = require('mysql2');
+import { config } from 'dotenv';
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { createPool } from 'mysql2';
+import routes from './routes.js';
+
+config();
 
 const app = express();
 
@@ -27,7 +30,6 @@ app.use(
     })
 );
 
-const routes = require('./routes');
 app.use('/', routes); // Use routes as middleware
 
 const PORT = process.env.PORT || 7888;
@@ -35,4 +37,4 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = pool;
+export default pool;

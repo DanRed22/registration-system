@@ -3,6 +3,7 @@ import './App.css';
 
 import { Attendance } from './pages/Attendance';
 import View from './pages/View';
+import BatchProcess from './pages/BatchProcess';
 function App() {
     return (
         <div className="App">
@@ -10,6 +11,7 @@ function App() {
                 <Routes>
                     <Route path="/" element={<Attendance />} />
                     <Route path="/view" element={<View />} />
+                    <Route path="/batch-process" element={<BatchProcess />} />
                 </Routes>
             </Router>
         </div>

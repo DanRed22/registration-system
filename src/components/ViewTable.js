@@ -46,6 +46,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showPaid, setShowPaid] = useState(true);
     const [showPaid2, setShowPaid2] = useState(true);
     const [showTimeOut, setShowTimeOut] = useState(true);
+    const [showDbId, setShowDbId] = useState(false);
 
     //SelectedRecord
     const [selectedName, setSelectedName] = useState('');
@@ -609,6 +610,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             <div className="flex items-center mb-2">
                                 <input
                                     type="checkbox"
+                                    name="show-dbid"
+                                    checked={showDbId}
+                                    onClick={() => setShowDbId(!showDbId)}
+                                />
+                                <label htmlFor="show-dbid" className="ml-2">
+                                    {'Show DB ID'}
+                                </label>
+                            </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
                                     name="show-amount2"
                                     checked={showPaid2}
                                     onClick={() => setShowPaid2(!showPaid2)}
@@ -1074,12 +1086,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     {/* Shirking the table makes it appear larger when printing */}
                     <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th
-                                scope="col"
-                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                            >
-                                {' '}
-                            </th>
+                            {
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    {`${showDbId ? 'ID' : '#'}`}
+                                </th>
+                            }
                             {showOrg ? (
                                 <th
                                     scope="col"
@@ -1194,9 +1208,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                       className="border-b border-gray-200 dark:border-gray-700 text-sm min-h-20"
                                   >
                                       <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">
-                                          {idx +
-                                              1 +
-                                              (currentPage - 1) * itemsPerPage}
+                                          {showDbId
+                                              ? entry.id
+                                              : idx +
+                                                1 +
+                                                (currentPage - 1) *
+                                                    itemsPerPage}
                                       </td>
                                       {showOrg ? (
                                           <td className="px-1 py-1 whitespace-normal break-words overflow-wrap">

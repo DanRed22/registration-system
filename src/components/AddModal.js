@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaWindowClose } from 'react-icons/fa';
 import API from '../components/Config';
@@ -22,6 +22,13 @@ const AddModal = ({ hide }) => {
     const [showOrganizationDropDown, setShowOrganizationDropDown] =
         useState(false);
     const [showYearDropDown, setShowYearDropDown] = useState(false);
+    const [sections, setSections] = useState([]);
+    const [selectedSections, setSelectedSections] = useState([]);
+    const [showSectionsDropDown, setShowSectionsDropDown] = useState(false);
+
+    useEffect(() => {
+        getAllSections();
+    }, []);
 
     const handleEmailChange = (e) => {
         setEmail(e.target.value);
@@ -36,6 +43,22 @@ const AddModal = ({ hide }) => {
         const response = await axios.get(`${API}is-name-taken?name=${name}`);
         setIsNameTaken(response.data.isTaken);
     };
+
+    const getAllSections = async () => {
+        try {
+            const response = await axios.get(`${API}sections`);
+            console.log(response);
+            setSections(response.data);
+        } catch (error) {
+            console.log(error.message);
+            console.log(error);
+            setSections([]);
+        }
+    };
+
+    useEffect(() => {
+        console.log('SELECTED SEction', selectedSections);
+    }, [selectedSections]);
 
     const handleCourseChange = (name) => {
         setCourse(name);
@@ -128,6 +151,7 @@ const AddModal = ({ hide }) => {
             timeOut: timeOut,
             amount: parseInt(amount),
             amount_2: parseInt(amount2),
+            section_ids: JSON.stringify(selectedSections),
         });
         if (response) {
             alert(response.data.message);
@@ -145,6 +169,7 @@ const AddModal = ({ hide }) => {
         setAmount(0);
         setAmount2(0);
         setIsLoading(false);
+        setSelectedSections([]);
         hide();
     };
 
@@ -235,7 +260,7 @@ const AddModal = ({ hide }) => {
                                     }
                                     type="button"
                                     id="organization"
-                                    className="justify-center w-36 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    className="justify-center w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                                     placeholder="Game Changer / Starter"
                                 >
                                     {organization}
@@ -311,9 +336,109 @@ const AddModal = ({ hide }) => {
                                     </div>
                                 )}
                             </div>
+
+                            <div className="mt-4">
+                                <label
+                                    for="sections"
+                                    className="block mb-2 text-sm font-medium text-white"
+                                >
+                                    Section
+                                </label>
+                                <button
+                                    value={selectedSections}
+                                    onClick={() =>
+                                        setShowSectionsDropDown(
+                                            !showSectionsDropDown
+                                        )
+                                    }
+                                    type="button"
+                                    id="sections"
+                                    className="justify-center w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    placeholder="Section"
+                                >
+                                    {!selectedSections ||
+                                    selectedSections.length === 0 ? (
+                                        <span>No Section Selected</span>
+                                    ) : null}
+                                    {selectedSections.map((item, index) =>
+                                        index === selectedSections.length - 1
+                                            ? item.name
+                                            : item.name + ', '
+                                    )}
+                                    <svg
+                                        class="w-2.5 h-2.5 ms-3"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 10 6"
+                                    >
+                                        <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="m1 1 4 4 4-4"
+                                        />
+                                    </svg>
+                                </button>
+                                {showSectionsDropDown && (
+                                    <div
+                                        id="sectiondrop"
+                                        class="p-2 z-0 absolute bg-white rounded-lg shadow-lg w-[9rem] dark:bg-gray-700 text-center border-solid border border-black"
+                                    >
+                                        {sections?.map((item, index) => {
+                                            return (
+                                                <div className="p-1 indent-2 border border-solid border-slate-400 rounded-lg my-1 space-x-1 flex justify-start items-center">
+                                                    <input
+                                                        id={`section_${item.id}`}
+                                                        type="checkbox"
+                                                        checked={
+                                                            selectedSections.find(
+                                                                (section) =>
+                                                                    section.id ===
+                                                                    item.id
+                                                            )
+                                                                ? true
+                                                                : false
+                                                        }
+                                                        onChange={() => {
+                                                            if (
+                                                                selectedSections.includes(
+                                                                    item
+                                                                )
+                                                            ) {
+                                                                setSelectedSections(
+                                                                    selectedSections.filter(
+                                                                        (
+                                                                            section
+                                                                        ) =>
+                                                                            section.id !==
+                                                                            item.id
+                                                                    )
+                                                                );
+                                                            } else {
+                                                                setSelectedSections(
+                                                                    [
+                                                                        ...selectedSections,
+                                                                        item,
+                                                                    ]
+                                                                );
+                                                            }
+                                                        }}
+                                                    />
+                                                    <label
+                                                        for={`section_${item.id}`}
+                                                    >
+                                                        {item.name}
+                                                    </label>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="grid gap-6 mb-6 md:grid-cols-2">
-                            {/* ... existing input fields ... */}
                             <div>
                                 <label
                                     htmlFor="amount"

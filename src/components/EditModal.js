@@ -20,35 +20,47 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
     const [showYearDropDown, setShowYearDropDown] = useState(false);
     const [amount, setAmount] = useState(null);
     const [amount_2, setAmount_2] = useState(null);
+    const [sections, setSections] = useState([]);
+    const [selectedSections, setSelectedSections] = useState([]);
+    const [showSectionsDropDown, setShowSectionsDropDown] = useState(false);
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await axios.get(`${API}member/`, {
-                    params: {
-                        id: memberId,
-                    },
-                });
-                console.log(response.data);
-                const data = response.data.data;
-                setName(data.name);
-                setCourse(data.course);
-                setEmail(data.email);
-                setYear(data.year);
-                setRegular(data.regular);
-                setOrganization(data.organization);
-                setRemarks(data.remarks);
-                setTimeIn(data.timeIn);
-                setTimeOut(data.timeOut);
-                setAmount(data.amount);
-                setAmount_2(data.amount_2);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        };
+    const getAllSections = async () => {
+        try {
+            const response = await axios.get(`${API}sections`);
+            console.log(response);
+            setSections(response.data);
+        } catch (error) {
+            console.log(error.message);
+            console.log(error);
+            setSections([]);
+        }
+    };
 
-        fetchUserData();
-    }, [memberId]);
+    const fetchUserData = async () => {
+        try {
+            const response = await axios.get(`${API}member/`, {
+                params: {
+                    id: memberId,
+                },
+            });
+            console.log(response.data);
+            const data = response.data.data;
+            setName(data.name);
+            setCourse(data.course);
+            setEmail(data.email);
+            setYear(data.year);
+            setRegular(data.regular);
+            setOrganization(data.organization);
+            setRemarks(data.remarks);
+            setTimeIn(data.timeIn);
+            setTimeOut(data.timeOut);
+            setAmount(data.amount);
+            setAmount_2(data.amount_2);
+            setSelectedSections(JSON.parse(data.section_ids));
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        }
+    };
 
     const handleTimeIn = () => {
         if (timeIn === '' || timeIn === null) {
@@ -89,6 +101,7 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                 timeOut,
                 amount,
                 amount_2,
+                section_ids: JSON.stringify(selectedSections),
             });
             if (response) {
                 alert(response.data.message);
@@ -106,6 +119,11 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
         setOrganization(value);
         setShowOrganizationDropDown(false);
     };
+
+    useEffect(() => {
+        getAllSections();
+        fetchUserData();
+    }, [memberId]);
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm">
@@ -236,7 +254,109 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                     </button>
                                 </div>
                             )}
+
+                            <div className="mt-4">
+                                <label
+                                    for="sections"
+                                    className="block mb-2 text-sm font-medium text-white"
+                                >
+                                    Section
+                                </label>
+                                <button
+                                    value={selectedSections}
+                                    onClick={() =>
+                                        setShowSectionsDropDown(
+                                            !showSectionsDropDown
+                                        )
+                                    }
+                                    type="button"
+                                    id="sections"
+                                    className="justify-center w-64 h-10 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    placeholder="Section"
+                                >
+                                    {!selectedSections ||
+                                    selectedSections.length === 0 ? (
+                                        <span>No Section Selected</span>
+                                    ) : null}
+                                    {selectedSections.map((item, index) =>
+                                        index === selectedSections.length - 1
+                                            ? item.name
+                                            : item.name + ', '
+                                    )}
+                                    <svg
+                                        class="w-2.5 h-2.5 ms-3"
+                                        aria-hidden="true"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 10 6"
+                                    >
+                                        <path
+                                            stroke="currentColor"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="m1 1 4 4 4-4"
+                                        />
+                                    </svg>
+                                </button>
+                                {showSectionsDropDown && (
+                                    <div
+                                        id="sectiondrop"
+                                        class="p-2 z-0 absolute bg-white rounded-lg shadow-lg w-[9rem] dark:bg-gray-700 text-center border-solid border border-black"
+                                    >
+                                        {sections?.map((item, index) => {
+                                            return (
+                                                <div className="p-1 indent-2 border border-solid border-slate-400 rounded-lg my-1 space-x-1 flex justify-start items-center">
+                                                    <input
+                                                        id={`section_${item.id}`}
+                                                        type="checkbox"
+                                                        checked={selectedSections.some(
+                                                            (section) =>
+                                                                section.id ===
+                                                                item.id
+                                                        )}
+                                                        onChange={() => {
+                                                            const isAlreadySelected =
+                                                                selectedSections.some(
+                                                                    (section) =>
+                                                                        section.id ===
+                                                                        item.id
+                                                                );
+                                                            if (
+                                                                isAlreadySelected
+                                                            ) {
+                                                                setSelectedSections(
+                                                                    selectedSections.filter(
+                                                                        (
+                                                                            section
+                                                                        ) =>
+                                                                            section.id !==
+                                                                            item.id
+                                                                    )
+                                                                );
+                                                            } else {
+                                                                setSelectedSections(
+                                                                    [
+                                                                        ...selectedSections,
+                                                                        item,
+                                                                    ]
+                                                                );
+                                                            }
+                                                        }}
+                                                    />
+                                                    <label
+                                                        for={`section_${item.id}`}
+                                                    >
+                                                        {item.name}
+                                                    </label>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
                         </div>
+
                         <div className="flex flex-col mt-2">
                             <label
                                 for="amount"

@@ -25,4 +25,10 @@ model members {
   amount           Int      @default(0)
   amount_2         Int?
   isEventCommittee Boolean  @default(false)
+  section_ids      String?  @db.Text
+}
+
+model sections {
+  id   BigInt   @id @default(autoincrement())
+  name String?  @db.VarChar(255)
 }
