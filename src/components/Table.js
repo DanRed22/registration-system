@@ -537,26 +537,27 @@ const Table = ({ showAddModal, setShowAddModal, showNotif, setMessage }) => {
                                                 {entry.year}
                                                 {show.section_ids ? (
                                                     <p className="text-xs text-gray-500 dark:text-gray-300">
-                                                        {JSON.parse(
-                                                            entry.section_ids
-                                                        ).map(
-                                                            (
-                                                                section,
-                                                                index,
-                                                                array
-                                                            ) => (
-                                                                <p>
-                                                                    {
-                                                                        section.name
-                                                                    }
-                                                                    {index <
-                                                                    array.length -
-                                                                        1
-                                                                        ? ','
-                                                                        : ''}
-                                                                </p>
-                                                            )
-                                                        )}
+                                                        {entry.section_ids &&
+                                                            JSON.parse(
+                                                                entry.section_ids
+                                                            ).map(
+                                                                (
+                                                                    section,
+                                                                    index,
+                                                                    array
+                                                                ) => (
+                                                                    <p>
+                                                                        {
+                                                                            section.name
+                                                                        }
+                                                                        {index <
+                                                                        array.length -
+                                                                            1
+                                                                            ? ','
+                                                                            : ''}
+                                                                    </p>
+                                                                )
+                                                            )}
                                                     </p>
                                                 ) : null}
                                             </td>
