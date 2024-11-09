@@ -318,15 +318,14 @@ const EditModal = ({ memberId, hide, refresh, showNotif, setMessage }) => {
                                                                 selectedSections &&
                                                                 Array.isArray(
                                                                     selectedSections
+                                                                ) &&
+                                                                selectedSections.find(
+                                                                    (section) =>
+                                                                        section.id ===
+                                                                        item.id
                                                                 )
-                                                                    ? selectedSections.map(
-                                                                          (
-                                                                              section
-                                                                          ) =>
-                                                                              section.id ===
-                                                                              item.id
-                                                                      )
-                                                                    : undefined
+                                                                    ? true
+                                                                    : false
                                                             }
                                                             onChange={() => {
                                                                 if (
