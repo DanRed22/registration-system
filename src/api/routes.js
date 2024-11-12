@@ -199,7 +199,6 @@ router.get('/searchFiltered', async (req, res) => {
     const organizationFilters = JSON.parse(orgsFilter); // Parse orgsFilter
     // Parse onlyPresent to a boolean
     const isOnlyPresent = onlyPresent === 'true';
-
     try {
         const members = await prisma.members.findMany({
             where: {
