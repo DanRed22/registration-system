@@ -24,11 +24,16 @@ export default function ConfirmationResetModal({ close, type, action }) {
         }
         if (type === 'revealPayment') {
             if (input === config.password) {
-                action(true);
+                action();
                 close();
             } else {
                 alert('Incorrect password');
             }
+            return;
+        }
+        if (type === 'batch-process-delete') {
+            action([]);
+            close();
             return;
         }
         try {
