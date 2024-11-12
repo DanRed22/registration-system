@@ -20,7 +20,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState([]); // Ensure data is an array initially
     const [paginatedData, setPaginatedData] = useState([]);
-    const itemsPerPage = 16; // adjust this if necessary
+    const itemsPerPage = 13; // adjust this if necessary
     const totalPages = Math.ceil(data.length / itemsPerPage);
     const fileNameExport = config.eventName; //change this if necessary
     const [currentPage, setCurrentPage] = useState(0);
@@ -28,6 +28,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const optionsDropdownRef = useRef(null);
     const filtersDropdownRef = useRef(null);
     const [organizations, setOrganizations] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentResultIndex, setCurrentResultIndex] = useState(0);
+    const [showResults, setShowResults] = useState(false);
+    const [searchResults, setSearchResults] = useState([]);
 
     //Options Toggles
     const [showOptionsDropdown, setShowOptionsDropdown] = useState(false);
@@ -60,7 +64,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [exportCSV, setExportCSV] = useState(false);
     const [resetType, setResetType] = useState('');
     const [exportData, setExportData] = useState([]);
-
+    const [currentDataToDisplay, setCurrentDataToDisplay] = useState([]);
     //Filters
     const [coursesFilter, setCoursesFilter] = useState({
         AMT: true,
@@ -339,6 +343,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orgsFilter,
     ]);
 
+    const searchStudent = useCallback(async () => {
+        const response = await axios.get(
+            `${API}searchStudent?searchTerm=${searchTerm}`
+        );
+        if (response.data.error) {
+            alert(response.data.error_msg);
+        } else {
+            setSearchResults(response.data.data);
+        }
+    }, [searchTerm]);
+
     const handleSearch = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -423,11 +438,11 @@ const ViewTable = ({ showNotif, setMessage }) => {
         setShowReset(!showReset);
     };
 
-    const currentDataToDisplay = isLoading
-        ? []
-        : exportCSV
-          ? exportData
-          : paginatedData;
+    useEffect(() => {
+        setCurrentDataToDisplay(
+            isLoading ? [] : exportCSV ? exportData : paginatedData
+        );
+    }, [isLoading, exportCSV, exportData, paginatedData, data]);
 
     useEffect(() => {
         // Initialize the orgsFilter state based on fetched organizations
@@ -485,6 +500,46 @@ const ViewTable = ({ showNotif, setMessage }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            if (searchTerm && searchTerm.length > 1) {
+                searchStudent();
+            }
+        }, 500);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [searchTerm, searchStudent]);
+
+    useEffect(() => {
+        if (searchResults.length > 0) {
+            setShowResults(true);
+            setCurrentResultIndex(0);
+        }
+        if (!searchTerm || searchTerm.length < 2) {
+            setShowResults(false);
+            setCurrentResultIndex(-1);
+            setSearchResults([]);
+        }
+    }, [searchResults]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                showResults &&
+                !event.target.closest('.search-results-container')
+            ) {
+                setShowResults(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showResults]);
 
     return (
         <div className="w-[90%]">
@@ -1173,6 +1228,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 >
                     Only List Committee
                 </button>
+
+                <button
+                    onClick={() => setPaginatedData([])}
+                    type="button"
+                    className="mt-2 ml-4 p-2.5 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+                >
+                    Empty Batch
+                </button>
             </div>
 
             <div className="w-[100%] overflow-x-auto overflow-y-auto shadow-md flex flex-col justify-center items-center">
@@ -1194,6 +1257,142 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     >
                         Next
                     </button>
+                </div>
+                <div>
+                    <div className="relative search-results-container">
+                        <input
+                            type="text"
+                            placeholder="Search Student"
+                            className="w-96 h-full my-3"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onFocus={() => setShowResults(true)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                    if (
+                                        currentResultIndex <
+                                        searchResults.length - 1
+                                    ) {
+                                        setCurrentResultIndex(
+                                            currentResultIndex + 1
+                                        );
+                                    }
+                                }
+                                if (e.key === 'ArrowUp') {
+                                    if (currentResultIndex > 0) {
+                                        setCurrentResultIndex(
+                                            currentResultIndex - 1
+                                        );
+                                    }
+                                }
+                                if (e.key === 'Enter') {
+                                    if (
+                                        currentResultIndex >= 0 &&
+                                        searchResults.length > 0
+                                    ) {
+                                        data.unshift(
+                                            searchResults[currentResultIndex]
+                                        );
+                                    }
+                                }
+                            }}
+                        />
+                        {showResults && searchResults.length > 0 && (
+                            <div
+                                className="absolute z-10 w-96 mt-1 bg-white rounded-md shadow-lg"
+                                onBlur={(e) => {
+                                    if (
+                                        !e.currentTarget.contains(
+                                            e.relatedTarget
+                                        )
+                                    ) {
+                                        setShowResults(false);
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'ArrowDown') {
+                                        if (
+                                            currentResultIndex <
+                                            searchResults.length - 1
+                                        ) {
+                                            setCurrentResultIndex(
+                                                currentResultIndex + 1
+                                            );
+                                        }
+                                    }
+                                    if (e.key === 'ArrowUp') {
+                                        if (currentResultIndex > 0) {
+                                            setCurrentResultIndex(
+                                                currentResultIndex - 1
+                                            );
+                                        }
+                                    }
+                                    if (e.key === 'Enter') {
+                                        if (
+                                            currentResultIndex >= 0 &&
+                                            searchResults.length > 0
+                                        ) {
+                                            const isDuplicate =
+                                                currentDataToDisplay.some(
+                                                    (dataItem) =>
+                                                        dataItem.id ===
+                                                        searchResults[
+                                                            currentResultIndex
+                                                        ].id
+                                                );
+
+                                            if (isDuplicate) {
+                                                alert(
+                                                    'This student is already in the batch list'
+                                                );
+                                            } else {
+                                                data.unshift(
+                                                    searchResults[
+                                                        currentResultIndex
+                                                    ]
+                                                );
+                                            }
+                                        }
+                                    }
+                                }}
+                                tabIndex={-1}
+                            >
+                                {searchResults.map((result, index) => (
+                                    <button
+                                        key={index}
+                                        className={`w-full px-4 py-2 hover:bg-gray-100 cursor-pointer ${
+                                            index === currentResultIndex
+                                                ? 'bg-blue-200'
+                                                : ''
+                                        }
+                                            ${
+                                                currentDataToDisplay.some(
+                                                    (dataItem) =>
+                                                        dataItem.id ===
+                                                        result.id
+                                                )
+                                                    ? 'bg-green-500'
+                                                    : ''
+                                            }`}
+                                        onClick={() => {
+                                            if (
+                                                !currentDataToDisplay.some(
+                                                    (dataItem) =>
+                                                        dataItem.id ===
+                                                        result.id
+                                                )
+                                            ) {
+                                                data.unshift(result);
+                                            }
+                                        }}
+                                    >
+                                        {result.name} - {result.year}{' '}
+                                        {result.course}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <table
                     id="table-container"

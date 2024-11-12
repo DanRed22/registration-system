@@ -1025,4 +1025,27 @@ router.get('/searchStudent', async (req, res) => {
         res.status(500).json({ error: true, error_msg: error.message });
     }
 });
+
+router.post('/processData', async (req, res) => {
+    let { data, ids } = req.body;
+    Object.keys(data).forEach((key) => {
+        if (data[key] === '') {
+            data[key] = undefined;
+        }
+        if (key === 'amount2') {
+            data['amount_2'] = data[key] || undefined;
+            delete data[key];
+        }
+    });
+    try {
+        await prisma.members.updateMany({
+            where: { id: { in: ids } },
+            data,
+        });
+        res.status(201).json({ message: 'Processed Data' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: error.message });
+    }
+});
 export default router;
