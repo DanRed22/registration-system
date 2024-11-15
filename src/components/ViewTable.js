@@ -944,7 +944,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 {'Select Year Level >'}
                             </button>
                             {showYearLevelDropDown ? (
-                                <div className="border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64">
+                                <div className="Z-50 border border-black absolute ml-40 flex-col bg-white p-4 rounded-lg w-64">
                                     <div
                                         className="flex items-center justify-start space-x-3 flex-row border rounded-lg p-2 hover:bg-blue-200"
                                         onClick={() =>
