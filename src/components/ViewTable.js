@@ -860,7 +860,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </button>
 
                     {showFiltersDropDown && (
-                        <div className="absolute bg-white rounded-lg shadow w-48 text-black p-2 ">
+                        <div className="z-50 absolute bg-white rounded-lg shadow w-48 text-black p-2 ">
                             <button
                                 className="hover:bg-blue-200 p-2 rounded-lg"
                                 onClick={() =>
@@ -870,7 +870,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                 {'Select Courses >'}
                             </button>
                             {showCoursesDropDown ? (
-                                <div className="border border-black absolute ml-48 flex-col bg-white p-4 rounded-lg w-64 ">
+                                <div className="z-50 border border-black absolute ml-48 flex-col bg-white p-4 rounded-lg w-64 ">
                                     <div
                                         className="hover:bg-blue-200 flex items-center justify-start space-x-3 flex-row border rounded-lg p-2"
                                         onClick={() =>
@@ -1259,7 +1259,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
                     </button>
                 </div>
                 <div>
-                    <div className="relative search-results-container">
+                    <div className="relative search-results-container z-10">
                         <input
                             type="text"
                             placeholder="Search Student"

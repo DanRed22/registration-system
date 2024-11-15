@@ -66,9 +66,11 @@ export const Attendance = () => {
     };
 
     useEffect(() => {
+        console.log(API);
         refreshStatus(); // Initial call
         const interval = setInterval(() => {
             refreshStatus(); // Refresh every 3 seconds
+            console.log(config);
         }, 3000);
 
         return () => clearInterval(interval); // Cleanup
