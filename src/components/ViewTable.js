@@ -51,7 +51,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showTimeOut, setShowTimeOut] = useState(true);
     const [showDbId, setShowDbId] = useState(false);
     const [showSection, setShowSection] = useState(true);
-
+    const [showAction, setShowAction] = useState(false);
     //SelectedRecord
     const [selectedName, setSelectedName] = useState('');
     const [selectedIDNumber, setSelectedIDNumber] = useState('');
@@ -858,6 +858,17 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                     Section
                                 </label>
                             </div>
+                            <div className="flex items-center mb-2">
+                                <input
+                                    type="checkbox"
+                                    name="action"
+                                    checked={showAction}
+                                    onClick={() => setShowAction(!showAction)}
+                                />
+                                <label htmlFor="action" className="ml-2">
+                                    Action
+                                </label>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -1554,12 +1565,14 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             ) : (
                                 ''
                             )}
-                            <th
-                                scope="col"
-                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                            >
-                                Action
-                            </th>
+                            {showAction && (
+                                <th
+                                    scope="col"
+                                    className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Action
+                                </th>
+                            )}
                         </tr>
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
@@ -1739,22 +1752,24 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         ) : (
                                             ''
                                         )}
-                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
-                                            <button
-                                                className="bg-red-500 text-white px-4 py-2 rounded-md"
-                                                onClick={() =>
-                                                    setData((prev) =>
-                                                        prev.filter(
-                                                            (item) =>
-                                                                item.id !==
-                                                                entry.id
+                                        {showAction && (
+                                            <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                                <button
+                                                    className="bg-red-500 text-white px-4 py-2 rounded-md"
+                                                    onClick={() =>
+                                                        setData((prev) =>
+                                                            prev.filter(
+                                                                (item) =>
+                                                                    item.id !==
+                                                                    entry.id
+                                                            )
                                                         )
-                                                    )
-                                                }
-                                            >
-                                                <IoTrash />
-                                            </button>
-                                        </td>
+                                                    }
+                                                >
+                                                    <IoTrash />
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 );
                             })}
