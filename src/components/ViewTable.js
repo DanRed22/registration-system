@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { CiSearch } from 'react-icons/ci';
-import RemarksModal from '../components/RemarksModal';
 import API from './Config';
-import { FaPencilAlt, FaRegEye } from 'react-icons/fa';
 import ClipLoader from 'react-spinners/ClipLoader';
 import ViewOnlyShowSignatureModal from './ViewOnlyShowSignatureModal';
 import { useNavigate } from 'react-router-dom';
@@ -13,6 +11,7 @@ import ExportMatTableToCSV from './ExportMatTableToCSV';
 import config from '../configuration';
 import ConfirmationResetModal from './ConfirmationResetModal';
 import { debounce } from 'lodash';
+import { IoTrash } from 'react-icons/io5';
 import PaymentFilter from './dropdowns/PaymentFilter';
 const ViewTable = ({ showNotif, setMessage }) => {
     const filePath = '/signatures/';
@@ -21,7 +20,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [data, setData] = useState([]); // Ensure data is an array initially
     const [paginatedData, setPaginatedData] = useState([]);
     const itemsPerPage = 13; // adjust this if necessary
-    const totalPages = Math.ceil(data.length / itemsPerPage);
+    const [totalPages, setTotalPages] = useState(0);
     const fileNameExport = config.eventName; //change this if necessary
     const [currentPage, setCurrentPage] = useState(0);
     const navigate = useNavigate();
@@ -57,7 +56,6 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [selectedName, setSelectedName] = useState('');
     const [selectedIDNumber, setSelectedIDNumber] = useState('');
     const [isExporting, setIsExporting] = useState(false);
-    const [selectedCourse, setSelectedCourse] = useState('');
 
     //Utilities
     const [showReset, setShowReset] = useState(false);
@@ -91,6 +89,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const [showSectionDropDown, setShowSectionDropDown] = useState(false);
 
     const handleSectionFilterSelect = (section) => {
+        const noSection = { id: -1, name: 'Display No Section' };
+        if (selectedSections.includes(noSection)) {
+            setSelectedSections(
+                selectedSections.filter((s) => s !== noSection)
+            );
+        }
         if (selectedSections.includes(section)) {
             setSelectedSections(selectedSections.filter((s) => s !== section));
         } else {
@@ -112,6 +116,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
             const response = await axios.get(`${API}sections`);
             console.log(response);
             setSections(response.data);
+            setSections((prev) => [
+                ...prev,
+                { id: -1, name: 'Display No Section' },
+            ]);
         } catch (error) {
             console.log(error.message);
             console.log(error);
@@ -343,16 +351,19 @@ const ViewTable = ({ showNotif, setMessage }) => {
         orgsFilter,
     ]);
 
-    const searchStudent = useCallback(async () => {
-        const response = await axios.get(
-            `${API}searchStudent?searchTerm=${searchTerm}`
-        );
-        if (response.data.error) {
-            alert(response.data.error_msg);
-        } else {
-            setSearchResults(response.data.data);
-        }
-    }, [searchTerm]);
+    const searchStudent = useCallback(
+        debounce(async () => {
+            const response = await axios.get(
+                `${API}searchStudent?searchTerm=${searchTerm}`
+            );
+            if (response.data.error) {
+                alert(response.data.error_msg);
+            } else {
+                setSearchResults(response.data.data);
+            }
+        }, 100),
+        []
+    );
 
     const handleSearch = useCallback(async () => {
         setIsLoading(true);
@@ -374,26 +385,37 @@ const ViewTable = ({ showNotif, setMessage }) => {
                 throw new Error(response);
             }
             let tempData = [];
+            console.log(selectedSections);
             response.data.data.forEach((entry, idx) => {
                 if (selectedSections.length > 0) {
-                    // If entry has no section_ids, exclude it when sections are selected
-                    if (!entry.section_ids) {
-                        return null;
+                    // Check if entry.section_ids is null or empty string
+                    const sectionIds = entry.section_ids
+                        ? JSON.parse(entry.section_ids)
+                        : [];
+
+                    // Handle "Display No Section" case
+                    if (selectedSections.some((section) => section.id === -1)) {
+                        if (!sectionIds.length) {
+                            tempData.push(entry);
+                            return;
+                        }
                     }
 
-                    // If entry's sections don't match any selected sections, exclude it
+                    // Check if any of the entry's sections match selected sections
                     if (
-                        !JSON.parse(entry.section_ids).some((section) =>
+                        sectionIds.length &&
+                        sectionIds.some((section) =>
                             selectedSections.some(
                                 (selectedSection) =>
                                     selectedSection.name === section.name
                             )
                         )
                     ) {
-                        return null;
+                        tempData.push(entry);
                     }
+                } else {
+                    tempData.push(entry);
                 }
-                tempData.push(entry);
             });
             setData(
                 selectedSections.length > 0 ? tempData : response.data.data
@@ -437,6 +459,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
     const handleShowReset = () => {
         setShowReset(!showReset);
     };
+
+    useEffect(() => {
+        refreshPaginatedData();
+    }, [data]);
 
     useEffect(() => {
         setCurrentDataToDisplay(
@@ -511,7 +537,7 @@ const ViewTable = ({ showNotif, setMessage }) => {
         return () => {
             clearTimeout(handler);
         };
-    }, [searchTerm, searchStudent]);
+    }, [searchTerm, search, searchStudent]);
 
     useEffect(() => {
         if (searchResults.length > 0) {
@@ -540,6 +566,10 @@ const ViewTable = ({ showNotif, setMessage }) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showResults]);
+
+    useEffect(() => {
+        setTotalPages(Math.ceil(data.length / itemsPerPage));
+    }, [data]);
 
     return (
         <div className="w-[90%]">
@@ -1163,7 +1193,9 @@ const ViewTable = ({ showNotif, setMessage }) => {
 
                             <button
                                 className="hover:bg-blue-200 p-2 rounded-lg"
-                                onClick={() => setShowSectionDropDown(true)}
+                                onClick={() =>
+                                    setShowSectionDropDown(!showSectionDropDown)
+                                }
                             >
                                 Sections &gt;
                             </button>
@@ -1522,6 +1554,12 @@ const ViewTable = ({ showNotif, setMessage }) => {
                             ) : (
                                 ''
                             )}
+                            <th
+                                scope="col"
+                                className="px-1 py-1 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                            >
+                                Action
+                            </th>
                         </tr>
                     </thead>
                     <tbody className="bg-white  divide-gray-200 dark:bg-gray-900 dark:divide-gray-700">
@@ -1701,6 +1739,22 @@ const ViewTable = ({ showNotif, setMessage }) => {
                                         ) : (
                                             ''
                                         )}
+                                        <td className="px-1 py-1 text-xs font-medium whitespace-normal break-words overflow-wrap">
+                                            <button
+                                                className="bg-red-500 text-white px-4 py-2 rounded-md"
+                                                onClick={() =>
+                                                    setData((prev) =>
+                                                        prev.filter(
+                                                            (item) =>
+                                                                item.id !==
+                                                                entry.id
+                                                        )
+                                                    )
+                                                }
+                                            >
+                                                <IoTrash />
+                                            </button>
+                                        </td>
                                     </tr>
                                 );
                             })}
